@@ -4,6 +4,8 @@ from calculations.lines import LineWins
 from calculations.statistics import getRandomOutcome
 from events.events import *
 from typing import List, Dict
+import random 
+import numpy as np
 
 class Executables(Conditions, Board, LineWins):
     """
@@ -21,9 +23,10 @@ class Executables(Conditions, Board, LineWins):
         
         revealBoardEvent(self)
 
-    def forceSpecialBoard(self, forceCriteria: str):
+    def forceSpecialBoard(self, forceCriteria: str, numForceSymbols: int):
         reelStripId = getRandomOutcome(self.getCurrentDistributionConditions()['reelWeights'][self.gameType])
         reelStops = self.getSymbolLocationsOnReel(reelStripId, forceCriteria)
+        chosenReels = random.sample(np.arange())
         self.forceBoardFromReelStrips(reelStripId, reelStops)
 
 
