@@ -1,0 +1,10 @@
+__pycache__
+*/.pyc
+
+**/library/forces
+**library/books
+**library/books_compressed
+**temp_multi_threaded_files
+
+.*.env
+*.DS_Store
