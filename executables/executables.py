@@ -15,8 +15,8 @@ class Executables(Conditions, Board, LineWins):
 
     def drawBoard(self) -> None:
         if self.getCurrentDistributionConditions()["forceFreeSpins"]:
-            self.forceSpecialBoard('scatter')
-            #force specific symbol combination on board
+            numScatters = getRandomOutcome(self.getCurrentDistributionConditions()["scatterTriggers"])
+            self.forceSpecialBoard('scatter', numScatters)
         else:
             while self.countSpecialSymbols('scatter') >= min(self.config.freeSpinTrigger[self.gameType].keys()):
                 self.createBoardFromReelStrips()
@@ -26,7 +26,14 @@ class Executables(Conditions, Board, LineWins):
     def forceSpecialBoard(self, forceCriteria: str, numForceSymbols: int):
         reelStripId = getRandomOutcome(self.getCurrentDistributionConditions()['reelWeights'][self.gameType])
         reelStops = self.getSymbolLocationsOnReel(reelStripId, forceCriteria)
-        chosenReels = random.sample(np.arange())
+
+        symbolProb = [len(x) for x in reelStops]#number of symbols on each reel
+        forceStopPositions = {}
+        while len(forceStopPositions) != numForceSymbols:
+            chosenReel = random.choice(list(np.arange(0,self.config.numReels,symbolProb)))
+            chosenStop = random.choice(reelStops[chosenReel])
+            symbolProb.remove(chosenReel)
+            forceStopPositions[chosenReel] = chosenStop
         self.forceBoardFromReelStrips(reelStripId, reelStops)
 
 

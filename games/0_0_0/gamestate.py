@@ -1,5 +1,5 @@
 import os, sys 
-from game_executables import *
+from game_override import *
 from state.state import *
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
@@ -7,9 +7,10 @@ from game_config import *
 from game_executables import *
 from game_calculations import * 
 
-class GameState(GameExecutables):
-    
+class GameState(GameStateOverride):
+
     def runSpin(self, sim):
+        self.assignSpecialSymbolFuncions()
         self.resetSeed(sim)
         self.repeat = True
         while self.repeat:
@@ -46,8 +47,3 @@ class GameState(GameExecutables):
             if self.checkFreespinCondition():
                 self.updateFreeSpinRetriggerAmount()
 
-    
-    #TODO: create functions in better location, must be loaded in from Globals()
-    def assignMultiplier(self, symbol:object):
-        multValue = getRandomOutcome(self.getCurrentDistributionConditions()['multiplierValues'][self.gameType])
-        symbol.assignAttribute({'multValue': multValue})

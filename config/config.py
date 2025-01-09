@@ -29,8 +29,9 @@ class Config:
         self.payTable = {} #Symbol information assumes ('kind','name) format
         
         #Define special Symbols properties - list all possible symbol states during gameplay
-        self.defaultBaseGameType = "baseGame"
-        self.defaultBonusGameType = "freeSpins"
+        self.baseGameType = "baseGame"
+        self.freeGameType = "freeSpins"
+        
         self.includePaddingSymbols = True
  
         #Define the number of scatter-symbols required to award free-spins

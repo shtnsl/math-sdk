@@ -105,7 +105,12 @@ class Board(GeneralGameState):
             self.bottomSymbols = bottomSymbols
 
     def createSymbol(self, name) -> object:
-        return self.validSymbols[name]
+        if name not in self.validSymbols:
+            raise ValueError(f"Symbol '{name}' is not registered.")
+        "Leave valid symbol registery unaltered"
+        symObject = deepcopy(self.validSymbols[name])
+        symObject.applySpecialFunction()  
+        return symObject
     
     def refreshSpecalSymbolsOnBoard(self) -> None:
         self.specialSymbolsOnBoard = {}

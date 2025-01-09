@@ -13,11 +13,11 @@ class GameConfig(Config):
         self.winType = "lines"
         self.rtp = 0.9700
         self.constructFilePaths(self.gameId)
+
         
         # Game Dimensions
         self.numReels = 5
         self.numRows = [3]*self.numReels #Optionally include variable number of rows per reel
-        
         #Board and Symbol Properties
         self.payTable = {
             (5, 'W'): 20, (4, 'W'): 10,	(3, 'W'): 5,
@@ -56,19 +56,11 @@ class GameConfig(Config):
 
         }
     
-        #Valid gametypes
-        self.baseGameType = "baseGame"
-        self.freeGameType = "freeGame"
-
         self.includePadding = True
         self.specialSymbols = {
             "wild": ["W"],
             "scatter": ["S"],
             "multiplier": ["M", "W"]
-        }
-        self.specialSymbolFunctions = {
-            "W": ["assignMultiplier"],
-            "M": ["assignMultiplier"]
         }
 
         self.freeSpinTriggers = {
@@ -107,6 +99,8 @@ class GameConfig(Config):
                         winCriteria=self.winCap, 
                         conditions = {
                             "reelWeights": {self.baseGameType : {"BR0":1}, self.freeGameType: {"FR0":1}},
+                            "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}}},
+                            "scatterTriggers": {4:1, 5:2},
                             "forceWinCap": True,
                             "forceFreeSpins": True
                         }),
@@ -115,6 +109,7 @@ class GameConfig(Config):
                         quota=0.1, 
                         conditions= {
                             "reelWeights": {self.baseGameType: {"BR0": 1}, self.freeGameType: {"FR0: 1"}},
+                            "scatterTriggers": {4:1, 5:2},
                             "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}}},
                             "forceWinCap": False,
                             "forceFreeSpins": True
@@ -125,6 +120,7 @@ class GameConfig(Config):
                         winCriteria=0.0, 
                         conditions= {
                             "reelWeights": {self.baseGameType: {"BR0": 1}},
+                            "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}}},
                             "forceWinCap": False,
                             "forceFreeSpins": False
                         }),
@@ -133,6 +129,7 @@ class GameConfig(Config):
                         quota=0.5, 
                         conditions= {
                             "reelWeights": {self.baseGameType: {"BR0": 1}},
+                            "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}}},
                             "forceWinCap": False,
                             "forceFreeSpins": False
                     })

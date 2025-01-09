@@ -1,6 +1,7 @@
 import random 
 
 def getRandomOutcome(distribution: dict, totalWeight:float = None) -> type:
+    assert type(distribution) == dict, "distribution must be of form: dict "
     if totalWeight is None: totalWeight = sum(distribution.values())
     roll = random.uniform(0,totalWeight)
     cumulative = 0.0

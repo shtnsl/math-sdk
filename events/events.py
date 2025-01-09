@@ -68,7 +68,7 @@ def winInfoEvent(gameState, includePaddingIndex=True):
         winDataCopy["wins"][idx]["positions"] = newPositions   
         winDataCopy["wins"][idx]["amount"] = winDataCopy["wins"][idx]["win"],
         winDataCopy["wins"][idx]["meta"] = winDataCopy["wins"][idx]["meta"]
-        winDataCopy["wins"][idx]["meta"]["winWithOutMult"] = int(min(round(winDataCopy["wins"][idx]["meta"]["winWithOutMult"]*100,0),gameState.config.winCap*100))
+        winDataCopy["wins"][idx]["meta"]["winWithOutMult"] = int(min(round(winDataCopy["wins"][idx]["meta"]["winWithoutMult"]*100,0),gameState.config.winCap*100))
         
         dic = {
             "index": len(gameState.book['events']),

@@ -13,12 +13,12 @@ class GeneralGameState:
         self.totalCumulativeWins = 0
         self.tempWins = []  
         self.createSymbolHashMap()
+        self.assignSpecialSymbolFuncions()
 
     def createSymbolHashMap(self):
         symbolClasses = {}
         payingSymbolMap = {}
         for key,value in self.config.payTable.items():
-
             if payingSymbolMap.get(key[1]) != None:
                 payingSymbolMap[key[1]].append({'kind': key[0], 'value': value})
             else:
@@ -43,6 +43,10 @@ class GeneralGameState:
 
         self.validSymbols = symbolClasses
 
+    def assignSpecialSymbolFuncions(self):
+        warn("No special sybmol functionality implmented! ")
+
+
     def resetBook(self) -> None:
         """
         Reset global simulation variables
@@ -56,13 +60,14 @@ class GeneralGameState:
             "criteria": self.criteria
         }
         self.globalMultiplier = 1
-        self.runningBetWin = 0
+        self.runningBetWin = 0 #total 
+        self.spinWin = 0 
         self.baseGameWins = 0
         self.freeGameWins = 0
         self.totalWins = 0
         self.totFs = 0
         self.fs = 0
-        self.gameType = self.config.defaultBaseGameType
+        self.gameType = self.config.baseGameType
         self.repeat = False
         self.anticipation = [0]*self.config.numReels
         self.winCapTriggered = False
@@ -74,7 +79,7 @@ class GeneralGameState:
     def resetFsSpin(self) -> None:
         self.freeGameWins = 0
         self.fs = 0
-        self.gameType = self.config.defaultBonusGame
+        self.gameType = self.config.freeGameType
         
     def verifyWinAmounts(self) -> None:
         assert (min(round(self.baseGameWins + self.freeGameWins,1), self.config.winCap)) == min(round(self.totalWins,1), self.config.winCap), "Ensure sum of basegame and freespin wins equal total amount"
