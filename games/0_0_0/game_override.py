@@ -11,6 +11,7 @@ class GameStateOverride(GameExecutables):
         #Reset global values used across multiple projects
         super().resetBook()
         #Reset parameters relevant to local game only
+        self.emitWinEvent = True
 
     def assignSpecialSymbolFuncions(self):
             specialSymbolFunctions = {
@@ -24,9 +25,15 @@ class GameStateOverride(GameExecutables):
 
     def assignWildProperty(self, symbol):
         symbol.wild = True
-        # symbol.assignAttribute(attributeDict={'wild', True})
 
     def assignMultiplierProperty(self, symbol):
         multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
         symbol.multiplier = multiplierValue
-        # symbol.assignAttribute(attributeDict={'multiplier': multiplierValue})
+
+    
+    def checkGameRepeat(self):
+        if self.repeat == False:
+            winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()
+            if winCriteria is not None and self.finalWin != winCriteria:
+                self.repeat = True 
+            

@@ -33,6 +33,18 @@ class Distribution:
             assert rk in conditionKeys, f"condition missing required key: {rk}\n conditionKeys"
         self._conditions = conditions
 
+    def getCriteria(self):
+        return self._criteria
+
+    def getQuota(self):
+        return self._quota
+    
+    def getWinCriteria(self):
+        return self._winCriteria 
+    
+    def getRequiredDistributionConditions(self):
+        return self._requiredDistribtionConditions
+
     def __str__(self):
         return f"Criteria: {self._criteria}\nConditions: {json.dumps(self._conditions)}"
     

@@ -27,7 +27,7 @@ def revealBoardEvent(gameState):
 
     gameState.book["events"] += [event]
 
-def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger=True, freeGameTrigger=False):
+def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:bool=None, freeGameTrigger:bool=None):
     assert baseGameTrigger != freeGameTrigger, "must set either baseGameTrigger or freeSpinTrigger to = True"
     scatterPositions = gameState.specialSymbolsOnBoard['scatter']
     if includePaddingIndex:
@@ -57,16 +57,13 @@ def winInfoEvent(gameState, includePaddingIndex=True):
     winDataCopy = {}    
     winDataCopy["wins"] = gameState.winData["wins"]
     for idx,w in enumerate(gameState.winData["wins"]):
-        winDataCopy["wins"][idx]["amount"] = int(min(round(winDataCopy["wins"][idx]["win"]*100,0),gameState.config.winCap*100))
         if includePaddingIndex:
             newPositions = [{"reel":p["reel"], "row": p["row"]+1} for p in w["positions"]]
         else:
             newPositions = w["positions"]
 
-        winDataCopy["wins"][idx]["win"] = int(round(winDataCopy["wins"][idx]["win"]*100,0))
-        winDataCopy["wins"][idx]["win"] = int(round(winDataCopy["wins"][idx]["win"]*100,0))
+        winDataCopy["wins"][idx]["win"] = int(round(min(winDataCopy["wins"][idx]["win"], gameState.config.winCap)*100,0))
         winDataCopy["wins"][idx]["positions"] = newPositions   
-        winDataCopy["wins"][idx]["amount"] = winDataCopy["wins"][idx]["win"],
         winDataCopy["wins"][idx]["meta"] = winDataCopy["wins"][idx]["meta"]
         winDataCopy["wins"][idx]["meta"]["winWithOutMult"] = int(min(round(winDataCopy["wins"][idx]["meta"]["winWithoutMult"]*100,0),gameState.config.winCap*100))
         
@@ -74,6 +71,25 @@ def winInfoEvent(gameState, includePaddingIndex=True):
             "index": len(gameState.book['events']),
             "type": WIN_DATA,
             "totalWin": min(int(round(gameState.winData['totalWin']*100, 0)),int(round(gameState.config.winCap*100, 0))),
-            "wins": winDataCopy["wins"],
+            "wins": deepcopy(winDataCopy["wins"]),
         }
         gameState.book['events'] += [dic]
+
+def updateFreeSpinEvent(gameState):
+    event = {
+        "index": len(gameState.book['events']), 
+        "type": UPDATE_FS, 
+        "amount": int(gameState.fs),
+        "total": int(gameState.totFs)}
+    gameState.book["events"] += [event]
+
+def freeSpinEndEvent(gameState):
+    event = {"index": len(gameState.book['events']), 
+             "type": FREE_SPIN_END, 
+             "amount": deepcopy(int(min(round(gameState.freeGameWins*100), gameState.config.winCap*100)))
+    }
+    gameState.book["events"] += [event]
+
+def finalWinEvent(gameState):
+    event = {"index": len(gameState.book['events']), "type": FINAL_WIN, "amount": min(int(round(gameState.finalWin*100, 0)), gameState.config.winCap*100)}
+    gameState.book["events"] += [event]

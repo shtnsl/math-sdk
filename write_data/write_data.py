@@ -10,6 +10,7 @@ from config.bet_mode import *
 import cProfile
 import zstandard
 from warnings import warn
+from collections import defaultdict
 
 def getSHA256(fileToHash):
     try:
@@ -65,43 +66,12 @@ def makeForceJson(gameState):
     with open(force_file_path, 'w', encoding='utf-8') as forcefile:
         json.dump(forceData, forcefile, indent=4)
 
-def stringitizeForces(forceKeys):
-    for key in forceKeys:
-        for elementIndex in range(len(forceKeys[key])):
-            if type(forceKeys[key][elementIndex]) != str:
-                forceKeys[key][elementIndex] = str(forceKeys[key][elementIndex])
-
-def undoubleForceQuoteElement(forceKeys, key, element, elementIndex):
-    if len(element) > 1:
-        if element[0] == "\"":
-            if element[-1] == "\"":
-                forceKeys[key][elementIndex] = element[1:-1]
-                undoubleForceQuoteElement(forceKeys, key, forceKeys[key][elementIndex], elementIndex)
-        elif element[0] == "\'":
-            if element[-1] == "\'":
-                forceKeys[key][elementIndex] = element[1:-1]
-                undoubleForceQuoteElement(forceKeys, key, forceKeys[key][elementIndex], elementIndex)
-
-def undoubleForceQuotes(forceKeys):
-    for key in forceKeys:
-        for elementIndex in range(len(forceKeys[key])):
-            undoubleForceQuoteElement(forceKeys, key, forceKeys[key][elementIndex], elementIndex)
-
-def getForceResultOptions(forceResults, gameState):
-    finalForceKeys = {}
-    # Setting up the forceKeys
-    for result in forceResults:
-        forceKeys = gameState.getCurrentBetMode().getForceKeys()
-        for forceKeyIndex in range(len(forceKeys)):
-            finalForceKeys[forceKeys[forceKeyIndex]] = []
-        break
-    for result in forceResults:
-        for forceKeyIndex in range(len(forceKeys)):  
-            if result[forceKeyIndex][1] != 'None' and result[forceKeyIndex][1] not in finalForceKeys[forceKeys[forceKeyIndex]]:  
-                finalForceKeys[forceKeys[forceKeyIndex]].append(result[forceKeyIndex][1]) 
-    stringitizeForces(finalForceKeys)
-    undoubleForceQuotes(finalForceKeys)
-    return finalForceKeys
+def getForceResultOptions(forceResults):
+    forceKeys = defaultdict(set)
+    for force in forceResults.keys():
+        for key,val in force:
+            forceKeys[str(key)].add(val)
+    return {key:list(val) for key,val in forceKeys.items()}
 
 def makeLookUpTable(gameState, name):
     file = open(str.join("/",[gameState.config.tempPath, name]), 'w')
@@ -144,14 +114,14 @@ def writeLibraryEvents(gameState, library, gameType):
 
 def outputLookUpTablesAndForceFiles(threads, batchingSize, gameId, betMode, gameState, numSims=1000000, compress=True):
     print("Saving books for", gameId, "in", betMode)
-    forcekeys = gameState.getCurrentBetMode().getForceKeys()
     numRepeats = max(int(round(numSims/threads/batchingSize, 0)), 1)
     file_list = []
     for repeatIndex in range(numRepeats):
         for thread in range(threads):
             file_list.append(str.join("/",[gameState.config.tempPath, "books_"+betMode+"_"+str(thread)+"_"+str(repeatIndex)+".json" + ".zst"*compress]))
+
     if compress:
-        with open(str.join("/",[gameState.config.compressedbookPath, "books_"+betMode+".json.zst"]), 'wb') as outfile:
+        with open(str.join("/",[gameState.config.compressedBookPath, "books_"+betMode+".json.zst"]), 'wb') as outfile:
             for filename in file_list:
                 with open(filename, 'rb') as infile:
                     outfile.write(infile.read())
@@ -160,6 +130,7 @@ def outputLookUpTablesAndForceFiles(threads, batchingSize, gameId, betMode, game
             for filename in file_list:
                 with open(filename, 'r') as infile:
                     outfile.write(infile.read())
+
     print("Saving force files for", gameId, "in", betMode)
     forceResultsDictionary = {}
     file_list = []
@@ -179,19 +150,10 @@ def outputLookUpTablesAndForceFiles(threads, batchingSize, gameId, betMode, game
     forceResultsDictionaryJustForRob = []
     for forceCombination in forceResultsDictionary:
         searchDict = {}
-        searchNameValueDict = []
         for key in forceCombination:
             searchDict[key[0]] = key[1]
-            if key[1] != "None":
-                searchNameValueDict.append(
-                    {
-                        "name": str(key[0]),
-                        "value": str(key[1])
-                    }
-                )
-
         forceDict = {
-            "search": searchNameValueDict,
+            "search": searchDict,
             "timesTriggered": forceResultsDictionary[forceCombination]["timesTriggered"],
             "bookIds": forceResultsDictionary[forceCombination]["bookIds"]
         }
@@ -201,7 +163,7 @@ def outputLookUpTablesAndForceFiles(threads, batchingSize, gameId, betMode, game
     file.write(json_object_for_rob)
     file.close()
     
-    forceResultKeys = getForceResultOptions(forceResultsDictionary, gameState)
+    forceResultKeys = getForceResultOptions(forceResultsDictionary)
     json_file_path = str.join("/",[gameState.config.forcePath, "force.json"])
     try:
         with open(json_file_path, 'r') as file:
@@ -260,7 +222,7 @@ def printRecordedWins(gameState, name=""):
 
 def createBooks(gameState, config, numSimArgs, batchSize, threads, compress, profiling):
     for ns in numSimArgs.values():
-        if all([ns > 0, ns > batchSize]):
+        if all([ns > 0, ns > batchSize*batchSize]):
             assert ns%(threads*batchSize) == 0, "mode-sims/(batch * threads) must be divisible with no remainder"
         
     if not compress and sum(numSimArgs.values())>1e4:

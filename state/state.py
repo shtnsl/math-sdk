@@ -94,6 +94,13 @@ class GeneralGameState:
         for betMode in self.config.betModes:
             if betMode.getName() == self.betMode:
                 return betMode
+            
+    def getCurrentBetModeDistribution(self) -> object:
+        dist = self.getCurrentBetMode().getDistributions()
+        for c in dist:
+            if c._criteria == self.criteria:
+                return c 
+        raise RuntimeError("could not locate criteria distribtuion")
         
     def getCurrentDistributionConditions(self) -> dict:
         for d in self.getBetMode(self.betMode).getDistributions():
@@ -101,6 +108,7 @@ class GeneralGameState:
                 return d._conditions
         return RuntimeError ("could not locate betMode conditions")
     
+
     #State verifications/checks
     def getWinCapTriggered(self) -> bool:
         if self.winCapTriggered:
@@ -131,6 +139,16 @@ class GeneralGameState:
             if keyValue[0] not in currentModeForceKeys:
                 self.getCurrentBetMode().addForceKey(keyValue[0])  # type:ignore
                 
+    def combine(self, modes, betModeName):
+        for modeConfig in modes:
+            for betMode in modeConfig:
+                if betMode.getName() == betModeName:
+                    break
+            forceKeys = betMode.getForceKeys()  # type:ignore
+            for key in forceKeys:
+                if key not in self.getBetMode(betModeName).getForceKeys():  # type:ignore
+                    self.getBetMode(betModeName).addForceKey(key)  # type:ignore
+
     def imprintWins(self) -> None:
         for tempWinIndex in range(int(len(self.tempWins)/2)):
             description = tuple(sorted(self.tempWins[2*tempWinIndex].items()))
@@ -149,12 +167,26 @@ class GeneralGameState:
         # for event in list(self.book['events']):
         #     if event['type'] not in self.uniqueEventTypes:
         #         self.uniqueEventTypes.add(event['type'])
-        print("TODO: get unique wins")
+        # print("TODO: get unique wins")
         self.tempWins = []
         self.library[self.sim+1] = deepcopy(self.book)
         self.totalCumulativeWins += self.runningBetWin
         self.cumulativeBaseWins += self.baseGameWins
         self.cumulativeFreeWins += self.freeGameWins
+
+    def updateFinalWin(self):
+        self.finalWin = round(min(self.runningBetWin, self.config.winCap),2)
+        self.book["payoutMultiplier"] = self.finalWin
+        self.book["baseGameWins"] = float(round(min(self.baseGameWins,self.config.winCap),2))
+        self.book["freeGameWins"] = float(round(min(self.freeGameWins,self.config.winCap),2))
+
+        assert min(round(self.book["baseGameWins"]  + self.book["freeGameWins"] ,1),self.config.winCap) == round(self.book["payoutMultiplier"],1), "Base + Free game payout mismatch!"
+  
+    def checkRepeat(self):
+        if self.repeat == False:
+            winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()
+            if winCriteria is not None and self.finalWin != winCriteria:
+                self.repeat = True 
 
     def runSpin(self, sim):
         print("Base Game is not implemented in this game. We are currently passing when calling runSpin.")
@@ -172,7 +204,7 @@ class GeneralGameState:
             self.runSpin(sim)
         modeCost = self.getCurrentBetMode().getCost()
         print("Thread "+str(threadIndex), "finished with", round(self.totalCumulativeWins/(numSims*modeCost), 3), "RTP.",
-              f"[baseGame: {round(self.baseGameWins/(numSims*modeCost), 3)}, freeGame: {round(self.freeGameWins/(numSims*modeCost), 3)}]",
+              f"[baseGame: {round(self.cumulativeBaseWins/(numSims*modeCost), 3)}, freeGame: {round(self.cumulativeFreeWins/(numSims*modeCost), 3)}]",
               flush=True)
         lastFileWrite = threadIndex == totalThreads-1 and repeatCount == totalRepeats - 1
         firstFileWrite = threadIndex == 0 and repeatCount == 0

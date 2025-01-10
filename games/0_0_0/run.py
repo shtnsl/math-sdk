@@ -8,11 +8,11 @@ if __name__ == '__main__':
     numThreads = 1
     rustThreads = 20
     batchingSize = 5000
-    compression = False
+    compression = True
     profiling = False
 
     numSimArgs = {
-        "base":int(2e2),
+        "base":int(1e3),
          }
     
     config = GameConfig()

@@ -10,39 +10,29 @@ from game_calculations import *
 class GameState(GameStateOverride):
 
     def runSpin(self, sim):
-        self.assignSpecialSymbolFuncions()
         self.resetSeed(sim)
         self.repeat = True
         while self.repeat:
             self.resetBook()
 
-            #Draw random board and 
-            self.createBoardFromReelStrips()
-            revealBoardEvent(self)
+            self.drawBoard()
+            self.calculateWins(winType="lineWins", emitEvent=True, emitWinEvent=self.emitWinEvent)
 
-            #Modify board/apply special conditions
-
-            #Evaluate wins
-            self.calculateWins(winType="lineWins")
-            winInfoEvent(self)
-
-            #Check free-spin trigger
             if self.checkFreespinCondition():
                 self.runFreeSpinFromBaseGame()
 
-            #Verify win-criteria is satisfied
-            self.record({"gameType":self.gameType,"book":self.bookId})
+            self.evaluateFinalWin()
+            self.checkRepeat()
 
         self.imprintWins()
     
     def runFreeSpin(self):
         self.resetFsSpin()
         while self.fs < self.totFs:
-            self.createBoardFromReelStrips()
-            revealBoardEvent(self)
+            self.updateFreeSpin()
+            self.drawBoard()
 
-            self.calculateWins(winType="lineWins")
-            winInfoEvent(self)
+            self.calculateWins(winType="lineWins", emitEvent=True, emitWinEvent=self.emitWinEvent)
 
             if self.checkFreespinCondition():
                 self.updateFreeSpinRetriggerAmount()
