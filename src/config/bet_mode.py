@@ -1,6 +1,6 @@
 from warnings import warn
-from calculations.statistics import normalize
-from config.constants import *
+from src.calculations.statistics import normalize
+from src.config.constants import *
 from copy import deepcopy
 from typing import List, Dict
 

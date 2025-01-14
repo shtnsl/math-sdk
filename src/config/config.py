@@ -1,11 +1,11 @@
 import pathlib, os, sys
-from config.bet_mode import *
-from config.constants import *
-from write_data.force import *
+from src.config.bet_mode import *
+from src.config.constants import *
+from src.write_data.force import *
 import pathlib
-from events.event_constants import *
-from write_data.force import *
-from calculations.symbol import Symbol
+from src.events.event_constants import *
+from src.write_data.force import *
+from src.calculations.symbol import Symbol
 
 class Config:
     """
@@ -51,7 +51,7 @@ class Config:
         
         #Define win-levels for each game-mode, returned during win information events
         self.winLevels = {
-            "base":{
+            "standard":{
                 1: (0,0.1),
                 2: (0.1,1.0),
                 3: (1.0, 2.0),
@@ -63,20 +63,26 @@ class Config:
                 9: (100.0, self.winCap),
                 10: (self.winCap, float('inf'))            
             },
-            "bonus": {
-                1: (0,0.1),
-                2: (0.1,1.0),
-                3: (1.0, 2.0),
-                4: (2.0, 5.0),
-                5: (5.0, 15.0),
-                6: (15.0, 30.0),
-                7: (30.0, 50.0),
-                8: (50.0, 100.0),
-                9: (100.0, self.winCap),
-                10: (self.winCap, float('inf'))
+            "endFeature": {
+                1: (0.0,1.0),
+                2: (1.0,5.0),
+                3: (5.0, 10.0),
+                4: (10.0, 20.0),
+                5: (20.0, 50.0),
+                6: (50.0, 100.0),
+                7: (200.0, 500.0),
+                8: (500.0, 2000.0),
+                9: (200.0, self.winCap),
+                10: (self.winCap, float('inf'))            
             }
         }
-        
+
+    def getWinLevel(self, winAmount:float, winLevelKey:str) -> int:
+        levels = self.winLevels[winLevelKey]
+        for idx, pair in levels.items():
+            if winAmount >= pair[0] and winAmount < pair[1]:
+                return idx 
+        return RuntimeError(f"winLevel not found: {winAmount}")
         
     def getSpecialSymbolNames(self) -> None:
         self.specalSymbolNames = set()
@@ -172,3 +178,13 @@ class Config:
     def checkFolderExistance(self, folderPath:str) -> None:
         if not(os.path.exists(folderPath)):
             os.makedirs(folderPath)
+
+    def convertWinRangeToPayTable(self):
+        """
+        requires self.payGroup to be defined
+        for each symbol, define a pay-range dict stucture: self.payGroup = {(x-y, 's'): z}
+        where x-y defines the paying cluster size on the closed interval [x,y].
+        e.g (5-5,'L1'): 0.1 will pay 0.1x for clusters of exactly 5 elements
+
+        Function returns RuntimeError if there are overlapping ranges
+        """

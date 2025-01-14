@@ -2,11 +2,11 @@ import time
 import hashlib
 import json
 import ast
-from calculations.statistics import *
+from src.calculations.statistics import *
 from multiprocessing import Process, Manager
 import shutil
-from config.paths import *
-from config.bet_mode import *
+from src.config.paths import *
+from src.config.bet_mode import *
 import cProfile
 import zstandard
 from warnings import warn

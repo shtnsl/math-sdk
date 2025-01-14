@@ -1,21 +1,21 @@
-from state.state_conditions import Conditions
-from calculations.board import Board
-from calculations.lines import LineWins
-from calculations.statistics import getRandomOutcome
-from events.events import *
+from src.state.state_conditions import Conditions
+from src.calculations.board import Board
+from src.calculations.lines import LineWins
+from src.calculations.cluster import ClusterWins
+from src.calculations.statistics import getRandomOutcome
+from src.events.events import *
 from typing import List, Dict
 import random 
 import numpy as np
 
-class Executables(Conditions, Board, LineWins):
+class Executables(Conditions, Board, LineWins, ClusterWins):
     """
     The purpose of this Class is to group together common actions which are likely to be reused between games.
     These can be overridden in the GameExecuatables or GameCalculations if game-specific alterations are required
     """
 
     def drawBoard(self, emitEvent:bool = True) -> None:
-        self.refreshSpecalSymbolsOnBoard()
-        if self.getCurrentDistributionConditions()["forceFreeSpins"]:
+        if self.getCurrentDistributionConditions()["forceFreeSpins"] and self.gameType == self.config.baseGameType:
             numScatters = getRandomOutcome(self.getCurrentDistributionConditions()["scatterTriggers"])
             self.forceSpecialBoard('scatter', numScatters)
         else:
@@ -65,10 +65,27 @@ class Executables(Conditions, Board, LineWins):
                 raise NotImplementedError
             case "customWins":
                 raise NotImplementedError ("must define custom win evaluation")
-        if emitEvent:
-            winInfoEvent(self)
 
-            
+        self.evaluateWinCap()
+        if emitEvent:
+            self.emitWinInformation()
+
+    def emitWinInformation(self):
+        'setWin - cumulative win amount for a given individual spin'
+        'setTotalWin - running bet win, including all previous freeSpin and baseGame wins in feature games'
+        'winInfo - winning symbol information'
+        winInfoEvent(self)
+        if not self.winCapTriggered:
+            setWinEvent(self)
+        setTotalWinEvent(self)
+
+    def evaluateWinCap(self):
+        if self.runningBetWin >= self.config.winCap and not(self.winCapTriggered):
+            self.winCapTriggered = True
+            winCapEvent(self)
+            return True
+        return False
+    
     def countSpecialSymbols(self, specialSymbolCriteria:str) -> bool:
         return len(self.specialSymbolsOnBoard[specialSymbolCriteria])
 

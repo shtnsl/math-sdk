@@ -1,4 +1,4 @@
-from state.state import GeneralGameState
+from src.state.state import GeneralGameState
 
 class Conditions(GeneralGameState):
     def inFence(self, *args):

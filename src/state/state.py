@@ -1,6 +1,6 @@
-from config.config import *
-from write_data.write_data import *
-from calculations.symbol import Symbol
+from src.config.config import *
+from src.write_data.write_data import *
+from src.calculations.symbol import Symbol
 import random 
 
 class GeneralGameState:
@@ -67,10 +67,10 @@ class GeneralGameState:
         self.totalWins = 0
         self.totFs = 0
         self.fs = 0
+        self.winCapTriggered = False
         self.gameType = self.config.baseGameType
         self.repeat = False
         self.anticipation = [0]*self.config.numReels
-        self.winCapTriggered = False
         
     def resetSeed(self,sim) -> None:
         random.seed(sim+1)

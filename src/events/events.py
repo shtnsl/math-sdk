@@ -1,4 +1,4 @@
-from events.event_constants import *
+from src.events.event_constants import *
 from copy import deepcopy
 
 def getSpecialSymbolAttributes(gameState):
@@ -50,6 +50,30 @@ def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:b
     assert gameState.totFs >0, "total freespins (gameState.totFs) must be >0"
     gameState.book["events"] += [event]
 
+def setWinEvent(gameState, winLevelKey: str = "standard"):
+    if not(gameState.winCapTriggered):
+        event = {"index": len(gameState.book['events']),
+                "type": SET_WIN,
+                "amount": int(min(round(gameState.spinWin*100,0), gameState.config.winCap*100)),
+                "winLevel": gameState.config.getWinLevel(gameState.spinWin, winLevelKey)
+        }
+        gameState.book["events"] += [event]
+
+def setTotalWinEvent(gameState):
+    event = {"index": len(gameState.book['events']),
+             "type": SET_TOTAL_WIN,
+             "amount" :int(round(min(gameState.runningBetWin, gameState.config.winCap)*100, 0))
+    }
+    gameState.book["events"] += [event]
+
+def winCapEvent(gameState):
+    event = {
+        "index": len(gameState.book['events']), 
+        "type": WINCAP,
+        "amount": int(round(min(gameState.runningBetWin, gameState.config.winCap)*100, 0))
+    }
+    gameState.book["events"] += [event]
+
 def winInfoEvent(gameState, includePaddingIndex=True):
     """
     includePaddingIndex: starts winning-symbol poasitions at row=1, to account for top/bottom symbol inclusion in board
@@ -65,15 +89,15 @@ def winInfoEvent(gameState, includePaddingIndex=True):
         winDataCopy["wins"][idx]["win"] = int(round(min(winDataCopy["wins"][idx]["win"], gameState.config.winCap)*100,0))
         winDataCopy["wins"][idx]["positions"] = newPositions   
         winDataCopy["wins"][idx]["meta"] = winDataCopy["wins"][idx]["meta"]
-        winDataCopy["wins"][idx]["meta"]["winWithOutMult"] = int(min(round(winDataCopy["wins"][idx]["meta"]["winWithoutMult"]*100,0),gameState.config.winCap*100))
+        winDataCopy["wins"][idx]["meta"]["winWithoutMult"] = int(round(min(winDataCopy["wins"][idx]["meta"]["winWithoutMult"], gameState.config.winCap)*100, 0))
         
-        dic = {
+        dictData = {
             "index": len(gameState.book['events']),
             "type": WIN_DATA,
-            "totalWin": min(int(round(gameState.winData['totalWin']*100, 0)),int(round(gameState.config.winCap*100, 0))),
+            "totalWin": int(round(min(gameState.winData['totalWin'], gameState.config.winCap)*100, 0)),
             "wins": deepcopy(winDataCopy["wins"]),
         }
-        gameState.book['events'] += [dic]
+        gameState.book['events'] += [dictData]
 
 def updateFreeSpinEvent(gameState):
     event = {
@@ -86,10 +110,13 @@ def updateFreeSpinEvent(gameState):
 def freeSpinEndEvent(gameState):
     event = {"index": len(gameState.book['events']), 
              "type": FREE_SPIN_END, 
-             "amount": deepcopy(int(min(round(gameState.freeGameWins*100), gameState.config.winCap*100)))
+             "amount": int(round(min(gameState.freeGameWins, gameState.config.winCap)*100, 0))
     }
     gameState.book["events"] += [event]
 
 def finalWinEvent(gameState):
-    event = {"index": len(gameState.book['events']), "type": FINAL_WIN, "amount": min(int(round(gameState.finalWin*100, 0)), gameState.config.winCap*100)}
+    event = {"index": len(gameState.book['events']), 
+             "type": FINAL_WIN,
+             "amount": int(round(min(gameState.finalWin, gameState.config.winCap)*100, 0))
+    }
     gameState.book["events"] += [event]

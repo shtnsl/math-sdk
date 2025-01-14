@@ -1,12 +1,12 @@
-from config.config import Config
-from config.distributions import Distribution, DistributionConditions
-from write_data.force import *
-from config.bet_mode import BetMode
+from src.config.config import Config
+from src.config.distributions import Distribution, DistributionConditions
+from src.write_data.force import *
+from src.config.bet_mode import BetMode
 
 class GameConfig(Config):
     def __init__(self):
         super().__init__()
-        self.gameId = "0_0_0"
+        self.gameId = "0_0_lines"
         self.providerNumber = int(self.gameId.split("_")[0])
         self.workingName = "Sample Lines Game"
         self.winCap = 5000.0

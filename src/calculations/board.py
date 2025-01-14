@@ -1,8 +1,8 @@
 import random
-from state.state import *
+from src.state.state import *
 from copy import deepcopy
-from calculations.statistics import getRandomOutcome
-from calculations.symbol import Symbol
+from src.calculations.statistics import getRandomOutcome
+from src.calculations.symbol import Symbol
 from typing import List
 
 class Board(GeneralGameState):
@@ -11,8 +11,6 @@ class Board(GeneralGameState):
             topSymbols = []
             bottomSymbols = []
         self.refreshSpecalSymbolsOnBoard()
-        if type(self.getCurrentDistributionConditions()['reelWeights'][self.gameType]) != dict:
-            print('here')
         self.reelStripId = getRandomOutcome(self.getCurrentDistributionConditions()['reelWeights'][self.gameType])
         self.reelStrip = self.config.reels[self.reelStripId]
         anticipation = [0]*self.config.numReels
