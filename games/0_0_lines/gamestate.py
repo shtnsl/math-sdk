@@ -17,8 +17,8 @@ class GameState(GameStateOverride):
 
             self.drawBoard()
 
-            self.calculateWins(winType="lineWins", emitEvent=True, emitWinEvent=self.emitWinEvent)
-
+            self.calculateWins(winType="lineWins", recordWinInfo=True)
+ 
             if self.checkFreespinCondition():
                 self.runFreeSpinFromBaseGame()
 
@@ -33,7 +33,7 @@ class GameState(GameStateOverride):
             self.updateFreeSpin()
             self.drawBoard()
 
-            self.calculateWins(winType="lineWins", emitEvent=True, emitWinEvent=self.emitWinEvent)
+            self.calculateWins(winType="lineWins", recordWinInfo=True)
 
             if self.checkFreespinCondition():
                 self.updateFreeSpinRetriggerAmount()

@@ -22,6 +22,15 @@ class LineWins:
             "mult": mult,
             "gameType": gameType
         })
+    
+    def lineWinInfo(self, symbol: str, kind: int, win: float, positions: list, metaData: dict) -> dict:
+        return {
+            "symbol": symbol,
+            "kind": kind,
+            "win": win,
+            "positions": positions,
+            "meta": metaData
+        }
 
     def calculateLineWins(self, wildKey:str = 'wild', multiplierKey:str = 'multiplier', recordWins=None):
         returnData = {
@@ -56,24 +65,65 @@ class LineWins:
                 if firstSymNotWild == "" or not((wildMatches+matches, firstSymNotWild.name) in self.config.payTable):
                     positions = [{"reel": reel_, "row": self.config.payLines[lineIndex][reel_]} for reel_ in range(wildMatches)]
                     baseWin, win, mult = self.getLineWin(wildMatches, firstSymNotWild.name, multiplierKey, positions)
+                    mult *= self.globalMultiplier
+                    winDict = self.lineWinInfo(winLine[0].name, 
+                                               wildMatches, 
+                                               win, 
+                                               positions, 
+                                               {"lineIndex": lineIndex, 
+                                                "multiplier": mult, 
+                                                "winWithoutMult": baseWin, 
+                                                "globalMultiplier": self.globalMultiplier, 
+                                                "lineMultiplier": mult/self.globalMultiplier})
+                    returnData['wins'].append(winDict)
                     returnData['wins'] += [{"symbol": winLine[0].name, "kind": wildMatches, "win": win, "positions": positions, "meta": {"lineIndex": lineIndex, "multiplier": mult, "winWithoutMult": baseWin}}]
                     if recordWins: self.recordLineWin(wildMatches, winLine[0].name, mult, self.gameType)
                 else:
                     if self.config.payTable[(wildMatches, winLine[0].name)] > self.config.payTable[wildMatches+matches, firstSymNotWild.name]:
                         positions = [{"reel": reel_, "row": self.config.payLines[lineIndex][reel_]} for reel_ in range(wildMatches)]
                         baseWin, win, mult = self.getLineWin(wildMatches, firstSymNotWild.name, multiplierKey, positions)
-                        returnData['wins'] += [{"symbol": winLine[0].name, "kind": wildMatches, "win": win, "positions": positions, "meta": {"lineIndex": lineIndex, "multiplier": mult, "winWithoutMult": baseWin}}]
+                        mult *= self.globalMultiplier
+                        winDict = self.lineWinInfo(winLine[0].name, 
+                                                wildMatches, 
+                                                win, 
+                                                positions, 
+                                                {"lineIndex": lineIndex, 
+                                                    "multiplier": mult, 
+                                                    "winWithoutMult": baseWin, 
+                                                    "globalMultiplier": self.globalMultiplier, 
+                                                    "lineMultiplier": mult/self.globalMultiplier})
+                        returnData['wins'].append(winDict)
                         if recordWins: self.recordLineWin(wildMatches, winLine[0].name, mult, self.gameType)
                     else:
                         positions = [{"reel": reel_, "row": self.config.payLines[lineIndex][reel_]} for reel_ in range(wildMatches+matches)]
                         baseWin, win, mult = self.getLineWin(wildMatches+matches, firstSymNotWild.name, multiplierKey, positions)
-                        returnData['wins'] += [{"symbol": firstSymNotWild.name, "kind": wildMatches+matches, "win": win, "positions": [{"reel": reel_, "row": self.config.payLines[lineIndex][reel_]} for reel_ in range(wildMatches+matches)], "meta": {"lineIndex": lineIndex, "multiplier": mult, "winWithoutMult": baseWin}}]
+                        mult *= self.globalMultiplier
+                        winDict = self.lineWinInfo(firstSymNotWild.name, 
+                                                wildMatches+matches, 
+                                                win, 
+                                                positions, 
+                                                {"lineIndex": lineIndex, 
+                                                    "multiplier": mult, 
+                                                    "winWithoutMult": baseWin, 
+                                                    "globalMultiplier": self.globalMultiplier, 
+                                                    "lineMultiplier": mult/self.globalMultiplier})
+                        returnData['wins'].append(winDict)
                         if recordWins: self.recordLineWin(wildMatches+matches,firstSymNotWild.name, mult, self.gameType)
             else:
                 if firstSymNotWild != "" and (wildMatches+matches, firstSymNotWild.name) in self.config.payTable:
                     positions = [{"reel": reel_, "row": self.config.payLines[lineIndex][reel_]} for reel_ in range(wildMatches+matches)]
                     baseWin, win, mult = self.getLineWin(wildMatches+matches, firstSymNotWild.name, multiplierKey, positions)
-                    returnData['wins'] += [{"symbol": firstSymNotWild.name, "kind": wildMatches+matches, "win": win, "positions": positions, "meta": {"lineIndex": lineIndex, "multiplier": mult, "winWithoutMult": baseWin}}]
+                    mult *= self.globalMultiplier
+                    winDict = self.lineWinInfo(firstSymNotWild.name, 
+                                            wildMatches+matches, 
+                                            win, 
+                                            positions, 
+                                            {"lineIndex": lineIndex, 
+                                                "multiplier": mult, 
+                                                "winWithoutMult": baseWin, 
+                                                "globalMultiplier": self.globalMultiplier, 
+                                                "lineMultiplier": mult/self.globalMultiplier})
+                    returnData['wins'].append(winDict)
                     if recordWins: self.recordLineWin(wildMatches+matches,firstSymNotWild.name, mult, self.gameType)
 
             returnData['totalWin'] += win
@@ -81,9 +131,6 @@ class LineWins:
         self.winData = returnData
         totalLineWin = round(returnData['totalWin'])
         if totalLineWin > 0:
-            if self.gameType == self.config.baseGameType:
-                self.baseGameWins += totalLineWin
-            elif self.gameType == self.config.freeGameType:
-                self.freeGameWins += totalLineWin
+            self.updateGameModeWins(totalLineWin)
             self.runningBetWin += totalLineWin
             self.spinWin += totalLineWin

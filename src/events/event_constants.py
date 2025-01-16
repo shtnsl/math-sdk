@@ -13,3 +13,10 @@ UPDATE_FS = "updateFreeSpin"
 FREESPINTRIGGER = "freeSpinTrigger"
 FREESPINRETRIGGER = "freeSpinRetrigger"
 FREE_SPIN_END = "freeSpinEnd"
+
+#Tumble events
+TUMBLE_BOARD = "tumbleBoard"
+SET_TUMBLE_WIN = "setTumbleWin"
+
+#Special symbol events
+UPDATE_GLOBAL_MULT = "updateGlobalMult"

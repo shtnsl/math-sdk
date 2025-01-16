@@ -66,6 +66,13 @@ def setTotalWinEvent(gameState):
     }
     gameState.book["events"] += [event]
 
+def setTumbleWinEvent(gameState):
+    event = {"index": len(gameState.book['events']),
+             "type": SET_TUMBLE_WIN,
+             "amount": int(round(min(gameState.tumbleWin, gameState.config.winCap)*100))
+             }
+    gameState.book["events"] += [event]
+
 def winCapEvent(gameState):
     event = {
         "index": len(gameState.book['events']), 
@@ -120,3 +127,34 @@ def finalWinEvent(gameState):
              "amount": int(round(min(gameState.finalWin, gameState.config.winCap)*100, 0))
     }
     gameState.book["events"] += [event]
+
+def updateGlobalMultEvent(gameState):
+    event = {"index": 
+             len(gameState.book['events']), 
+             "type": UPDATE_GLOBAL_MULT, 
+             "globalMult": int(gameState.globalMult)}
+    
+    gameState.book["events"] += [event]
+
+def tumbleBoardEvent(gameState):
+    if gameState.config.includePaddingSymbols:
+        exploding = []
+        for sym in gameState.explodingSymbols:
+            exploding.append({'reel':sym['reel'], "row": sym['row'] + 1})
+    else:
+        exploding = gameState.explodingSymbols
+    
+    exploding = sorted(exploding, key=lambda x: x['reel'])
+    exploding = sorted(exploding, key=lambda x: x['row'])
+
+    newSymbols = [[] for _ in range(gameState.config.numReels)]
+    for r in range(len(gameState.newSymbolsFromTumble)):
+        if len(gameState.newSymbolsFromTumble[r]) > 0:
+            newSymbols[r] = [s.name for s in gameState.newSymbolsFromTumble[r]]
+
+    gameState.book["events"] += [{
+        "index": len(gameState.book['events']),
+        "type": TUMBLE_BOARD,
+        "newSymbols": deepcopy(newSymbols),
+        "explodingSymbols": deepcopy(exploding)
+    }]

@@ -179,7 +179,7 @@ class Config:
         if not(os.path.exists(folderPath)):
             os.makedirs(folderPath)
 
-    def convertWinRangeToPayTable(self):
+    def convertWinRangeToPayTable(self, payGroup: dict) -> dict:
         """
         requires self.payGroup to be defined
         for each symbol, define a pay-range dict stucture: self.payGroup = {(x-y, 's'): z}
@@ -188,3 +188,13 @@ class Config:
 
         Function returns RuntimeError if there are overlapping ranges
         """
+        payTable = {}
+        for symDetails, payout in payGroup.items():
+            minConnectionSize, maxConnectionSize = symDetails[0][0], symDetails[0][1]
+            symbol = symDetails[1]
+            for i in range(minConnectionSize, maxConnectionSize+1):
+                payTable[(i,symbol)] = payout
+
+        #Todo: return runtime error
+
+        return payTable

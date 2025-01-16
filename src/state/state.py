@@ -52,6 +52,8 @@ class GeneralGameState:
         Reset global simulation variables
         """
         self.board = [[[] for _ in range(self.config.numRows[x])] for x in range(self.config.numReels)]
+        self.topSymbols = None 
+        self.bottomSymbols = None
         self.bookId = self.sim + 1
         self.book = {
             "id": self.bookId,
@@ -182,6 +184,15 @@ class GeneralGameState:
 
         assert min(round(self.book["baseGameWins"]  + self.book["freeGameWins"] ,1),self.config.winCap) == round(self.book["payoutMultiplier"],1), "Base + Free game payout mismatch!"
   
+    def updateGameModeWins(self, winAmount: float) -> None:
+        if winAmount > 0:
+            if self.gameType == self.config.baseGameType:
+                self.baseGameWins += winAmount
+            elif self.gameType == self.config.freeGameType:
+                self.freeGameWins += winAmount
+            else:
+                raise RuntimeError(f"{self.gameType} not a reconised game-type")
+            
     def checkRepeat(self):
         if self.repeat == False:
             winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()

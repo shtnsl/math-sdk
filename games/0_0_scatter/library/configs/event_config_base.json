@@ -100,9 +100,10 @@
             0
         ]
     },
-    "setTumbleWin": {
-        "type": "setTumbleWin",
-        "amount": 0
+    "setWin": {
+        "type": "setWin",
+        "amount": 0,
+        "winLevel": 1
     },
     "finalWin": {
         "type": "finalWin",
@@ -209,10 +210,5 @@
         "type": "updateFreeSpin",
         "amount": 0,
         "total": 12
-    },
-    "setWin": {
-        "type": "setWin",
-        "amount": 200,
-        "winLevel": 4
     }
 }

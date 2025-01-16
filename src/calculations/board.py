@@ -1,9 +1,9 @@
 import random
-from src.state.state import *
 from copy import deepcopy
-from src.calculations.statistics import getRandomOutcome
-from src.calculations.symbol import Symbol
 from typing import List
+
+from src.state.state import *
+from src.calculations.statistics import getRandomOutcome
 
 class Board(GeneralGameState):
     def createBoardFromReelStrips(self) -> None:
@@ -127,7 +127,7 @@ class Board(GeneralGameState):
             for row in range(len(self.board[reel])):
                 if self.board[reel][row].special:
                     for specialType in list(self.specialSymbolsOnBoard.keys()):
-                           if self.board[reel][row].specialType:
+                           if self.board[reel][row].checkAttribute(specialType):
                                self.specialSymbolsOnBoard[specialType].append({'reel': reel, 'row': row})
 
     def transposeBoardString(self, boardString: List[List[str]]) -> List[List[str]]:

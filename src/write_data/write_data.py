@@ -2,15 +2,17 @@ import time
 import hashlib
 import json
 import ast
-from src.calculations.statistics import *
 from multiprocessing import Process, Manager
-import shutil
-from src.config.paths import *
-from src.config.bet_mode import *
-import cProfile
 import zstandard
-from warnings import warn
+import cProfile
 from collections import defaultdict
+from warnings import warn
+import shutil
+from typing import Dict
+
+from src.calculations.statistics import *
+from src.config.paths import *
+
 
 def getSHA256(fileToHash):
     try:

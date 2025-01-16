@@ -1,5 +1,5 @@
 from game_executables import *
-from calculations.statistics import getRandomOutcome
+from src.calculations.statistics import getRandomOutcome
 
 class GameStateOverride(GameExecutables):
     """
@@ -11,8 +11,10 @@ class GameStateOverride(GameExecutables):
         #Reset global values used across multiple projects
         super().resetBook()
         #Reset parameters relevant to local game only
-        self.emitWinEvent = True
-
+        self.emitWinEvent = False
+        self.tumbleWin = 0
+        self.tumbles = 0
+        
     def assignSpecialSymbolFuncions(self):
             specialSymbolFunctions = {
                 'W': [self.assignMultiplierProperty],

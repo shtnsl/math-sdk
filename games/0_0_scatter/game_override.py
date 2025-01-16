@@ -11,11 +11,17 @@ class GameStateOverride(GameExecutables):
         #Reset global values used across multiple projects
         super().resetBook()
         #Reset parameters relevant to local game only
-        self.emitWinEvent = True
-        self.cumulativePrize = 0
+        self.emitWinEvent = False
+        self.tumbleWin = 0
+        self.tumbles = 0
 
+    def resetFsSpin(self):
+        super().resetFsSpin()
+        self.globalMultiplier = 1
+        
     def assignSpecialSymbolFuncions(self):
             specialSymbolFunctions = {
+                'W': [self.assignMultiplierProperty],
                 'M': [self.assignMultiplierProperty]
             }
             for name, symObject in self.validSymbols.items():

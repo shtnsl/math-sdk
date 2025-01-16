@@ -101,7 +101,9 @@
                 "meta": {
                     "lineIndex": 1,
                     "multiplier": 1,
-                    "winWithoutMult": 30
+                    "winWithoutMult": 30,
+                    "globalMultiplier": 1,
+                    "lineMultiplier": 1.0
                 }
             }
         ]

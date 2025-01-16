@@ -1,8 +1,6 @@
 
 from gamestate import GameConfig, GameState
 from src.write_data.write_data import createBooks
-import sys
-sys.path.append('./') #Ensure root directory is added to the Python path
 
 if __name__ == '__main__':
     

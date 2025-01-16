@@ -6,17 +6,17 @@ from src.config.bet_mode import BetMode
 class GameConfig(Config):
     def __init__(self):
         super().__init__()
-        self.gameId = "0_0_cluster"
+        self.gameId = "0_0_scatter"
         self.providerNumber = int(self.gameId.split("_")[0])
-        self.workingName = "Sample Cluster Game"
+        self.workingName = "Sample scatter pay (pay anywhere)"
         self.winCap = 5000.0
-        self.winType = "cluster"
+        self.winType = "scatter"
         self.rtp = 0.9700
         self.constructFilePaths(self.gameId)
         
         # Game Dimensions
-        self.numReels = 7
-        self.numRows = [7]*self.numReels #Optionally include variable number of rows per reel
+        self.numReels = 6
+        self.numRows = [5]*self.numReels #Optionally include variable number of rows per reel
         #Board and Symbol Properties
         t1, t2, t3, t4 = (5, 5), (6, 8), (9, 12), (13, 36)
         payGroup = {
