@@ -129,7 +129,7 @@ class LineWins:
             returnData['totalWin'] += win
 
         self.winData = returnData
-        totalLineWin = round(returnData['totalWin'])
+        totalLineWin = round(returnData['totalWin'],2)
         if totalLineWin > 0:
             self.updateGameModeWins(totalLineWin)
             self.runningBetWin += totalLineWin

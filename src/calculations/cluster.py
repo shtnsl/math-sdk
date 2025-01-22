@@ -62,21 +62,18 @@ class ClusterWins:
                     for positions in cluster:
                         if self.board[positions[0]][positions[1]].checkAttribute(multiplierKey):
                             if int(self.board[positions[0]][positions[1]].getAttribute(multiplierKey)) > 0:
-                                mult += self.board[positions[0]][positions[1]].multiplier
+                                clusterMult += self.board[positions[0]][positions[1]].multiplier
                     clusterMult = max(clusterMult, 1)
                     symWin = self.config.payTable[(numSymsInCluster, sym)]
                     symWinMult = symWin*clusterMult*self.globalMultiplier
                     totalWin += symWinMult
                     jsonPositions = [{"reel": p[0], "row": p[1]} for p in cluster]
-                    returnData['wins'] += [{"symbol": sym, "clusterSize": numSymsInCluster, "win": symWinMult, "positions": jsonPositions, "meta": {"multiplier": mult, 'winWithoutMult': symWin, "globalMultiplier": self.globalMultiplier, "clusterMultiplier": clusterMult}}]
+                    returnData['wins'] += [{"symbol": sym, "clusterSize": numSymsInCluster, "win": symWinMult, "positions": jsonPositions, "meta": {"multiplier": clusterMult, 'winWithoutMult': symWin, "globalMultiplier": self.globalMultiplier, "clusterMultiplier": clusterMult}}]
 
                     for positions in cluster:
-                        reel = positions[0]
-                        row = positions[1]
-                        if self.board[reel][row].name == sym and not(self.board[reel][row].checkAttribute(wildKey)):
-                            self.board[reel][row].explode = True
-                            if {'reel':reel, 'row':row} not in explodingSymbols:
-                                explodingSymbols.append({"reel": reel, "row": row})
+                        self.board[positions[0]][positions[1]].explode = True
+                        if {'reel':positions[0], 'row':positions[1]} not in explodingSymbols:
+                            explodingSymbols.append({"reel": positions[0], "row": positions[1]})
         
         return returnData, explodingSymbols, totalWin
 

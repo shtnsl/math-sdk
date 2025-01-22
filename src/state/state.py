@@ -33,13 +33,11 @@ class GeneralGameState:
                     specialSymbolArgs[sym] = [key]
         
         for sym in payingSymbolMap.keys():
-            if sym in specialSymbolArgs:
-                symbolClasses[sym] = Symbol(name=sym, payTable=payingSymbolMap[sym], specials=specialSymbolArgs[sym])
-            else:
-                symbolClasses[sym] = Symbol(name=sym, payTable=payingSymbolMap[sym])
+            symbolClasses[sym] = Symbol(name=sym, config=self.config)
+            
         for sym in specialSymbolArgs.keys():
             if sym not in payingSymbolMap.keys():
-                symbolClasses[sym] = Symbol(name=sym, specials=specialSymbolArgs[sym])
+                symbolClasses[sym] = Symbol(name=sym, config=self.config)
 
         self.validSymbols = symbolClasses
 
@@ -182,7 +180,7 @@ class GeneralGameState:
         self.book["baseGameWins"] = float(round(min(self.baseGameWins,self.config.winCap),2))
         self.book["freeGameWins"] = float(round(min(self.freeGameWins,self.config.winCap),2))
 
-        assert min(round(self.book["baseGameWins"]  + self.book["freeGameWins"] ,1),self.config.winCap) == round(self.book["payoutMultiplier"],1), "Base + Free game payout mismatch!"
+        assert min(round(self.book["baseGameWins"]  + self.book["freeGameWins"] ,2),self.config.winCap) == round(self.book["payoutMultiplier"],2), "Base + Free game payout mismatch!"
   
     def updateGameModeWins(self, winAmount: float) -> None:
         if winAmount > 0:
@@ -200,7 +198,7 @@ class GeneralGameState:
                 self.repeat = True 
 
     def runSpin(self, sim):
-        print("Base Game is not implemented in this game. We are currently passing when calling runSpin.")
+        print("Base Game is not implemented in this game. Currently passing when calling runSpin.")
         pass
 
     def runFreeSpin(self):

@@ -80,7 +80,7 @@ def makeLookUpTable(gameState, name):
     sims = list(gameState.library.keys())
     sims.sort()
     for sim in sims:
-        file.write(str(gameState.library[sim]["id"]) + ",1," + str(gameState.library[sim]["payoutMultiplier"]) + "\n")
+        file.write("{},1,{:.2f}\n".format(gameState.library[sim]["id"],gameState.library[sim]["payoutMultiplier"]))
     file.close()
 
 def makeLookUpTableIdToCriteria(gameState, name):

@@ -3,7 +3,7 @@ UPDATE_TUMBLE_BANNER = "updateTumbleBanner"
 BOAD_MULT_INFO = "boardMultiplierInfo"
 from src.events.events import *
 
-def updateTumbleBoardBanner(gameState):
+def updateTumbleBoardBannerEvent(gameState):
     event = {
         "index": len(gameState.book['events']),
         "type": UPDATE_TUMBLE_BANNER,
@@ -11,14 +11,14 @@ def updateTumbleBoardBanner(gameState):
     }
     gameState.book['events'] += [deepcopy(event)]
 
-def sendBoardMultInfo(gameState, boardMult:int, multInfo: dict):
+def sendBoardMultInfoEvent(gameState, boardMult:int, multInfo: dict):
     multEventInfo = []
     if gameState.config.includePadding:
-        for m in range(multInfo):
-            multEventInfo.append({'positions': [{'reel': multInfo[m]['reel'], 'row': multInfo[m]['row']+1, 'multiplier': multInfo[m]['value']}]})
+        for m in range(len(multInfo)):
+            multEventInfo.append({'positions': [{'reel': multInfo[m]['reel'], 'row': multInfo[m]['row']+1, 'value': multInfo[m]['value']}]})
     else:
         for m in range(multInfo):
-            multEventInfo.append({'positions': [{'reel': multInfo[m]['reel'], 'row': multInfo[m]['row'], 'multiplier': multInfo[m]['value']}]})
+            multEventInfo.append({'positions': [{'reel': multInfo[m]['reel'], 'row': multInfo[m]['row'], 'value': multInfo[m]['value']}]})
             
     event = {
         "index": len(gameState.book['events']),

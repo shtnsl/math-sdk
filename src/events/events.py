@@ -1,4 +1,5 @@
 from src.events.event_constants import *
+from collections import defaultdict
 from copy import deepcopy
 
 def getSpecialSymbolAttributes(gameState):
@@ -16,10 +17,22 @@ def revealBoardEvent(gameState):
             boardForClient[reel] = [deepcopy(gameState.topSymbols[reel].name)]+boardForClient[reel]
             boardForClient[reel].append(deepcopy(gameState.bottomSymbols[reel].name))
     
+    printSpecials = defaultdict(list)
+    for prop in gameState.specialSymbolsOnBoard:
+        if len(gameState.specialSymbolsOnBoard[prop]) >0:
+            for sym in gameState.specialSymbolsOnBoard[prop]:
+                if gameState.config.includePadding:
+                    if gameState.board[sym['reel']][sym['row']].checkAttribute(prop) and (gameState.board[sym['reel']][sym['row']].getAttribute(prop) == True or type(gameState.board[sym['reel']][sym['row']].getAttribute(prop)) != bool):
+                        printSpecials[prop].append({'reel':sym['reel'], 'row':sym['row']+1, str(prop): gameState.board[sym['reel']][sym['row']].getAttribute(prop)})
+                else:
+                    if gameState.board[sym['reel']][sym['row']].checkAttribute(prop) and (gameState.board[sym['reel']][sym['row']].getAttribute(prop) == True or type(gameState.board[sym['reel']][sym['row']].getAttribute(prop)) != bool):
+                        printSpecials[prop].append({'reel':sym['reel'], 'row':sym['row'], str(prop): gameState.board[sym['reel']][sym['row']].getAttribute(prop)})
+
     event = {
         "index": len(gameState.book['events']), 
         "type": REVEAL,
         "board": deepcopy(boardForClient),
+        "specials": deepcopy(printSpecials),
         "paddingPositions": deepcopy(gameState.reelPositions),
         "gameType": deepcopy(gameState.gameType),
         "anticipation": deepcopy(gameState.anticipation),
@@ -89,7 +102,9 @@ def winInfoEvent(gameState, includePaddingIndex=True):
     winDataCopy["wins"] = gameState.winData["wins"]
     for idx,w in enumerate(gameState.winData["wins"]):
         if includePaddingIndex:
-            newPositions = [{"reel":p["reel"], "row": p["row"]+1} for p in w["positions"]]
+            newPositions = []
+            for p in w["positions"]:
+                newPositions.append({"reel":p["reel"], "row": p["row"]+1})
         else:
             newPositions = w["positions"]
 
@@ -132,7 +147,7 @@ def updateGlobalMultEvent(gameState):
     event = {"index": 
              len(gameState.book['events']), 
              "type": UPDATE_GLOBAL_MULT, 
-             "globalMult": int(gameState.globalMult)}
+             "globalMult": int(gameState.globalMultiplier)}
     
     gameState.book["events"] += [event]
 
@@ -145,7 +160,6 @@ def tumbleBoardEvent(gameState):
         exploding = gameState.explodingSymbols
     
     exploding = sorted(exploding, key=lambda x: x['reel'])
-    exploding = sorted(exploding, key=lambda x: x['row'])
 
     newSymbols = [[] for _ in range(gameState.config.numReels)]
     for r in range(len(gameState.newSymbolsFromTumble)):

@@ -56,7 +56,7 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
 
         return reelStopPositions
     
-    def evaluateClusterWins(self, recordWins:bool = False):
+    def evaluateClusterWins(self):
         self.getClusterWins()
         self.evaluateWinCap()
         'For tumbling games, do not send setTotalWin until all tumble events have concluded'
@@ -86,9 +86,10 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
             case "lineWins":
                 self.evaluateLineWins(recordWins = recordWinInfo)
             case "scatterWins":
+                self.evaluateScatterWins()
                 raise NotImplementedError
             case "clusterWins":
-                self.evaluateClusterWins(recordWins = recordWinInfo)
+                self.evaluateClusterWins()
             case "waysWins":
                 raise NotImplementedError
             case None:
@@ -114,7 +115,7 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
         return len(self.specialSymbolsOnBoard[specialSymbolCriteria])
 
     def checkFreespinCondition(self, scatterKey:str = 'scatter') -> bool:
-        if self.countSpecialSymbols(scatterKey) >= min(self.config.freeSpinTriggers[self.gameType].keys()):
+        if self.countSpecialSymbols(scatterKey) >= min(self.config.freeSpinTriggers[self.gameType].keys()) and not(self.repeat):
             return True 
         return False
     
@@ -142,6 +143,7 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
         self.tumbleWinMultiplier = 0
         self.winData = {}
         self.fs += 1 
+        self.globalMultiplier = 1
 
     def endFreeSpin(self):
         freeSpinEndEvent(self)
@@ -153,6 +155,5 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
         self.repeat = False
 
     def evaluateFinalWin(self):
-        self.finalWin = min(self.runningBetWin, self.config.winCap)
         self.updateFinalWin()
         finalWinEvent(self)

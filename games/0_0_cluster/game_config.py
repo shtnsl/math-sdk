@@ -53,7 +53,7 @@ class GameConfig(Config):
         }
         self.reels = {}
         for r,f in reels.items():
-            self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,"BR0.csv"]))
+            self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,f]))
 
         self.betModes = [
             BetMode(
@@ -71,7 +71,7 @@ class GameConfig(Config):
                     Distribution(
                         criteria="winCap", 
                         quota=0.001, 
-                        winCriteria=self.winCap, 
+                        # winCriteria=self.winCap, 
                         conditions = {
                             "reelWeights": {self.baseGameType : {"BR0":1}, self.freeGameType: {"FR0":1}},
                             "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},

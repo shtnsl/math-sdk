@@ -13,11 +13,10 @@ class GameConfig(Config):
         self.winType = "lines"
         self.rtp = 0.9700
         self.constructFilePaths(self.gameId)
-
         
         # Game Dimensions
         self.numReels = 5
-        self.numRows = [3]*self.numReels #Optionally include variable number of rows per reel
+        self.numRows = [3]*self.numReels
         #Board and Symbol Properties
         self.payTable = {
             (5, 'W'): 20, (4, 'W'): 10,	(3, 'W'): 5,
@@ -78,7 +77,7 @@ class GameConfig(Config):
         }
         self.reels = {}
         for r,f in reels.items():
-            self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,"BR0.csv"]))
+            self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,f]))
 
         self.betModes = [
             BetMode(

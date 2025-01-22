@@ -29,12 +29,13 @@ class Board(GeneralGameState):
                 symbolID = self.reelStrip[reel][(reelPos+row) % len(self.reelStrip[reel])]
                 sym = self.createSymbol(symbolID)
                 board[reel][row] = sym
-
-                for specialSymbol in self.specialSymbolsOnBoard:
-                    if sym.special:
-                        self.specialSymbolsOnBoard[specialSymbol] += [{"reel": reel, "row": row}]
-                        if hasattr(sym, 'scatter') and len(self.specialSymbolsOnBoard[specialSymbol]) >= self.config.anticipationTriggers[self.gameType] and firstScatterReel == -1:
-                                firstScatterReel = reel+1
+                if sym.special:
+                    for specialSymbol in self.specialSymbolsOnBoard:
+                        for s in self.config.specialSymbols[specialSymbol]:
+                            if board[reel][row].name == s:
+                                self.specialSymbolsOnBoard[specialSymbol] += [{"reel": reel, "row": row}]
+                                if hasattr(sym, 'scatter') and len(self.specialSymbolsOnBoard[specialSymbol]) >= self.config.anticipationTriggers[self.gameType] and firstScatterReel == -1:
+                                        firstScatterReel = reel+1
             paddingPositions[reel] = (reelPositions[reel]+len(board[reel])+1) % len(self.reelStrip[reel])
 
         if firstScatterReel > -1:

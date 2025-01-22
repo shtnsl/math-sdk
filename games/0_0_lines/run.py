@@ -4,14 +4,14 @@ from src.write_data.write_data import createBooks
 
 if __name__ == '__main__':
     
-    numThreads = 1
+    numThreads = 10
     rustThreads = 20
     batchingSize = 5000
-    compression = False
+    compression = True
     profiling = False
 
     numSimArgs = {
-        "base":int(1e2),
+        "base":int(1e4),
          }
     
     config = GameConfig()

@@ -18,33 +18,36 @@ class GameState(GameStateOverride):
 
             self.drawBoard()
             self.evaluateScatterPaysAndTumble()
+            #Cumulative wins in tumble banner (with globalmult applied at each update)
             while self.tumbleWin > 0:
                 self.evaluateScatterPaysAndTumble()
-                self.calculateWins(winType="scatterWins", emitWinEvent=True) 
 
             if self.spinWin > 0: 
                 self.setEndOfTumbleWins()
     
-            if self.checkFreespinCondition():
+            if self.checkFreespinCondition() and self.checkFreeSpinEntry():
                 self.runFreeSpinFromBaseGame()
 
             self.evaluateFinalWin()
+            self.checkRepeat()
 
         self.imprintWins()
 
     def runFreeSpin(self):
         self.resetFsSpin()
         while self.fs < self.totFs:
+            #Resets global multiplier at each spin
             self.updateFreeSpin()
             self.drawBoard()
-            self.calculateWins(winType="scatterWins", emitWinEvent=True)
+            self.evaluateScatterPaysAndTumble()
             
             while self.tumbleWin > 0:
+                self.updateGlobalMult()
                 self.evaluateScatterPaysAndTumble()
-                self.calculateWins(winType="scatterWins", emitWinEvent=True) 
-
+            
             if self.spinWin > 0: 
                 self.setEndOfTumbleWins()
     
             if self.checkFreespinCondition():
-                self.runFreeSpinFromBaseGame()
+                pass #send retriggers
+                # self.runFreeSpinFromBaseGame()

@@ -24,7 +24,7 @@ class GameState(GameStateOverride):
                 self.calculateWins(winType="clusterWins") 
             
             if self.spinWin > 0: 
-                setTotalWinEvent(self) #Only called at end of spin action
+                setTotalWinEvent(self) 
     
             if self.checkFreespinCondition():
                 self.runFreeSpinFromBaseGame()
@@ -38,11 +38,12 @@ class GameState(GameStateOverride):
         while self.fs < self.totFs:
             self.updateFreeSpin()
             self.drawBoard()
-
+            #Apply game-specific actions (i.e special symbol attributes before or after evaluation)
             self.calculateWins(winType="clusterWins")
             while self.tumbleWin > 0 and not(self.winCapTriggered):
                 self.tumbleBoard()
                 tumbleBoardEvent(self)
+                #Optional game actions
                 self.calculateWins(winType="clusterWins")
             
             if self.spinWin > 0 and not(self.winCapTriggered):
