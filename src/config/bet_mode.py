@@ -1,7 +1,6 @@
 from warnings import warn
 from src.calculations.statistics import normalize
 from src.config.constants import *
-from copy import deepcopy
 from typing import List, Dict
 
 
@@ -80,11 +79,11 @@ class BetMode:
     def getFeature(self):
         return self._isFeature
 
-    def getAutoCloseDisabled(self):
-        return self._autoCloseBetDisabled
-
     def getEnhancedMode(self):
         return self._isEnhancedMode
+
+    def getAutoCloseDisabled(self):
+        return self._autoCloseBetDisabled
 
     def getBuyBonus(self):
         return self._isBuyBonus

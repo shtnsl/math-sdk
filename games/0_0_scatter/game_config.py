@@ -7,6 +7,7 @@ class GameConfig(Config):
     def __init__(self):
         super().__init__()
         self.gameId = "0_0_scatter"
+        self.gameName = "sample_scatter"
         self.providerNumber = int(self.gameId.split("_")[0])
         self.workingName = "Sample scatter pay (pay anywhere)"
         self.winCap = 5000.0
@@ -55,6 +56,8 @@ class GameConfig(Config):
         for r,f in reels.items():
             self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,f]))
 
+        self.paddingReels[self.baseGameType] = self.reels["BR0"]
+        self.paddingReels[self.freeGameType] = self.reels["FR0"]
         self.betModes = [
             BetMode(
                 name = "base",
@@ -108,6 +111,41 @@ class GameConfig(Config):
                             "forceWinCap": False,
                             "forceFreeSpins": False
                     })
+                ]
+            ),
+            BetMode(
+                name = "bonus",
+                title= "buy bonus game entry",
+                description = "by bonus 1",
+                cost = 200,
+                rtp = self.rtp,
+                maxWin = self.winCap,
+                autoCloseDisabled = False,
+                isFeature = False,
+                isEnhancedMode = False,
+                isBuyBonus = True,
+                distributions = [
+                    Distribution(
+                        criteria="winCap", 
+                        quota=0.001, 
+                        # winCriteria=self.winCap, 
+                        conditions = {
+                            "reelWeights": {self.baseGameType : {"BR0":1}, self.freeGameType: {"FR0":1}},
+                            "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "scatterTriggers": {4:1, 5:2},
+                            "forceWinCap": True,
+                            "forceFreeSpins": True
+                        }),
+                    Distribution(
+                        criteria="freeGame", 
+                        quota=0.1, 
+                        conditions= {
+                            "reelWeights": {self.baseGameType: {"BR0": 1}, self.freeGameType: {"FR0":1}},
+                            "scatterTriggers": {3:20, 4:5, 5:1},
+                            "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "forceWinCap": False,
+                            "forceFreeSpins": True
+                        }),
                 ]
             ),
         ]

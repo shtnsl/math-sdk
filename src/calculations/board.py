@@ -139,9 +139,11 @@ class Board(GeneralGameState):
         maxSymLength = max(len(sym.name) for row in board for sym in row) + 1
         boardString = [[sym.name.ljust(maxSymLength) for sym in reel] for reel in board]
         transposedBoard = self.transposeBoardString(boardString)
+        print("\n")
         for row in transposedBoard:
             stringBoard.append("".join(row))
             print("".join(row))
+        print("\n")
         return stringBoard
     
     def boardString(self, board:List[List[object]]):

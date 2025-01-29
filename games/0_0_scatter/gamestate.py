@@ -1,12 +1,11 @@
 import os, sys 
 from game_override import *
 from src.state.state import *
-from src.events.events import setTotalWinEvent, tumbleBoardEvent
-if os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
 from game_config import *
 from game_executables import *
 from game_calculations import * 
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
 
 class GameState(GameStateOverride):
 
@@ -15,16 +14,20 @@ class GameState(GameStateOverride):
         self.repeat = True
         while self.repeat:
             self.resetBook()
-
             self.drawBoard()
-            self.evaluateScatterPaysAndTumble()
-            #Cumulative wins in tumble banner (with globalmult applied at each update)
-            while self.tumbleWin > 0:
-                self.evaluateScatterPaysAndTumble()
 
-            if self.spinWin > 0: 
-                self.setEndOfTumbleWins()
-    
+            self.winData = self.getScatterPayWinData(recordWins=True)
+            self.winManager.updateSpinWin(self.winManager.tumbleWin)
+            self.emitTumbleWinEvents()
+
+            while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
+                self.winData = self.getScatterPayWinData(recordWins=True)
+                self.winManager.updateSpinWin(self.winData['totalWin'])
+                self.emitTumbleWinEvents()
+
+            self.setEndOfTumbleWins()
+            self.winManager.updateGameTypeWins(self.gameType)
+            
             if self.checkFreespinCondition() and self.checkFreeSpinEntry():
                 self.runFreeSpinFromBaseGame()
 
@@ -39,15 +42,21 @@ class GameState(GameStateOverride):
             #Resets global multiplier at each spin
             self.updateFreeSpin()
             self.drawBoard()
-            self.evaluateScatterPaysAndTumble()
-            
-            while self.tumbleWin > 0:
-                self.updateGlobalMult()
-                self.evaluateScatterPaysAndTumble()
-            
-            if self.spinWin > 0: 
-                self.setEndOfTumbleWins()
+
+            self.winData = self.getScatterPayWinData(recordWins=True)
+            self.winManager.updateSpinWin(self.tumbleWin)
+            self.emitTumbleWinEvents()
+            while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
+                self.updateGlobalMult() #Special mechainc - increase multiplier with every tumble
+                self.winData = self.getScatterPayWinData()
+                self.winManager.updateSpinWin(self.winData['totalWin'])
+                self.emitTumbleWinEvents()
+                
+            self.setEndOfTumbleWins()
+            self.winManager.updateGameTypeWins(self.gameType)
     
             if self.checkFreespinCondition():
-                pass #send retriggers
-                # self.runFreeSpinFromBaseGame()
+                self.updateFreeSpinRetriggerAmount()
+
+
+

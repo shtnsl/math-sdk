@@ -14,11 +14,13 @@ class GameState(GameStateOverride):
         self.repeat = True
         while self.repeat:
             self.resetBook()
-
             self.drawBoard()
 
-            self.calculateWins(winType="lineWins", recordWinInfo=True)
- 
+            self.winData = self.getLineWinData(recordWins=True)
+            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.emitLineWinEvents()
+            
+            self.winManager.updateGameTypeWins(self.gameType)
             if self.checkFreespinCondition():
                 self.runFreeSpinFromBaseGame()
 
@@ -33,8 +35,12 @@ class GameState(GameStateOverride):
             self.updateFreeSpin()
             self.drawBoard()
 
-            self.calculateWins(winType="lineWins", recordWinInfo=True)
+            self.winData = self.getLineWinData(recordWins=True)
+            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.emitLineWinEvents()
 
             if self.checkFreespinCondition():
                 self.updateFreeSpinRetriggerAmount()
 
+            self.winManager.updateGameTypeWins(self.gameType)
+        #send freeSpinEnd event

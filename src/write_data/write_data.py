@@ -8,6 +8,8 @@ import cProfile
 from collections import defaultdict
 from warnings import warn
 import shutil
+import subprocess
+import asyncio
 from typing import Dict
 
 from src.calculations.statistics import *
@@ -96,7 +98,7 @@ def makeLookUpTablePaySplit(gameState, name):
     sims = list(gameState.library.keys())
     sims.sort()
     for sim in sims:
-        file.write(str(gameState.library[sim]["id"]) + "," + str(gameState.baseGameWins) + "," + str(gameState.freeGameWins)+"\n")
+        file.write(str(gameState.library[sim]["id"]) + "," + str(round(gameState.library[sim]["baseGameWins"],2)) + "," + str(round(gameState.library[sim]["freeGameWins"],2))+"\n")
     file.close()
 
 def writeLibraryEvents(gameState, library, gameType):
@@ -222,6 +224,7 @@ def printRecordedWins(gameState, name=""):
     file.write(json_object)
     file.close()
 
+
 def createBooks(gameState, config, numSimArgs, batchSize, threads, compress, profiling):
     for ns in numSimArgs.values():
         if all([ns > 0, ns > batchSize*batchSize]):
@@ -269,6 +272,15 @@ def assignSimsToCriteria(numSimsPerCriteria: Dict[str, int], sims: int) -> Dict[
     random.shuffle(simAllocation)
     return {i: simAllocation[i] for i in range(min(sims, len(simAllocation)))}
 
+async def profile_and_visualize(gameId, gameState, allBetModesConfigs, betMode, simCriteriaAllocation, threads, numRepeats, simsPerThread, repeat, compress, writeEventList):
+    output_string = f'games/{gameId}/simulationProfile_{betMode}.prof'
+    cProfile.runctx(
+        'gameState.runSims(allBetModesConfigs, betMode, simCriteriaAllocation, threads, numRepeats, simsPerThread, 0, repeat, compress, writeEventList)', 
+        globals(), locals(), 
+        output_string
+    )
+    await asyncio.create_subprocess_exec('snakeviz', output_string)
+
 
 def runMultiProcessSims(threads, batchingSize, gameId, betMode, gameState, numSims=1000000, compress=True, writeEventList=False, profiling=False):
     print("\nCreating books for", gameId, "in", betMode)
@@ -282,7 +294,19 @@ def runMultiProcessSims(threads, batchingSize, gameId, betMode, gameState, numSi
         manager = Manager()
         allBetModesConfigs = manager.list()
         if profiling:
-            cProfile.runctx('gameState.runSims(allBetModesConfigs, betMode, simCriteriaAllocation, threads, numRepeats, simsPerThread, 0, repeat, compress, writeEventList)', globals(), locals())
+            asyncio.run(profile_and_visualize(
+                gameId=gameId,
+                gameState=gameState,
+                allBetModesConfigs=allBetModesConfigs,
+                betMode=betMode,
+                simCriteriaAllocation=simCriteriaAllocation,
+                threads=threads,
+                numRepeats=numRepeats,
+                simsPerThread=simsPerThread,
+                repeat=repeat,
+                compress=compress,
+                writeEventList=writeEventList
+            ))
         elif threads == 1:
             gameState.runSims(allBetModesConfigs, betMode, simCriteriaAllocation, threads, numRepeats, simsPerThread, 0, repeat, compress, writeEventList)
         else:

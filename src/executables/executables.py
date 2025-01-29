@@ -28,7 +28,7 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
         if emitEvent:
             revealBoardEvent(self)
 
-    def forceSpecialBoard(self, forceCriteria: str, numForceSymbols: int):
+    def forceSpecialBoard(self, forceCriteria: str, numForceSymbols: int) -> None:
         reelStripId = getRandomOutcome(self.getCurrentDistributionConditions()['reelWeights'][self.gameType])
         reelStops = self.getSymbolLocationsOnReel(reelStripId, forceCriteria)
 
@@ -55,57 +55,28 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
                     reelStopPositions[r].append(s)
 
         return reelStopPositions
-    
-    def evaluateClusterWins(self):
-        self.getClusterWins()
-        self.evaluateWinCap()
-        'For tumbling games, do not send setTotalWin until all tumble events have concluded'
-        winInfoEvent(self)
-        setTumbleWinEvent(self)
-        if not self.winCapTriggered:
-            setWinEvent(self)
 
-    def evaluateLineWins(self, recordWins: bool = False):
-        self.calculateLineWins(recordWins= recordWins)
-        self.evaluateWinCap()
-        winInfoEvent(self)
-        if not self.winCapTriggered:
-            setWinEvent(self)
-        setTotalWinEvent(self)
 
-    def evaluateScatterWins(self, emitWinEvent:bool = False):
-        self.winData = self.getScatterPayWinData()
-        if emitWinEvent:
+    #Line pays game logic and events
+    def emitLineWinEvents(self) -> None:
+        if self.winManager.spinWin > 0:
             winInfoEvent(self)
-            if not self.winCapTriggered:
-                setTumbleWinEvent(self)
-
-
-    def calculateWins(self, winType:str = None, recordWinInfo:bool = False) -> ModuleNotFoundError:
-        match winType:
-            case "lineWins":
-                self.evaluateLineWins(recordWins = recordWinInfo)
-            case "scatterWins":
-                self.evaluateScatterWins()
-                raise NotImplementedError
-            case "clusterWins":
-                self.evaluateClusterWins()
-            case "waysWins":
-                raise NotImplementedError
-            case None:
-                raise NotImplementedError (f"must define a valid winTyp ({winType}) when calling 'calculateWins()' function")
-            
-    def emitWinInformation(self):
-        'setWin - cumulative win amount for a given individual spin'
-        'setTotalWin - running bet win, including all previous freeSpin and baseGame wins in feature games'
-        'winInfo - winning symbol information'
-        winInfoEvent(self)
-        if not self.winCapTriggered:
+            self.evaluateWinCap()
             setWinEvent(self)
         setTotalWinEvent(self)
 
-    def evaluateWinCap(self):
-        if self.runningBetWin >= self.config.winCap and not(self.winCapTriggered):
+    #Tumble (scatter/cluster) game logic and events
+    def emitTumbleWinEvents(self, tumbleAfterWins: bool = True) -> None:
+        if self.winData['totalWin'] >0:
+            winInfoEvent(self)
+            updateTumbleWinEvent(self)
+            self.evaluateWinCap()
+            if tumbleAfterWins:
+                self.tumbleBoard()
+                tumbleBoardEvent(self)
+
+    def evaluateWinCap(self) -> None:
+        if self.winManager.runningBetWin >= self.config.winCap and not(self.winCapTriggered):
             self.winCapTriggered = True
             winCapEvent(self)
             return True
@@ -119,13 +90,12 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
             return True 
         return False
     
-    
-    def runFreeSpinFromBaseGame(self, scatterKey:str = 'scatter'):
+    def runFreeSpinFromBaseGame(self, scatterKey:str = 'scatter') -> None:
         self.record({"kind": self.countSpecialSymbols(scatterKey), "symbol": scatterKey, "gameType": self.gameType})
         self.updateTotalFreeSpinAmount()
         self.runFreeSpin()
         
-    def updateTotalFreeSpinAmount(self, scatterKey:str = 'scatter'):
+    def updateTotalFreeSpinAmount(self, scatterKey:str = 'scatter') -> None:
         self.totFs = self.config.freeSpinTriggers[self.gameType][self.countSpecialSymbols(scatterKey)]
         if self.gameType == self.config.baseGameType:
             baseGameTrigger, freeGameTrigger = True, False 
@@ -133,27 +103,27 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
             baseGameTrigger, freeGameTrigger = False, True
         freeSpinsTriggerEvent(self, baseGameTrigger=baseGameTrigger, freeGameTrigger=freeGameTrigger)
 
-    def updateFreeSpinRetriggerAmount(self, scatterKey:str = 'scatter'):
+    def updateFreeSpinRetriggerAmount(self, scatterKey:str = 'scatter') -> None:
         self.totFs += self.config.freeSpinTriggers[self.gameType][self.countSpecialSymbols(scatterKey)]
         freeSpinsTriggerEvent(self, freeGameTrigger=True, baseGameTrigger=False)
 
-    def updateFreeSpin(self):
+    def updateFreeSpin(self) -> None:
         updateFreeSpinEvent(self)
-        self.spinWin = 0
+        self.winManager.resetSpinWin()
         self.tumbleWinMultiplier = 0
         self.winData = {}
         self.fs += 1 
         self.globalMultiplier = 1
 
-    def endFreeSpin(self):
+    def endFreeSpin(self) -> None:
         freeSpinEndEvent(self)
 
-    def enforceCriteriaConditions(self):
+    def enforceCriteriaConditions(self) -> None:
         """
         Define custom criteria conditions. By default no conditions are enforced and all simulated results are recorded
         """
         self.repeat = False
 
-    def evaluateFinalWin(self):
+    def evaluateFinalWin(self) -> None:
         self.updateFinalWin()
         finalWinEvent(self)

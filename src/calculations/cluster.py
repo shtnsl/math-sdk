@@ -1,6 +1,6 @@
 from collections import defaultdict
 from copy import deepcopy
-
+from abc import ABC, abstractmethod
 class ClusterWins:
 
     def getNeighbours(self, reel, row, localChecked) -> list:
@@ -50,10 +50,9 @@ class ClusterWins:
 
         return clusters
     
-    def evaluateAllClusters(self, clusters:dict, wildKey:str = "wild", multiplierKey:str = "multiplier", returnData: dict = {"totalWin": 0, "wins": []}) -> type:
+    def evaluateAllClusters(self, clusters:dict, multiplierKey:str = "multiplier", returnData: dict = {"totalWin": 0, "wins": []}) -> type:
         explodingSymbols = []
         totalWin = 0
-
         for sym in clusters:
             for cluster in clusters[sym]:
                 numSymsInCluster = len(cluster)
@@ -78,21 +77,28 @@ class ClusterWins:
         return returnData, explodingSymbols, totalWin
 
 
-    def getClusterWins(self, multiplierKey:str = 'multiplier', wildKey:str = 'wild') -> None:
+    def getClusterWinData(self, multiplierKey:str = 'multiplier', wildKey:str = 'wild') -> None:
         clusters = self.getClusters(wildKey)
-        self.tumbleWin = 0
         returnData = {
             "totalWin": 0,
             "wins": [],
         }
+        returnData, explodingSymbols, totalWin = self.evaluateAllClusters(clusters, multiplierKey, returnData)
 
-        returnData, explodingSymbols, totalWin = self.evaluateAllClusters(clusters, wildKey, multiplierKey, returnData)
         returnData['totalWin'] += totalWin
         self.clusters = clusters
-        self.winData = returnData
-        #individual tumble, wins since reveal, total bet win 
-        self.tumbleWin += totalWin
-        self.spinWin += totalWin
-        self.runningBetWin += totalWin
-        self.updateGameModeWins(totalWin)
+        self.winManager.tumbleWin = totalWin
         self.explodingSymbols = deepcopy(explodingSymbols)
+
+        return returnData
+    
+    def recordClusterWins(self) -> None:
+        for win in self.winData['wins']:
+            self.record({
+                "clusterSize": win["clusterSize"],
+                "symbol": win["symbol"],
+                "totalMultiplier": win["meta"]["multiplier"],
+                "gameType": self.gameType
+            })
+
+

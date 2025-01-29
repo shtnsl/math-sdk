@@ -14,6 +14,3 @@ rm -r env (if virtual env is not needed)
 # Package management
 install packages: pip install -r requirements.txt
 
-
-## Tasks
-Multiple symbol property attributes

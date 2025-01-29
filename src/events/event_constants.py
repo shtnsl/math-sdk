@@ -17,6 +17,7 @@ FREE_SPIN_END = "freeSpinEnd"
 #Tumble events
 TUMBLE_BOARD = "tumbleBoard"
 SET_TUMBLE_WIN = "setTumbleWin"
+UPDATE_TUMBLE_WIN = "updateTumbleWin"
 
 #Special symbol events
 UPDATE_GLOBAL_MULT = "updateGlobalMult"

@@ -1,8 +1,6 @@
 class Symbol:
     def __init__(self, config: object, name:str) -> None:
         self.name = name 
-        self.payTable = config.payTable
-        self.inWin = False 
         self.specialFunctions = []
         isSpecial = False
         for specialProperty in config.specialSymbols.keys():
@@ -33,18 +31,18 @@ class Symbol:
             assert type(tup[1]) == str, "paytable expects string for symbol name, (kind, symbol): value"
             payingSymbols.add(tup[1])
             if self.name == tup[1]:
-                payValue.append({tup: val})
+                payValue.append({str(tup[0]):val})
         if self.name not in list(payingSymbols):
             self.isPaying = False 
+            self.payTable = None
         else:
             self.isPaying = True
-    
-        self.payTable = payValue
+            self.payTable = payValue
 
-    def isSpecialSymbol(self) -> None:
+    def isSpecialSymbol(self) -> bool:
         return self.special 
 
-    def checkAttribute(self, *args) -> None:
+    def checkAttribute(self, *args) -> bool:
         for arg in args:
             if hasattr(self, arg) and (type(getattr(self, arg)) != bool or getattr(self,arg)==True):
                 return True 
@@ -57,7 +55,7 @@ class Symbol:
         for prop,value in attributeDict.items():
             setattr(self, prop, value)
 
-    def __eq__(self, name:str) -> None:
+    def __eq__(self, name:str) -> bool:
         if self.name == name:
             return True 
         return False 

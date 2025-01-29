@@ -13,9 +13,10 @@ class LineWins:
         mult = self.addMultipliersInWinningPositions(positions, multiplierKey)
         win = self.config.payTable[(kind, symName)]*mult
         baseWin = self.config.payTable[(kind, symName)]
+        
         return baseWin, win, mult
 
-    def recordLineWin(self, kind:int, symbol:str, mult:int, gameType:str):
+    def recordLineWin(self, kind:int, symbol:str, mult:int, gameType:str) -> None:
         self.record({
             "kind": kind,
             "symbol": symbol,
@@ -32,7 +33,7 @@ class LineWins:
             "meta": metaData
         }
 
-    def calculateLineWins(self, wildKey:str = 'wild', multiplierKey:str = 'multiplier', recordWins=None):
+    def getLineWinData(self, wildKey:str = 'wild', multiplierKey:str = 'multiplier', recordWins:bool = None):
         returnData = {
             "totalWin": 0,
             "wins": [],
@@ -128,9 +129,4 @@ class LineWins:
 
             returnData['totalWin'] += win
 
-        self.winData = returnData
-        totalLineWin = round(returnData['totalWin'],2)
-        if totalLineWin > 0:
-            self.updateGameModeWins(totalLineWin)
-            self.runningBetWin += totalLineWin
-            self.spinWin += totalLineWin
+        return returnData

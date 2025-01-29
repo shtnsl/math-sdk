@@ -35,7 +35,6 @@ class GameStateOverride(GameExecutables):
     def assignMultiplierProperty(self, symbol):
         multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
         symbol.multiplier = multiplierValue
-
     
     def checkGameRepeat(self):
         if self.repeat == False:

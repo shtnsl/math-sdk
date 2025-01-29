@@ -1,9 +1,7 @@
 import os, sys 
 from game_override import *
 from src.state.state import *
-from src.events.events import setTotalWinEvent, tumbleBoardEvent, setWinEvent, updateGlobalMultEvent
-if os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
+from src.events.events import setTotalWinEvent, setWinEvent 
 from game_config import *
 from game_executables import *
 from game_calculations import *
@@ -15,17 +13,22 @@ class GameState(GameStateOverride):
         self.repeat = True
         while self.repeat:
             self.resetBook()
-
             self.drawBoard()
-            self.calculateWins(winType="clusterWins")
-            while self.tumbleWin > 0:
-                self.tumbleBoard()
-                tumbleBoardEvent(self)
-                self.calculateWins(winType="clusterWins") 
             
-            if self.spinWin > 0: 
-                setTotalWinEvent(self) 
-    
+            self.winData = self.getClusterWinData()
+            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.emitTumbleWinEvents()
+            
+            while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
+                self.winData = self.getClusterWinData()
+                self.winManager.updateSpinWin(self.winData['totalWin'])
+                self.emitTumbleWinEvents()
+            
+            self.setEndOfTumbleWins()
+            
+            if len(self.specialSymbolsOnBoard['scatter']) >= min(self.config.freeSpinTriggers[self.gameType]) and not(self.getCurrentDistributionConditions()['forceFreeSpins']):
+                self.repeat = True
+            self.winManager.updateGameTypeWins(self.gameType)
             if self.checkFreespinCondition():
                 self.runFreeSpinFromBaseGame()
 
@@ -39,16 +42,18 @@ class GameState(GameStateOverride):
             self.updateFreeSpin()
             self.drawBoard()
             #Apply game-specific actions (i.e special symbol attributes before or after evaluation)
-            self.calculateWins(winType="clusterWins")
-            while self.tumbleWin > 0 and not(self.winCapTriggered):
-                self.tumbleBoard()
-                tumbleBoardEvent(self)
-                #Optional game actions
-                self.calculateWins(winType="clusterWins")
             
-            if self.spinWin > 0 and not(self.winCapTriggered):
-                #Update and apply global multiplier to tumble win
-                self.applyAndUpdateGlobalMult()
-                setWinEvent(self)
+            self.winData = self.getClusterWinData()
+            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.emitTumbleWinEvents()
 
-            setTotalWinEvent(self)
+            while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
+                self.winData = self.getClusterWinData()
+                self.winManager.updateSpinWin(self.winData['totalWin'])
+                self.emitTumbleWinEvents()
+            
+            self.setEndOfTumbleWins()
+            self.winManager.updateGameTypeWins(self.gameType)
+
+    #Make a game which has multipliers on the wilds (like juice monster)
+    #Mining game clone for scattery-pays (can also have symbol mults?)

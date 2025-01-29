@@ -2,13 +2,20 @@ from collections import defaultdict
 
 class ScatterWins:
 
-    def getScatterPayWinData(self, wildKey:str = "wild") -> dict:
+    def recordScatterWins(self, numWinningSyms:int, symbol:int, totalMultiplier:int, gameType:str) -> None:
+        self.record({
+            "winSize": numWinningSyms,
+            "symbol": symbol,
+            "totalMult": totalMultiplier,
+            "gameType": gameType
+        })
+    
+    def getScatterPayWinData(self, recordWins: bool = True, wildKey:str = "wild", multiplierKey:str = "multiplier") -> dict:
         returnData = {
             "totalWin": 0,
             "wins": [],
         }
-        self.explodingSymbols = []
-        self.tumbleWin = 0.0
+        explodingSymbols = []
         symbolsOnBoard = defaultdict(list)
         wildPositions = []
         totalWin = 0.0
@@ -25,28 +32,32 @@ class ScatterWins:
                 symbolsOnBoard[sym].append(wildPositions)
             winSize = len(symbolsOnBoard[sym])
             if (winSize, sym) in self.config.payTable:
+                symbolMultiplier = 0
+                for positions in symbolsOnBoard[sym]:
+                    if self.board[positions['reel']][positions['row']].checkAttribute(multiplierKey):
+                        symbolMultiplier += self.board[positions['reel']][positions['row']].getAttribute(multiplierKey)
+                    symbolMultiplier = max(symbolMultiplier, 1)
+
+                    self.board[positions['reel']][positions['row']].explode = True
+                    #Account for special symbols, such as wilds which can apply to multiple groups
+                    if positions not in explodingSymbols:
+                        explodingSymbols.append(positions)
+
+                if recordWins:
+                    self.recordScatterWins(winSize, sym, symbolMultiplier*self.globalMultiplier, self.gameType)
                 symbolWinData = {
                     'symbol': sym, 
-                    'win': self.config.payTable[(winSize, sym)]*self.globalMultiplier,
+                    'win': self.config.payTable[(winSize, sym)]*self.globalMultiplier*symbolMultiplier,
                     'positions': symbolsOnBoard[sym],
-                    'meta': {'multiplier': self.globalMultiplier, 'winWithoutMult': self.config.payTable[(winSize, sym)]}
-
+                    'meta': {'globalMultiplier': self.globalMultiplier, 
+                             'symbolMultiplier': symbolMultiplier,
+                             'winWithoutMult': self.config.payTable[(winSize, sym)]}
                 }
                 totalWin += symbolWinData['win']
                 returnData['wins'].append(symbolWinData)
 
-                for positions in symbolsOnBoard[sym]:
-                    self.board[positions['reel']][positions['row']].explode = True
-                    #Account for special symbols, such as wilds which can apply to multiple groups
-                    if positions not in self.explodingSymbols:
-                        self.explodingSymbols.append(positions)
-
         returnData['totalWin'] = totalWin
+        self.winManager.tumbleWin = totalWin
+        self.explodingSymbols = explodingSymbols
 
         return returnData
-    
-    def updateWinInformation(self, winData:dict):
-        #Running bet win not included - added at the end of tumble sequence
-        winFromTumble = winData['totalWin']
-        self.tumbleWin = winFromTumble
-        self.spinWin += winFromTumble

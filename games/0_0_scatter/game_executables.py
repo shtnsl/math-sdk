@@ -1,33 +1,22 @@
 from game_calculations import GameCalculations
 from src.events.events import updateGlobalMultEvent, tumbleBoardEvent, winInfoEvent, setWinEvent, setTotalWinEvent, freeSpinsTriggerEvent
-from game_events import updateTumbleBoardBannerEvent, sendBoardMultInfoEvent
+from game_events import updateTumbleWinEvent, sendBoardMultInfoEvent
+from copy import deepcopy
 
 class GameExecutables(GameCalculations):
 
-    def evaluateScatterPaysAndTumble(self):
-        self.winData = self.getScatterPayWinData()
-        if self.winData['totalWin'] >0:
-            self.updateWinInformation(self.winData)
-            winInfoEvent(self)
-            updateTumbleBoardBannerEvent(self)
-            self.tumbleBoard()
-            tumbleBoardEvent(self)
-
-    def tumbleBoardAndSendEvent(self):
-        self.tumbleBoard()
-        tumbleBoardEvent(self)
-
     def setEndOfTumbleWins(self):
-        boardMult, multInfo = self.getBoardMultipliers()
-        self.spinWin *= boardMult
-        self.runningBetWin += self.spinWin 
-        if self.spinWin> 0 and len(multInfo)>0:
-            sendBoardMultInfoEvent(self, boardMult, multInfo)
-            updateTumbleBoardBannerEvent(self)
-        self.updateGameModeWins(self.spinWin)
-        setWinEvent(self)
-        if self.spinWin > 0:
-            setTotalWinEvent(self)
+        if self.gameType == self.config.freeGameType: #Only multipliers in freeSpins
+            boardMult, multInfo = self.getBoardMultipliers()
+            baseTumbleWin = deepcopy(self.winManager.spinWin)
+            self.winManager.setSpinWin(baseTumbleWin * boardMult)
+            if self.winManager.spinWin > 0 and len(multInfo)>0:
+                sendBoardMultInfoEvent(self, boardMult, multInfo, baseTumbleWin, self.winManager.spinWin)
+                updateTumbleWinEvent(self)
+            
+        if self.winManager.spinWin > 0:
+            setWinEvent(self)
+        setTotalWinEvent(self)
 
     def updateGlobalMult(self):
         self.globalMultiplier += 1
@@ -42,7 +31,7 @@ class GameExecutables(GameCalculations):
         freeSpinsTriggerEvent(self, baseGameTrigger=baseGameTrigger, freeGameTrigger=freeGameTrigger)
 
     def checkFreeSpinEntry(self):
-        if not(self.getCurrentDistributionConditions()['forceFreeSpins']):
+        if not(self.getCurrentDistributionConditions()['forceFreeSpins']) and len(self.specialSymbolsOnBoard['scatter'])>=min(self.config.freeSpinTriggers[self.gameType].keys()):
             self.repeat = True
             return False 
         return True

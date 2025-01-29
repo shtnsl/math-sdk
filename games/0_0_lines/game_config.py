@@ -79,6 +79,9 @@ class GameConfig(Config):
         for r,f in reels.items():
             self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,f]))
 
+        self.paddingReels[self.baseGameType] = self.reels["BR0"]
+        self.paddingReels[self.freeGameType] = self.reels["FR0"]
+
         self.betModes = [
             BetMode(
                 name = "base",

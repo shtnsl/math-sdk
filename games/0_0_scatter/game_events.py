@@ -3,27 +3,25 @@ UPDATE_TUMBLE_BANNER = "updateTumbleBanner"
 BOAD_MULT_INFO = "boardMultiplierInfo"
 from src.events.events import *
 
-def updateTumbleBoardBannerEvent(gameState):
-    event = {
-        "index": len(gameState.book['events']),
-        "type": UPDATE_TUMBLE_BANNER,
-        "amount": int(round(min(gameState.spinWin, gameState.config.winCap)*100, 0))
-    }
-    gameState.book['events'] += [deepcopy(event)]
-
-def sendBoardMultInfoEvent(gameState, boardMult:int, multInfo: dict):
-    multEventInfo = []
+def sendBoardMultInfoEvent(gameState, boardMult:int, multInfo: dict, baseWin:float, updatedWin:float):
+    multiplierInfo, winInfo = {}, {}
+    multiplierInfo["positions"] = []
     if gameState.config.includePadding:
         for m in range(len(multInfo)):
-            multEventInfo.append({'positions': [{'reel': multInfo[m]['reel'], 'row': multInfo[m]['row']+1, 'value': multInfo[m]['value']}]})
+            multiplierInfo["positions"].append({'reel': multInfo[m]['reel'], 'row': multInfo[m]['row']+1, 'multiplier': multInfo[m]['value']})
     else:
         for m in range(multInfo):
-            multEventInfo.append({'positions': [{'reel': multInfo[m]['reel'], 'row': multInfo[m]['row'], 'value': multInfo[m]['value']}]})
-            
+            multiplierInfo["positions"].append({'reel': multInfo[m]['reel'], 'row': multInfo[m]['row'], 'multiplier': multInfo[m]['value']})
+    multiplierInfo["boardMult"] = boardMult
+
+    winInfo["tumbleWin"] = int(round(min(baseWin, gameState.config.winCap)*100))
+    winInfo["totalWin"] = int(round(min(updatedWin, gameState.config.winCap)*100))
+
+    assert round(updatedWin, 1) == round(baseWin*boardMult, 1)
     event = {
         "index": len(gameState.book['events']),
         "type": BOAD_MULT_INFO,
-        "totalMult": deepcopy(boardMult),
-        "multInfo": deepcopy(multEventInfo)
+        "multInfo": deepcopy(multiplierInfo),
+        "winInfo": deepcopy(winInfo)
     }
     gameState.book['events'] += [event]

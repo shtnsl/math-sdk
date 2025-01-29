@@ -1,21 +1,23 @@
 from src.config.config import *
 from src.write_data.write_data import *
 from src.calculations.symbol import Symbol
+from src.wins.win_manager import WinManager
+
+from copy import deepcopy
+from abc import ABC, abstractmethod
 import random 
 
-class GeneralGameState:
+class GeneralGameState(ABC):
     def __init__(self, config):
         self.config = config
         self.library = {}
         self.recordedEvents = {}
-        self.cumulativeBaseWins = 0
-        self.cumulativeFreeWins = 0
-        self.totalCumulativeWins = 0
         self.tempWins = []  
         self.createSymbolHashMap()
         self.assignSpecialSymbolFuncions()
+        self.setWinManager()
 
-    def createSymbolHashMap(self):
+    def createSymbolHashMap(self) -> None:
         symbolClasses = {}
         payingSymbolMap = {}
         for key,value in self.config.payTable.items():
@@ -41,9 +43,13 @@ class GeneralGameState:
 
         self.validSymbols = symbolClasses
 
+    @abstractmethod
     def assignSpecialSymbolFuncions(self):
-        warn("No special sybmol functionality implmented! ")
+        pass 
 
+
+    def setWinManager(self):
+        self.winManager = WinManager(self.config.baseGameType, self.config.freeGameType)
 
     def resetBook(self) -> None:
         """
@@ -59,15 +65,12 @@ class GeneralGameState:
             "events": [],
             "criteria": self.criteria
         }
+        self.winManager.resetEndOfRoundWins()
         self.globalMultiplier = 1
-        self.runningBetWin = 0 #total 
-        self.spinWin = 0 
-        self.baseGameWins = 0
-        self.freeGameWins = 0
-        self.totalWins = 0
         self.totFs = 0
         self.fs = 0
         self.winCapTriggered = False
+        self.triggeredFreeSpins = False
         self.gameType = self.config.baseGameType
         self.repeat = False
         self.anticipation = [0]*self.config.numReels
@@ -77,12 +80,10 @@ class GeneralGameState:
         self.sim = sim
     
     def resetFsSpin(self) -> None:
-        self.freeGameWins = 0
+        self.triggeredFreeSpins = True
         self.fs = 0
         self.gameType = self.config.freeGameType
-        
-    def verifyWinAmounts(self) -> None:
-        assert (min(round(self.baseGameWins + self.freeGameWins,1), self.config.winCap)) == min(round(self.totalWins,1), self.config.winCap), "Ensure sum of basegame and freespin wins equal total amount"
+        self.winManager.resetSpinWin()
         
     def getBetMode(self, modeNameToSelect) -> BetMode:
         for betMode in self.config.betModes:
@@ -108,7 +109,6 @@ class GeneralGameState:
                 return d._conditions
         return RuntimeError ("could not locate betMode conditions")
     
-
     #State verifications/checks
     def getWinCapTriggered(self) -> bool:
         if self.winCapTriggered:
@@ -121,7 +121,7 @@ class GeneralGameState:
                 return True 
         return False 
 
-    def record(self, description: dict):
+    def record(self, description: dict) -> None:
         """
         Record functions must be used for distribtion conditions.
         Freespin triggers are most commonly used, i.e {"kind": X, "symbol": "S", "gameType": "baseGame"}
@@ -139,7 +139,7 @@ class GeneralGameState:
             if keyValue[0] not in currentModeForceKeys:
                 self.getCurrentBetMode().addForceKey(keyValue[0])  # type:ignore
                 
-    def combine(self, modes, betModeName):
+    def combine(self, modes, betModeName) -> None:
         for modeConfig in modes:
             for betMode in modeConfig:
                 if betMode.getName() == betModeName:
@@ -170,16 +170,15 @@ class GeneralGameState:
         # print("TODO: get unique wins")
         self.tempWins = []
         self.library[self.sim+1] = deepcopy(self.book)
-        self.totalCumulativeWins += self.runningBetWin
-        self.cumulativeBaseWins += self.baseGameWins
-        self.cumulativeFreeWins += self.freeGameWins
+        self.winManager.updateEndRoundWins()
 
-    def updateFinalWin(self):
-        self.finalWin = round(min(self.runningBetWin, self.config.winCap),2)
+    def updateFinalWin(self) -> None:
+        self.finalWin = round(min(self.winManager.runningBetWin, self.config.winCap),2)
         self.book["payoutMultiplier"] = self.finalWin
-        self.book["baseGameWins"] = float(round(min(self.baseGameWins,self.config.winCap),2))
-        self.book["freeGameWins"] = float(round(min(self.freeGameWins,self.config.winCap),2))
+        self.book["baseGameWins"] = float(round(min(self.winManager.baseGameWins,self.config.winCap),2))
+        self.book["freeGameWins"] = float(round(min(self.winManager.freeGameWins,self.config.winCap),2))
 
+        assert min(round(self.winManager.baseGameWins + self.winManager.freeGameWins ,2),self.config.winCap) == round(self.winManager.runningBetWin, 2), "Base + Free game payout mismatch!"
         assert min(round(self.book["baseGameWins"]  + self.book["freeGameWins"] ,2),self.config.winCap) == round(self.book["payoutMultiplier"],2), "Base + Free game payout mismatch!"
   
     def updateGameModeWins(self, winAmount: float) -> None:
@@ -191,29 +190,34 @@ class GeneralGameState:
             else:
                 raise RuntimeError(f"{self.gameType} not a reconised game-type")
             
-    def checkRepeat(self):
+    def checkRepeat(self) -> None:
         if self.repeat == False:
             winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()
             if winCriteria is not None and self.finalWin != winCriteria:
                 self.repeat = True 
+            
+            if (self.getCurrentDistributionConditions()['forceFreeSpins'] and not(self.triggeredFreeSpins)):
+                self.repeat = True
 
+    @abstractmethod
     def runSpin(self, sim):
         print("Base Game is not implemented in this game. Currently passing when calling runSpin.")
         pass
 
+    @abstractmethod
     def runFreeSpin(self):
         print("gameState requires def runFreeSpin(), currently passing when calling runFreeSpin")
         pass
 
-    def runSims(self, betModesCopyList, betMode, simToCriteria, totalThreads, totalRepeats, numSims, threadIndex, repeatCount, compress=True, writeEventList=False):
+    def runSims(self, betModesCopyList, betMode, simToCriteria, totalThreads, totalRepeats, numSims, threadIndex, repeatCount, compress=True, writeEventList=False) -> None:
         self.betMode = betMode
         self.numSims = numSims
         for sim in range(threadIndex*numSims + (totalThreads*numSims)*repeatCount, (threadIndex+1)*numSims+(totalThreads*numSims)*repeatCount):
             self.criteria = simToCriteria[sim]
             self.runSpin(sim)
         modeCost = self.getCurrentBetMode().getCost()
-        print("Thread "+str(threadIndex), "finished with", round(self.totalCumulativeWins/(numSims*modeCost), 3), "RTP.",
-              f"[baseGame: {round(self.cumulativeBaseWins/(numSims*modeCost), 3)}, freeGame: {round(self.cumulativeFreeWins/(numSims*modeCost), 3)}]",
+        print("Thread "+str(threadIndex), "finished with", round(self.winManager.totalCumulativeWins/(numSims*modeCost), 3), "RTP.",
+              f"[baseGame: {round(self.winManager.cumulativeBaseWins/(numSims*modeCost), 3)}, freeGame: {round(self.winManager.cumulativeFreeWins/(numSims*modeCost), 3)}]",
               flush=True)
         lastFileWrite = threadIndex == totalThreads-1 and repeatCount == totalRepeats - 1
         firstFileWrite = threadIndex == 0 and repeatCount == 0
