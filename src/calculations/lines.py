@@ -1,5 +1,4 @@
 from typing import List, Tuple, Dict
-from copy import deepcopy
 
 class LineWins:
     def addMultipliersInWinningPositions(self, winingPositions:List[Dict], multiplierKey:str = "multiplier"):
@@ -120,10 +119,10 @@ class LineWins:
                                             win, 
                                             positions, 
                                             {"lineIndex": lineIndex, 
-                                                "multiplier": mult, 
-                                                "winWithoutMult": baseWin, 
-                                                "globalMultiplier": self.globalMultiplier, 
-                                                "lineMultiplier": mult/self.globalMultiplier})
+                                            "multiplier": mult, 
+                                            "winWithoutMult": baseWin, 
+                                            "globalMultiplier": self.globalMultiplier, 
+                                            "lineMultiplier": int(mult/self.globalMultiplier)})
                     returnData['wins'].append(winDict)
                     if recordWins: self.recordLineWin(wildMatches+matches,firstSymNotWild.name, mult, self.gameType)
 

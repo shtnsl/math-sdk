@@ -14,22 +14,18 @@ class GameStateOverride(GameExecutables):
         self.emitWinEvent = True
         self.cumulativePrize = 0
 
-    def assignSpecialSymbolFuncions(self):
-            specialSymbolFunctions = {
-                'M': [self.assignMultiplierProperty],
-                'W': [self.assignMultiplierProperty]
-            }
-            for name, symObject in self.validSymbols.items():
-                if name in specialSymbolFunctions:
-                    for func in specialSymbolFunctions[name]:
-                        symObject.registerSpecialFunction(func)
-
-    def assignWildProperty(self, symbol):
-        symbol.wild = True
+    def assignSpecialSymbolFunctions(self):
+        self.specialSymbolFunctions = {
+            'M': [self.assignMultiplierProperty],
+            'W': [self.assignMultiplierProperty]
+        }
 
     def assignMultiplierProperty(self, symbol):
-        multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
-        symbol.multiplier = multiplierValue
+        if self.gameType == self.config.freeGameType:
+            multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
+            symbol.assignAttribute({'multiplier': multiplierValue})
+        elif self.gameType == self.config.baseGameType:
+            symbol.assignAttribute({'multiplier': 1})
 
     
     def checkRepeat(self):

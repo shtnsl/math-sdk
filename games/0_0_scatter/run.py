@@ -5,15 +5,15 @@ from src.wins.win_manager import WinManager
 
 if __name__ == '__main__':
     
-    numThreads = 10
+    numThreads = 1
     rustThreads = 20
     batchingSize = 5000
-    compression = False
+    compression = True
     profiling = False
 
     numSimArgs = {
-        "base":int(50),
-        "bonus":int(50), 
+        "base":int(1e2),
+        "bonus":int(1e2), 
         }
     
     config = GameConfig()
@@ -21,4 +21,4 @@ if __name__ == '__main__':
     gameState = GameState(config)
 
     createBooks(gameState, config, numSimArgs, batchingSize, numThreads, compression, profiling)
-    generateConfigs(gameState)
+    # generateConfigs(gameState)

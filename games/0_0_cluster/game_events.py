@@ -12,5 +12,5 @@ def ApplyMutToTumbleWinEvent(gameState):
                 "tumbleMultiplier": gameState.globalMult        
              }
     }
-    gameState.book["events"] += [deepcopy(event)]
+    gameState.book["events"] += [event]
     

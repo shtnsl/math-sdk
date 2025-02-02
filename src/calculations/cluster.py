@@ -1,5 +1,4 @@
 from collections import defaultdict
-from copy import deepcopy
 from abc import ABC, abstractmethod
 class ClusterWins:
 
@@ -88,7 +87,7 @@ class ClusterWins:
         returnData['totalWin'] += totalWin
         self.clusters = clusters
         self.winManager.tumbleWin = totalWin
-        self.explodingSymbols = deepcopy(explodingSymbols)
+        self.explodingSymbols = explodingSymbols
 
         return returnData
     

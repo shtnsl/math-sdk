@@ -19,22 +19,14 @@ class GameStateOverride(GameExecutables):
         super().resetFsSpin()
         self.globalMultiplier = 1
         
-    def assignSpecialSymbolFuncions(self):
-            specialSymbolFunctions = {
-                'W': [self.assignMultiplierProperty],
-                'M': [self.assignMultiplierProperty]
-            }
-            for name, symObject in self.validSymbols.items():
-                if name in specialSymbolFunctions:
-                    for func in specialSymbolFunctions[name]:
-                        symObject.registerSpecialFunction(func)
-
-    def assignWildProperty(self, symbol):
-        symbol.wild = True
-
+    def assignSpecialSymbolFunctions(self):
+        self.specialSymbolFunctions = {
+            'M': [self.assignMultiplierProperty]
+        }
+ 
     def assignMultiplierProperty(self, symbol):
         multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
-        symbol.multiplier = multiplierValue
+        symbol.assignAttribute({'multiplier': multiplierValue})
     
     def checkGameRepeat(self):
         if self.repeat == False:

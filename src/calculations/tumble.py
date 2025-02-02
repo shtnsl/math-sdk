@@ -1,12 +1,11 @@
-from copy import deepcopy
+from copy import copy
 from src.events.events import setWinEvent, setTotalWinEvent
 
 class Tumble:
-    
     def tumbleBoard(self) -> None:
         self.tumbles += 1
-        self.boardBeforeTumble = deepcopy(self.board)
-        staticBoard = deepcopy(self.board)
+        self.boardBeforeTumble = copy(self.board)
+        staticBoard = copy(self.board)
         self.newSymbolsFromTumble = [[] for _ in range(len(staticBoard))]
 
         for reel in range(len(staticBoard)):
@@ -26,7 +25,7 @@ class Tumble:
                 copyReel.insert(0, insertSym)
                 self.newSymbolsFromTumble[reel].append(insertSym)
         
-            copyReel = [sym for sym in copyReel if not sym.checkAttribute('explode')]
+            copyReel = [copy(sym) for sym in copyReel if not sym.checkAttribute('explode')]
             if len(copyReel) != self.config.numRows[reel]:
                 raise RuntimeError(f"new reel length must match expected board size:\n expected: {self.config.numRows[reel]} \n actual: {len(copyReel)}")
             staticBoard[reel] = copyReel
@@ -37,10 +36,6 @@ class Tumble:
             for reel in range(self.config.numReels):
                 self.topSymbols[reel] = self.createSymbol(str(self.reelStrip[reel][(self.reelPositions[reel] - 1)%len(self.reelStrip[reel])]))
 
-        for reel in range(len(staticBoard)):
-            for row in range(len(staticBoard[reel])):
-                if staticBoard[reel][row].checkAttribute('explode'):
-                    print('here')
         self.getSpecialSymbolsOnBoard()
         self.board = staticBoard
 

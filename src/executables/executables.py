@@ -90,6 +90,12 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
             return True 
         return False
     
+    def checkFreeSpinEntry(self, scatterKey:str = "scatter"):
+        if not(self.getCurrentDistributionConditions()['forceFreeSpins']) and len(self.specialSymbolsOnBoard[scatterKey])>=min(self.config.freeSpinTriggers[self.gameType].keys()):
+            self.repeat = True
+            return False 
+        return True
+    
     def runFreeSpinFromBaseGame(self, scatterKey:str = 'scatter') -> None:
         self.record({"kind": self.countSpecialSymbols(scatterKey), "symbol": scatterKey, "gameType": self.gameType})
         self.updateTotalFreeSpinAmount()

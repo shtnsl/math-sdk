@@ -2,8 +2,9 @@ from src.config.config import *
 from src.write_data.write_data import *
 from src.calculations.symbol import Symbol
 from src.wins.win_manager import WinManager
+from src.calculations.symbol import SymbolStorage
 
-from copy import deepcopy
+from copy import copy
 from abc import ABC, abstractmethod
 import random 
 
@@ -14,39 +15,24 @@ class GeneralGameState(ABC):
         self.recordedEvents = {}
         self.tempWins = []  
         self.createSymbolHashMap()
-        self.assignSpecialSymbolFuncions()
+        self.assignSpecialSymbolFunctions()
         self.setWinManager()
 
     def createSymbolHashMap(self) -> None:
-        symbolClasses = {}
-        payingSymbolMap = {}
-        for key,value in self.config.payTable.items():
-            if payingSymbolMap.get(key[1]) != None:
-                payingSymbolMap[key[1]].append({'kind': key[0], 'value': value})
-            else:
-                payingSymbolMap[key[1]] = [{'kind': key[0], 'value': value}]
+        allSymbolsList = set()
+        for key,_ in self.config.payTable.items():
+            allSymbolsList.add(key[1])
 
-        specialSymbolArgs = {}
         for key in self.config.specialSymbols:
             for sym in self.config.specialSymbols[key]:
-                if specialSymbolArgs.get(sym) is not None:
-                    specialSymbolArgs[sym].append(key)
-                else:
-                    specialSymbolArgs[sym] = [key]
+                allSymbolsList.add(sym)
         
-        for sym in payingSymbolMap.keys():
-            symbolClasses[sym] = Symbol(name=sym, config=self.config)
-            
-        for sym in specialSymbolArgs.keys():
-            if sym not in payingSymbolMap.keys():
-                symbolClasses[sym] = Symbol(name=sym, config=self.config)
-
-        self.validSymbols = symbolClasses
+        allSymbolsList = list(allSymbolsList)
+        self.symbolStorage = SymbolStorage(self.config, allSymbolsList)   
 
     @abstractmethod
-    def assignSpecialSymbolFuncions(self):
-        pass 
-
+    def assignSpecialSymbolFunctions(self):
+        warn("No special symbol functions are defined")
 
     def setWinManager(self):
         self.winManager = WinManager(self.config.baseGameType, self.config.freeGameType)
@@ -169,7 +155,7 @@ class GeneralGameState(ABC):
         #         self.uniqueEventTypes.add(event['type'])
         # print("TODO: get unique wins")
         self.tempWins = []
-        self.library[self.sim+1] = deepcopy(self.book)
+        self.library[self.sim+1] = copy(self.book)
         self.winManager.updateEndRoundWins()
 
     def updateFinalWin(self) -> None:

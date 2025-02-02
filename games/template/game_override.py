@@ -12,16 +12,11 @@ class GameStateOverride(GameExecutables):
         super().resetBook()
         #Reset parameters relevant to local game only
 
-    def assignSpecialSymbolFuncions(self):
-            specialSymbolFunctions = {
-                'M': [self.assignMultiplierProperty],
-                'W': [self.assignMultiplierProperty]
-            }
-            for name, symObject in self.validSymbols.items():
-                if name in specialSymbolFunctions:
-                    for func in specialSymbolFunctions[name]:
-                        symObject.registerSpecialFunction(func)
-
+    def assignSpecialSymbolFunctions(self):
+        self.specialSymbolFunctions = {
+            'M': [self.assignMultiplierProperty],
+            'W': [self.assignMultiplierProperty]
+        }
 
     def assignMultiplierProperty(self, symbol):
         multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])

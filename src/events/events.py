@@ -1,12 +1,7 @@
 from src.events.event_constants import *
 from collections import defaultdict
-from copy import deepcopy
+from copy import copy
 
-def getSpecialSymbolAttributes(gameState):
-    for reel in range(len(gameState.board)):
-        for row in range(len(gameState.board[reel])):
-            if gameState.board[reel][row].special:
-                pass
 
 def revealReducedBoardEvent(gameState):
     boardForClient = []
@@ -14,8 +9,8 @@ def revealReducedBoardEvent(gameState):
         boardForClient.append([gameState.board[reel][row].name for row in range(len(gameState.board[reel]))])
     if gameState.config.includePaddingSymbols:
         for reel in range(len(boardForClient)):
-            boardForClient[reel] = [deepcopy(gameState.topSymbols[reel].name)]+boardForClient[reel]
-            boardForClient[reel].append(deepcopy(gameState.bottomSymbols[reel].name))
+            boardForClient[reel] = [copy(gameState.topSymbols[reel].name)]+boardForClient[reel]
+            boardForClient[reel].append(copy(gameState.bottomSymbols[reel].name))
     
     printSpecials = defaultdict(list)
     for prop in gameState.specialSymbolsOnBoard:
@@ -31,11 +26,11 @@ def revealReducedBoardEvent(gameState):
     event = {
         "index": len(gameState.book['events']), 
         "type": REVEAL,
-        "board": deepcopy(boardForClient),
-        "specials": deepcopy(printSpecials),
-        "paddingPositions": deepcopy(gameState.reelPositions),
-        "gameType": deepcopy(gameState.gameType),
-        "anticipation": deepcopy(gameState.anticipation),
+        "board": boardForClient,
+        "specials": printSpecials,
+        "paddingPositions": copy(gameState.reelPositions),
+        "gameType": copy(gameState.gameType),
+        "anticipation": copy(gameState.anticipation),
     }
 
     gameState.book["events"] += [event]
@@ -71,11 +66,11 @@ def revealBoardEvent(gameState):
         "anticipation": gameState.anticipation,
     }
 
-    gameState.book["events"] += [deepcopy(event)]
+    gameState.book["events"] += [event]
 
 def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:bool=None, freeGameTrigger:bool=None):
     assert baseGameTrigger != freeGameTrigger, "must set either baseGameTrigger or freeSpinTrigger to = True"
-    scatterPositions = gameState.specialSymbolsOnBoard['scatter']
+    scatterPositions = copy(gameState.specialSymbolsOnBoard['scatter'])
     if includePaddingIndex:
         for pos in scatterPositions:
             pos["row"] += 1
@@ -84,13 +79,15 @@ def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:b
         event = {
             "index": len(gameState.book["events"]),
             "type": FREESPINTRIGGER,
-            "totalFs": gameState.totFs,
+            "totalFs": copy(gameState.totFs),
+            "positions": scatterPositions
         }
     elif freeGameTrigger:
         event = {
             "index": len(gameState.book["events"]),
             "type": FREESPINRETRIGGER,
-            "totalFs": gameState.totFs,
+            "totalFs": copy(gameState.totFs),
+            "positions": scatterPositions
         }
 
     assert gameState.totFs >0, "total freespins (gameState.totFs) must be >0"
@@ -146,13 +143,13 @@ def winInfoEvent(gameState, includePaddingIndex=True):
         winDataCopy["wins"][idx]["meta"] = winDataCopy["wins"][idx]["meta"]
         winDataCopy["wins"][idx]["meta"]["winWithoutMult"] = int(round(min(winDataCopy["wins"][idx]["meta"]["winWithoutMult"], gameState.config.winCap)*100, 0))
         
-        dictData = {
-            "index": len(gameState.book['events']),
-            "type": WIN_DATA,
-            "totalWin": int(round(min(gameState.winData['totalWin'], gameState.config.winCap)*100, 0)),
-            "wins": winDataCopy["wins"],
-        }
-        gameState.book['events'] += [deepcopy(dictData)]
+    dictData = {
+        "index": len(gameState.book['events']),
+        "type": WIN_DATA,
+        "totalWin": int(round(min(gameState.winData['totalWin'], gameState.config.winCap)*100, 0)),
+        "wins": winDataCopy["wins"],
+    }
+    gameState.book['events'] += [dictData]
 
 def updateTumbleWinEvent(gameState):
     event = {
@@ -160,7 +157,7 @@ def updateTumbleWinEvent(gameState):
         "type": UPDATE_TUMBLE_WIN,
         "amount": int(round(min(gameState.winManager.spinWin, gameState.config.winCap)*100, 0))
     }
-    gameState.book['events'] += [deepcopy(event)]
+    gameState.book['events'] += [event]
 
 def updateFreeSpinEvent(gameState):
     event = {
@@ -211,6 +208,6 @@ def tumbleBoardEvent(gameState):
     gameState.book["events"] += [{
         "index": len(gameState.book['events']),
         "type": TUMBLE_BOARD,
-        "newSymbols": deepcopy(newSymbols),
-        "explodingSymbols": deepcopy(exploding)
+        "newSymbols": newSymbols,
+        "explodingSymbols": exploding
     }]

@@ -26,10 +26,8 @@ class GameState(GameStateOverride):
             
             self.setEndOfTumbleWins()
             
-            if len(self.specialSymbolsOnBoard['scatter']) >= min(self.config.freeSpinTriggers[self.gameType]) and not(self.getCurrentDistributionConditions()['forceFreeSpins']):
-                self.repeat = True
             self.winManager.updateGameTypeWins(self.gameType)
-            if self.checkFreespinCondition():
+            if self.checkFreespinCondition() and self.checkFreeSpinEntry():
                 self.runFreeSpinFromBaseGame()
 
             self.evaluateFinalWin()
@@ -54,6 +52,9 @@ class GameState(GameStateOverride):
             
             self.setEndOfTumbleWins()
             self.winManager.updateGameTypeWins(self.gameType)
+
+            if self.checkFreespinCondition():
+                self.updateFreeSpinRetriggerAmount()
 
     #Make a game which has multipliers on the wilds (like juice monster)
     #Mining game clone for scattery-pays (can also have symbol mults?)

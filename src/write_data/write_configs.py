@@ -1,5 +1,4 @@
 from src.calculations.symbol import Symbol
-from copy import deepcopy
 import json
 
 def generateConfigs(gameState:object, jsonPadding:bool=True, assignProperties:bool=True):
@@ -50,7 +49,7 @@ def makeFrontEndConfig(gameState, jsonPadding=True, assignProperties=True, **kwa
         pass
 
     symbols = {}
-    for sym in gameState.validSymbols.values():
+    for sym in gameState.symbolStorage.symbols.values():
         symbols[sym.name] = {}
         specialProperties = []
         for prop in gameState.config.specialSymbols:
@@ -72,7 +71,7 @@ def makeFrontEndConfig(gameState, jsonPadding=True, assignProperties=True, **kwa
                 column = reels[c]
                 for i in range(len(column)):
                     reelStripDictionaryJSON[idx][c].append({'name': column[i]})
-                    if len(gameState.validSymbols[column[i]].specialFunctions) >0:
+                    if len(gameState.symbolStorage.symbols[column[i]].specialFunctions) >0:
                         pass
                         # s = Symbol(gameState.config, column[i])
                         # s.applySpecialFunction()

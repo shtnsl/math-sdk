@@ -1,3 +1,19 @@
+from typing import Dict 
+class SymbolStorage:
+    def __init__(self, config: object, allSymbols: list):
+        self.config = config
+        self.symbols: Dict[str, Symbol] = {}
+        for symbol in allSymbols:
+            self.symbols[symbol] = Symbol(self.config, symbol)
+
+    def createSymbolState(self, symbolName:str) -> object:
+        return Symbol(self.config, symbolName)
+
+    def getSymbol(self, name: str) -> object:
+        if name not in self.symbols:
+            self.symbols[name] = Symbol(self.config, name)
+        return self.symbols[name]
+    
 class Symbol:
     def __init__(self, config: object, name:str) -> None:
         self.name = name 

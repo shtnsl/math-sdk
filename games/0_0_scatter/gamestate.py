@@ -17,7 +17,7 @@ class GameState(GameStateOverride):
             self.drawBoard()
 
             self.winData = self.getScatterPayWinData(recordWins=True)
-            self.winManager.updateSpinWin(self.winManager.tumbleWin)
+            self.winManager.updateSpinWin(self.winData['totalWin'])
             self.emitTumbleWinEvents()
 
             while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
@@ -44,10 +44,10 @@ class GameState(GameStateOverride):
             self.drawBoard()
 
             self.winData = self.getScatterPayWinData(recordWins=True)
-            self.winManager.updateSpinWin(self.tumbleWin)
+            self.winManager.updateSpinWin(self.winData['totalWin'])
             self.emitTumbleWinEvents()
             while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
-                self.updateGlobalMult() #Special mechainc - increase multiplier with every tumble
+                self.updateGlobalMult() #Special mechanic - increase multiplier with every tumble
                 self.winData = self.getScatterPayWinData()
                 self.winManager.updateSpinWin(self.winData['totalWin'])
                 self.emitTumbleWinEvents()

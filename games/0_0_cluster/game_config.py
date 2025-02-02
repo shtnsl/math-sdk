@@ -35,11 +35,11 @@ class GameConfig(Config):
         self.specialSymbols = {
             "wild": ["W"],
             "scatter": ["S"],
-            "multiplier": ["M"]
+            "multiplier": ["W"]
         }
 
         self.freeSpinTriggers = {
-           self.baseGameType : {3: 8, 4: 12, 5: 15},
+           self.baseGameType : {4: 10, 5: 15},
            self.freeGameType: {2: 3, 3:5, 4: 8, 5: 12}
         }
         self.anticipationTriggers = {

@@ -1,14 +1,14 @@
 from game_calculations import GameCalculations
 from src.events.events import updateGlobalMultEvent, tumbleBoardEvent, winInfoEvent, setWinEvent, setTotalWinEvent, freeSpinsTriggerEvent
 from game_events import updateTumbleWinEvent, sendBoardMultInfoEvent
-from copy import deepcopy
+from copy import copy
 
 class GameExecutables(GameCalculations):
 
     def setEndOfTumbleWins(self):
         if self.gameType == self.config.freeGameType: #Only multipliers in freeSpins
             boardMult, multInfo = self.getBoardMultipliers()
-            baseTumbleWin = deepcopy(self.winManager.spinWin)
+            baseTumbleWin = copy(self.winManager.spinWin)
             self.winManager.setSpinWin(baseTumbleWin * boardMult)
             if self.winManager.spinWin > 0 and len(multInfo)>0:
                 sendBoardMultInfoEvent(self, boardMult, multInfo, baseTumbleWin, self.winManager.spinWin)
@@ -29,10 +29,3 @@ class GameExecutables(GameCalculations):
         else:
             baseGameTrigger, freeGameTrigger = False, True
         freeSpinsTriggerEvent(self, baseGameTrigger=baseGameTrigger, freeGameTrigger=freeGameTrigger)
-
-    def checkFreeSpinEntry(self):
-        if not(self.getCurrentDistributionConditions()['forceFreeSpins']) and len(self.specialSymbolsOnBoard['scatter'])>=min(self.config.freeSpinTriggers[self.gameType].keys()):
-            self.repeat = True
-            return False 
-        return True
-

@@ -38,7 +38,7 @@ class ScatterWins:
                         symbolMultiplier += self.board[positions['reel']][positions['row']].getAttribute(multiplierKey)
                     symbolMultiplier = max(symbolMultiplier, 1)
 
-                    self.board[positions['reel']][positions['row']].explode = True
+                    self.board[positions['reel']][positions['row']].assignAttribute({'explode': True})
                     #Account for special symbols, such as wilds which can apply to multiple groups
                     if positions not in explodingSymbols:
                         explodingSymbols.append(positions)

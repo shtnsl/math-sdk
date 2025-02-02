@@ -1,5 +1,5 @@
 import os, sys 
-from state_override import *
+from game_override import *
 from src.state.state import *
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
@@ -43,4 +43,7 @@ class GameState(GameStateOverride):
                 self.updateFreeSpinRetriggerAmount()
 
             self.winManager.updateGameTypeWins(self.gameType)
-        #send freeSpinEnd event
+
+            if self.checkFreespinCondition():
+                self.updateFreeSpinRetriggerAmount()
+

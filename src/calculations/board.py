@@ -1,5 +1,4 @@
 import random
-from copy import deepcopy
 from typing import List
 
 from src.state.state import *
@@ -110,11 +109,13 @@ class Board(GeneralGameState):
             self.bottomSymbols = bottomSymbols
 
     def createSymbol(self, name) -> object:
-        if name not in self.validSymbols:
+        if name not in self.symbolStorage.symbols:
             raise ValueError(f"Symbol '{name}' is not registered.")
-        "Leave valid symbol registery unaltered"
-        symObject = deepcopy(self.validSymbols[name])
-        symObject.applySpecialFunction()  
+        symObject = self.symbolStorage.createSymbolState(name)
+        if name in self.specialSymbolFunctions:
+            for func in self.specialSymbolFunctions[name]:
+                func(symObject)
+
         return symObject
     
     def refreshSpecalSymbolsOnBoard(self) -> None:
