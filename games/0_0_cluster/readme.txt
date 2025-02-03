@@ -7,7 +7,7 @@ Standard tumbling game with Scatter and Wild symbols
 Minimum of 4 Scatter symbols are required for freeSpin triggers
 
 Freegame:
-Feature game has multipliers on Wilds
+All board positions start with a 1x multiplier - for every winning cluster, the multiplier value at that position is doubled (up to 512x)
 A minimum of 3 scatters are required for re-triggers
 
 

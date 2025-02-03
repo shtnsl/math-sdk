@@ -11,27 +11,16 @@ class GameStateOverride(GameExecutables):
         #Reset global values used across multiple projects
         super().resetBook()
         #Reset parameters relevant to local game only
-        self.resetGridMultipliers()
-        self.emitWinEvent = False
-        self.tumbleWin = 0
-        self.tumbles = 0
 
-    def resetFsSpin(self):
-        super().resetFsSpin()
-        self.resetGridMultipliers()
-        
     def assignSpecialSymbolFunctions(self):
         self.specialSymbolFunctions = {
-            'W': [self.assignMultiplierProperty],
+            'W': []
         }
-
-    def assignWildProperty(self, symbol):
-        symbol.wild = True
 
     def assignMultiplierProperty(self, symbol):
         multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
-        symbol.assignAttribute({'multiplier': multiplierValue})
-
+        symbol.assignAttribute({"multiplier":multiplierValue})
+    
     def checkGameRepeat(self):
         if self.repeat == False:
             winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()

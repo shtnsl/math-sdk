@@ -1,35 +1,43 @@
 from game_calculations import GameCalculations
-from game_events import ApplyMutToTumbleWinEvent
-from src.events.events import updateGlobalMultEvent
+from game_events import updateGridMultiplierEvent
 
 class GameExecutables(GameCalculations):
 
-    def applyAndUpdateGlobalMult(self):
-        """
-        In freepsins, we want to apply a multiplier if there is a multiplier and a winning combination on the board
-        """
-        boardMult = 0
-        for reel in range(len(self.board)):
-            for row in range(len(self.board)):
-                if self.board[reel][row].name == "M":
-                    boardMult += self.board[reel][row].multiplier
+    def resetGridMultipliers(self):
+        self.positionMultipliers = [[1 for _ in range(self.config.numRows[reel])] for reel in range(self.config.numReels)]
 
-        boardMult = max(boardMult, 1)
-        if boardMult > 1:
-            if self.globalMult == 1:
-                self.globalMult = boardMult
-            else:
-                self.globalMult += boardMult
+    def updateGridMultipliers(self):
+        if self.winData['totalWin'] > 0:
+            for win in self.winData['wins']:
+                for pos in win['positions']:
+                    self.positionMultipliers[pos['reel']][pos['row']] *= 2
+            updateGridMultiplierEvent(self)
 
-            finalSpinWin = self.spinWin * self.globalMult
-            self.runningBetWin += finalSpinWin
-            self.spinWin  = finalSpinWin 
-            if self.gameType == self.config.baseGameType:
-                self.baseGameWins += finalSpinWin 
-            elif self.gameType == self.config.freeGameType:
-                self.freeGameWins += finalSpinWin
 
-            self.tumbleWinMultiplier = self.globalMult
-            ApplyMutToTumbleWinEvent(self)
-            updateGlobalMultEvent(self)
-            self.evaluateWinCap()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

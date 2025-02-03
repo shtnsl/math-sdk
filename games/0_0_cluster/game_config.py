@@ -39,8 +39,8 @@ class GameConfig(Config):
         }
 
         self.freeSpinTriggers = {
-           self.baseGameType : {4: 10, 5: 15},
-           self.freeGameType: {2: 3, 3:5, 4: 8, 5: 12}
+           self.baseGameType : {4:10, 5:12, 6:15, 7:18, 8:20},
+           self.freeGameType: {3:5, 4:8, 5:10, 6:12, 7:15, 8:18}
         }
         self.anticipationTriggers = {
             self.baseGameType : min(self.freeSpinTriggers[self.baseGameType ].keys())-1,
@@ -110,6 +110,41 @@ class GameConfig(Config):
                     })
                 ]
             ),
+           BetMode(
+                name = "bonus",
+                title= "standard game entry",
+                description = "default game entry type",
+                cost = 200,
+                rtp = self.rtp,
+                maxWin = self.winCap,
+                autoCloseDisabled = False,
+                isFeature = True,
+                isEnhancedMode = False,
+                isBuyBonus = False,
+                distributions = [
+                    Distribution(
+                        criteria="winCap", 
+                        quota=0.001, 
+                        # winCriteria=self.winCap, 
+                        conditions = {
+                            "reelWeights": {self.baseGameType : {"BR0":1}, self.freeGameType: {"FR0":1}},
+                            "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "scatterTriggers": {4:1, 5:2},
+                            "forceWinCap": True,
+                            "forceFreeSpins": True
+                        }),
+                    Distribution(
+                        criteria="freeGame", 
+                        quota=0.1, 
+                        conditions= {
+                            "reelWeights": {self.baseGameType: {"BR0": 1}, self.freeGameType: {"FR0":1}},
+                            "scatterTriggers": {3:20, 4:5, 5:1},
+                            "multiplierValues": {self.baseGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "forceWinCap": False,
+                            "forceFreeSpins": True
+                        }),
+                ]
+            )
         ]
         
         # Optimisation(rtp, avgWin, hit-rate, recordConditions)

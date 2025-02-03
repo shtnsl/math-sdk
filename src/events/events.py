@@ -1,6 +1,6 @@
 from src.events.event_constants import *
 from collections import defaultdict
-from copy import copy
+from copy import copy, deepcopy
 
 
 def revealReducedBoardEvent(gameState):
@@ -9,8 +9,8 @@ def revealReducedBoardEvent(gameState):
         boardForClient.append([gameState.board[reel][row].name for row in range(len(gameState.board[reel]))])
     if gameState.config.includePaddingSymbols:
         for reel in range(len(boardForClient)):
-            boardForClient[reel] = [copy(gameState.topSymbols[reel].name)]+boardForClient[reel]
-            boardForClient[reel].append(copy(gameState.bottomSymbols[reel].name))
+            boardForClient[reel] = [gameState.topSymbols[reel].name]+boardForClient[reel]
+            boardForClient[reel].append(gameState.bottomSymbols[reel].name)
     
     printSpecials = defaultdict(list)
     for prop in gameState.specialSymbolsOnBoard:
@@ -28,12 +28,12 @@ def revealReducedBoardEvent(gameState):
         "type": REVEAL,
         "board": boardForClient,
         "specials": printSpecials,
-        "paddingPositions": copy(gameState.reelPositions),
-        "gameType": copy(gameState.gameType),
-        "anticipation": copy(gameState.anticipation),
+        "paddingPositions": gameState.reelPositions,
+        "gameType": gameState.gameType,
+        "anticipation": gameState.anticipation,
     }
 
-    gameState.book["events"] += [event]
+    gameState.book["events"] += [deepcopy(event)]
 
 def jsonReadySymbol(symbol:object, specialAttributes:list=None):
     assert specialAttributes is not None
@@ -70,7 +70,7 @@ def revealBoardEvent(gameState):
 
 def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:bool=None, freeGameTrigger:bool=None):
     assert baseGameTrigger != freeGameTrigger, "must set either baseGameTrigger or freeSpinTrigger to = True"
-    scatterPositions = copy(gameState.specialSymbolsOnBoard['scatter'])
+    scatterPositions = gameState.specialSymbolsOnBoard['scatter']
     if includePaddingIndex:
         for pos in scatterPositions:
             pos["row"] += 1
@@ -79,19 +79,19 @@ def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:b
         event = {
             "index": len(gameState.book["events"]),
             "type": FREESPINTRIGGER,
-            "totalFs": copy(gameState.totFs),
+            "totalFs": gameState.totFs,
             "positions": scatterPositions
         }
     elif freeGameTrigger:
         event = {
             "index": len(gameState.book["events"]),
             "type": FREESPINRETRIGGER,
-            "totalFs": copy(gameState.totFs),
+            "totalFs": gameState.totFs,
             "positions": scatterPositions
         }
 
     assert gameState.totFs >0, "total freespins (gameState.totFs) must be >0"
-    gameState.book["events"] += [event]
+    gameState.book["events"] += [deepcopy(event)]
 
 def setWinEvent(gameState, winLevelKey: str = "standard"):
     if not(gameState.winCapTriggered):
@@ -129,8 +129,8 @@ def winInfoEvent(gameState, includePaddingIndex=True):
     includePaddingIndex: starts winning-symbol poasitions at row=1, to account for top/bottom symbol inclusion in board
     """
     winDataCopy = {}    
-    winDataCopy["wins"] = gameState.winData["wins"]
-    for idx,w in enumerate(gameState.winData["wins"]):
+    winDataCopy["wins"] = deepcopy(gameState.winData["wins"])
+    for idx,w in enumerate(winDataCopy["wins"]):
         if includePaddingIndex:
             newPositions = []
             for p in w["positions"]:
@@ -149,7 +149,7 @@ def winInfoEvent(gameState, includePaddingIndex=True):
         "totalWin": int(round(min(gameState.winData['totalWin'], gameState.config.winCap)*100, 0)),
         "wins": winDataCopy["wins"],
     }
-    gameState.book['events'] += [dictData]
+    gameState.book['events'] += [deepcopy(dictData)]
 
 def updateTumbleWinEvent(gameState):
     event = {
@@ -159,7 +159,7 @@ def updateTumbleWinEvent(gameState):
     }
     gameState.book['events'] += [event]
 
-def updateFreeSpinEvent(gameState):
+def update_free_spinEvent(gameState):
     event = {
         "index": len(gameState.book['events']), 
         "type": UPDATE_FS, 
@@ -205,9 +205,9 @@ def tumbleBoardEvent(gameState):
         if len(gameState.newSymbolsFromTumble[r]) > 0:
             newSymbols[r] = [jsonReadySymbol(s, specialAttributes) for s in gameState.newSymbolsFromTumble[r]]
 
-    gameState.book["events"] += [{
+    gameState.book["events"] += deepcopy([{
         "index": len(gameState.book['events']),
         "type": TUMBLE_BOARD,
         "newSymbols": newSymbols,
         "explodingSymbols": exploding
-    }]
+    }])
