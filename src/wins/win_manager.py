@@ -4,9 +4,9 @@ class WinManager:
         self.freeGameMode = freeGameMode
 
         #Updates win amounts across all simulations
-        self.totalCumulativeWins = 0
-        self.cumulativeBaseWins = 0
-        self.cumulativeFreeWins = 0
+        self.total_cumulative_wins = 0
+        self.cumulative_base_wins = 0
+        self.cumulative_free_wins = 0
 
         #Base-game and free-game wins for a specific simulation
         self.running_bet_win = 0.0
@@ -40,9 +40,9 @@ class WinManager:
             raise RuntimeError("Must define a valid gameType")
 
     def update_end_round_wins(self):
-        self.totalCumulativeWins += (self.base_game_wins + self.freegame_wins)
-        self.cumulativeBaseWins += self.base_game_wins 
-        self.cumulativeFreeWins += self.freegame_wins  
+        self.total_cumulative_wins += (self.base_game_wins + self.freegame_wins)
+        self.cumulative_base_wins += self.base_game_wins 
+        self.cumulative_free_wins += self.freegame_wins  
 
     def reset_end_round_wins(self):
         self.base_game_wins = 0.0

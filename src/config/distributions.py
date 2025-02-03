@@ -5,45 +5,45 @@ class Distribution:
     def __init__(self, 
         criteria:str = None,  
         quota: int = 0, 
-        winCriteria: Union[float, None] = None, 
+        win_criteria: Union[float, None] = None, 
         conditions:dict = {}, 
-        requiredDistribtionConditions:list = ["reel_weights", "force_wincap", "force_freespins"],
+        required_distribtion_conditions:list = ["reel_weights", "force_wincap", "force_freespins"],
         ):
 
         assert quota > 0, "non-zero quota value must be assigned"
 
         self._quota = quota
         self._criteria = criteria
-        self._requiredDistribtionConditions = requiredDistribtionConditions
-        self._winCriteria = winCriteria
-        self.verifyAndSetConditions(conditions)
+        self._required_distribtion_conditions = required_distribtion_conditions
+        self._win_criteria = win_criteria
+        self.verify_and_set_conditions(conditions)
         
-    def dictFormat(self) -> dict:
-        dictFormat = {
+    def dict_format(self) -> dict:
+        dict_format = {
             'criteria': self._criteria,
             'rtp': self._rtp,
             'hr': self._hr,
             'avg': self._avg,
         }
-        return dictFormat
+        return dict_format
     
-    def verifyAndSetConditions(self, conditions):
+    def verify_and_set_conditions(self, conditions):
         conditionKeys = list(conditions.keys())
-        for rk in self._requiredDistribtionConditions:
+        for rk in self._required_distribtion_conditions:
             assert rk in conditionKeys, f"condition missing required key: {rk}\n conditionKeys"
         self._conditions = conditions
 
-    def getCriteria(self):
+    def get_criteria(self):
         return self._criteria
 
-    def getQuota(self):
+    def get_quota(self):
         return self._quota
     
-    def getWinCriteria(self):
-        return self._winCriteria 
+    def get_win_criteria(self):
+        return self._win_criteria 
     
-    def getRequiredDistributionConditions(self):
-        return self._requiredDistribtionConditions
+    def get_required_distribution_conditions(self):
+        return self._required_distribtion_conditions
 
     def __str__(self):
         return f"Criteria: {self._criteria}\nConditions: {json.dumps(self._conditions)}"

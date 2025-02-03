@@ -74,7 +74,7 @@ class GameConfig(Config):
                     Distribution(
                         criteria="winCap", 
                         quota=0.001, 
-                        # winCriteria=self.wincap, 
+                        # win_criteria=self.wincap, 
                         conditions = {
                             "reel_weights": {self.base_game_type : {"BR0":1}, self.free_game_type: {"FR0":1}},
                             "multiplierValues": {self.base_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
@@ -95,7 +95,7 @@ class GameConfig(Config):
                     Distribution(
                         criteria="0", 
                         quota=0.4, 
-                        winCriteria=0.0, 
+                        win_criteria=0.0, 
                         conditions= {
                             "reel_weights": {self.base_game_type: {"BR0": 1}},
                             "multiplierValues": {self.base_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
@@ -128,7 +128,7 @@ class GameConfig(Config):
                     Distribution(
                         criteria="winCap", 
                         quota=0.001, 
-                        # winCriteria=self.wincap, 
+                        # win_criteria=self.wincap, 
                         conditions = {
                             "reel_weights": {self.base_game_type : {"BR0":1}, self.free_game_type: {"FR0":1}},
                             "multiplierValues": {self.base_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},

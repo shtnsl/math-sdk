@@ -202,12 +202,12 @@ def output_lookup_and_force_files(threads, BATCHING_SIZE, game_id, bet_mode, gam
                 outfile.write(infile.read())
 
 
-def write_json(gamestate, library, name, firstFileWrite, lastFileWrite, compress):
+def write_json(gamestate, library, name, frist_file_write, last_file_write, compress):
    # Convert the list of dictionaries to a JSON-encoded string and compress it in chunks
     chunk = json.dumps(library)
-    if not (firstFileWrite):
+    if not (frist_file_write):
         chunk = chunk[1:]
-    if not (lastFileWrite):
+    if not (last_file_write):
         chunk = chunk[:-1] + ","
     if compress:
         file = open(str.join("/",[gamestate.config.library_path,name+'.zst']), 'wb')

@@ -5,7 +5,7 @@ from src.write_data.write_configs import generate_configs
 
 if __name__ == '__main__':
     
-    NUM_THREADS = 10
+    NUM_THREADS = 1
     RUST_THREADS = 20
     BATCHING_SIZE = 50000
     COMPRESSION = False

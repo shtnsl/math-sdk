@@ -178,7 +178,7 @@ def freespin_end_event(gamestate):
 def final_win_event(gamestate):
     event = {"index": len(gamestate.book['events']), 
              "type": FINAL_WIN,
-             "amount": int(round(min(gamestate.finalWin, gamestate.config.wincap)*100, 0))
+             "amount": int(round(min(gamestate.final_win, gamestate.config.wincap)*100, 0))
     }
     gamestate.book["events"] += [event]
 

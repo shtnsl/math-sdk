@@ -101,7 +101,7 @@ class GeneralGameState(ABC):
             return True
         return False 
     
-    def inCriteria(self, *args) -> bool:
+    def in_criteria(self, *args) -> bool:
         for arg in args:
             if self.criteria == arg:
                 return True 
@@ -159,8 +159,8 @@ class GeneralGameState(ABC):
         self.win_manager.update_end_round_wins()
 
     def update_final_win(self) -> None:
-        self.finalWin = round(min(self.win_manager.running_bet_win, self.config.wincap),2)
-        self.book["payoutMultiplier"] = self.finalWin
+        self.final_win = round(min(self.win_manager.running_bet_win, self.config.wincap),2)
+        self.book["payoutMultiplier"] = self.final_win
         self.book["baseGameWins"] = float(round(min(self.win_manager.base_game_wins,self.config.wincap),2))
         self.book["freeGameWins"] = float(round(min(self.win_manager.freegame_wins,self.config.wincap),2))
 
@@ -178,8 +178,8 @@ class GeneralGameState(ABC):
             
     def check_repeat(self) -> None:
         if self.repeat == False:
-            winCriteria = self.get_current_betmode_distributions().getWinCriteria()
-            if winCriteria is not None and self.finalWin != winCriteria:
+            win_criteria = self.get_current_betmode_distributions().get_win_criteria()
+            if win_criteria is not None and self.final_win != win_criteria:
                 self.repeat = True 
             
             if (self.get_current_distribution_conditions()['force_freespins'] and not(self.triggered_freespins)):
@@ -195,24 +195,24 @@ class GeneralGameState(ABC):
         print("gamestate requires def run_freespin(), currently passing when calling runFreeSpin")
         pass
 
-    def run_sims(self, betmode_copy_list, bet_mode, simToCriteria, totalThreads, totalRepeats, num_sims, threadIndex, repeatCount, compress=True, write_event_list=False) -> None:
+    def run_sims(self, betmode_copy_list, bet_mode, simToCriteria, total_threads, totalRepeats, num_sims, thread_index, repeat_count, compress=True, write_event_list=False) -> None:
         self.bet_mode = bet_mode
         self.num_sims = num_sims
-        for sim in range(threadIndex*num_sims + (totalThreads*num_sims)*repeatCount, (threadIndex+1)*num_sims+(totalThreads*num_sims)*repeatCount):
+        for sim in range(thread_index*num_sims + (total_threads*num_sims)*repeat_count, (thread_index+1)*num_sims+(total_threads*num_sims)*repeat_count):
             self.criteria = simToCriteria[sim]
             self.run_spin(sim)
-        modeCost = self.get_current_betmode().getCost()
-        print("Thread "+str(threadIndex), "finished with", round(self.win_manager.totalCumulativeWins/(num_sims*modeCost), 3), "RTP.",
-              f"[baseGame: {round(self.win_manager.cumulativeBaseWins/(num_sims*modeCost), 3)}, freeGame: {round(self.win_manager.cumulativeFreeWins/(num_sims*modeCost), 3)}]",
+        mode_cost = self.get_current_betmode().getCost()
+        print("Thread "+str(thread_index), "finished with", round(self.win_manager.total_cumulative_wins/(num_sims*mode_cost), 3), "RTP.",
+              f"[baseGame: {round(self.win_manager.cumulative_base_wins/(num_sims*mode_cost), 3)}, freeGame: {round(self.win_manager.cumulative_free_wins/(num_sims*mode_cost), 3)}]",
               flush=True)
-        lastFileWrite = threadIndex == totalThreads-1 and repeatCount == totalRepeats - 1
-        firstFileWrite = threadIndex == 0 and repeatCount == 0
+        last_file_write = thread_index == total_threads-1 and repeat_count == totalRepeats - 1
+        frist_file_write = thread_index == 0 and repeat_count == 0
 
-        write_json(self, list(self.library.values()), "temp_multi_threaded_files/books_"+bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount)+".json", firstFileWrite, lastFileWrite, compress)
-        print_recorded_wins(self, bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount))
-        make_lookup_tables(self, "lookUpTable_"+bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount))
-        make_lookup_to_criteria(self, "lookUpTableIdToCriteria_"+bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount))
-        make_lookup_pay_split(self, "lookUpTableSegmented"+"_"+str(bet_mode)+"_"+str(threadIndex)+"_"+str(repeatCount))
+        write_json(self, list(self.library.values()), "temp_multi_threaded_files/books_"+bet_mode+"_"+str(thread_index)+"_"+str(repeat_count)+".json", frist_file_write, last_file_write, compress)
+        print_recorded_wins(self, bet_mode+"_"+str(thread_index)+"_"+str(repeat_count))
+        make_lookup_tables(self, "lookUpTable_"+bet_mode+"_"+str(thread_index)+"_"+str(repeat_count))
+        make_lookup_to_criteria(self, "lookUpTableIdToCriteria_"+bet_mode+"_"+str(thread_index)+"_"+str(repeat_count))
+        make_lookup_pay_split(self, "lookUpTableSegmented"+"_"+str(bet_mode)+"_"+str(thread_index)+"_"+str(repeat_count))
         if write_event_list == True:
             write_library_events(self, list(self.library.values()), bet_mode)
         betmode_copy_list.append(self.config.bet_modes)

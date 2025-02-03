@@ -23,7 +23,7 @@ class GameStateOverride(GameExecutables):
     
     def check_game_repeat(self):
         if self.repeat == False:
-            winCriteria = self.get_current_betmode_distributions().getWinCriteria()
-            if winCriteria is not None and self.finalWin != winCriteria:
+            win_criteria = self.get_current_betmode_distributions().get_win_criteria()
+            if win_criteria is not None and self.final_win != win_criteria:
                 self.repeat = True 
             
