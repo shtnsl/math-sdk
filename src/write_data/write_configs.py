@@ -1,8 +1,8 @@
 from src.calculations.symbol import Symbol
 import json
 
-def generateConfigs(gameState:object, jsonPadding:bool=True, assignProperties:bool=True):
-    makeFrontEndConfig(gameState=gameState, jsonPadding=jsonPadding, assignProperties=assignProperties)
+def generate_configs(gamestate:object, jsonPadding:bool=True, assignProperties:bool=True):
+    makeFrontEndConfig(gamestate=gamestate, jsonPadding=jsonPadding, assignProperties=assignProperties)
 
 
 def passFeBetmode(betmode):
@@ -12,13 +12,13 @@ def passFeBetmode(betmode):
     modeInfo['ante'] = betmode.getEnhancedMode()
     modeInfo['buyBonus'] = betmode.getBuyBonus()
     modeInfo['rtp'] = betmode.getRTP()
-    modeInfo['maxWin'] = betmode.getMaxWin()
+    modeInfo['max_win'] = betmode.getMaxWin()
     modeInfo['description'] = betmode.getDescription()
 
     return {betmode.getName(): modeInfo}
 
 
-def makeFrontEndConfig(gameState, jsonPadding=True, assignProperties=True, **kwargs):
+def makeFrontEndConfig(gamestate, jsonPadding=True, assignProperties=True, **kwargs):
     '''
     jsonPadding formats symbols the same as the board {'name': symbol} (default), alternatively an array of strings ['H1',...] is passed
     assignProperties will invode 
@@ -26,16 +26,16 @@ def makeFrontEndConfig(gameState, jsonPadding=True, assignProperties=True, **kwa
     if assignProperties: assert jsonPadding == True, "jsonPadding must be `True` to invoke symbol properties in padding"
 
     jsonInfo = {}
-    jsonInfo["providerName"] = str(gameState.config.providerName)
-    jsonInfo["gameName"] = str(gameState.config.gameName)
-    jsonInfo["gameID"] = gameState.config.gameId
-    jsonInfo["rtp"] = gameState.config.rtp
-    jsonInfo['numReels'] = gameState.config.numReels
-    jsonInfo['numRows'] = gameState.config.numRows
+    jsonInfo["providerName"] = str(gamestate.config.provider_name)
+    jsonInfo["gameName"] = str(gamestate.config.game_name)
+    jsonInfo["gameID"] = gamestate.config.game_id
+    jsonInfo["rtp"] = gamestate.config.rtp
+    jsonInfo['numReels'] = gamestate.config.num_reels
+    jsonInfo['numRows'] = gamestate.config.num_rows
 
     jsonInfo['betModes'] = {}
-    for betMode in gameState.config.betModes:
-        bmInfo = passFeBetmode(betMode)
+    for bet_mode in gamestate.config.bet_modes:
+        bmInfo = passFeBetmode(bet_mode)
         modeName = next(iter(bmInfo))
         jsonInfo['betModes'][modeName] = bmInfo[modeName]
 
@@ -44,43 +44,43 @@ def makeFrontEndConfig(gameState, jsonPadding=True, assignProperties=True, **kwa
         jsonInfo[key] = val
 
     try:
-        jsonInfo["paylines"] = gameState.config.payLines
+        jsonInfo["paylines"] = gamestate.config.pay_lines
     except:
         pass
 
     symbols = {}
-    for sym in gameState.symbolStorage.symbols.values():
+    for sym in gamestate.symbolStorage.symbols.values():
         symbols[sym.name] = {}
-        specialProperties = []
-        for prop in gameState.config.specialSymbols:
-            if sym.name in gameState.config.specialSymbols[prop]:
-                specialProperties.append(prop)
+        special_properties = []
+        for prop in gamestate.config.special_symbols:
+            if sym.name in gamestate.config.special_symbols[prop]:
+                special_properties.append(prop)
         
-        if sym.payTable is not None:
-            symbols[sym.name]['payTable'] = sym.payTable 
+        if sym.paytable is not None:
+            symbols[sym.name]['paytable'] = sym.paytable 
         
-        if len(specialProperties) >0:
-            symbols[sym.name]['specialProperties'] = specialProperties
+        if len(special_properties) >0:
+            symbols[sym.name]['special_properties'] = special_properties
 
     jsonInfo["symbols"] = symbols
     reelStripDictionaryJSON = {}
     if jsonPadding:
-        for idx,reels in gameState.config.paddingReels.items():
-            reelStripDictionaryJSON[idx] = [[] for _ in range(gameState.config.numReels)]
+        for idx,reels in gamestate.config.padding_reels.items():
+            reelStripDictionaryJSON[idx] = [[] for _ in range(gamestate.config.num_reels)]
             for c in range(len(reels)):
                 column = reels[c]
                 for i in range(len(column)):
                     reelStripDictionaryJSON[idx][c].append({'name': column[i]})
-                    if len(gameState.symbolStorage.symbols[column[i]].specialFunctions) >0:
+                    if len(gamestate.symbolStorage.symbols[column[i]].special_functions) >0:
                         pass
-                        # s = Symbol(gameState.config, column[i])
+                        # s = Symbol(gamestate.config, column[i])
                         # s.applySpecialFunction()
                         pass
         #TODO: implement special function 
         jsonInfo["paddingReels"] = reelStripDictionaryJSON
     elif not jsonPadding:
-        jsonInfo["paddingReels"] = gameState.config.paddingReels
+        jsonInfo["paddingReels"] = gamestate.config.paddingReels
         
-    fe_json = open(str.join("/",[gameState.config.configPath,"config_fe_"+str(gameState.config.gameId)+".json"]), 'w')
+    fe_json = open(str.join("/",[gamestate.config.configPath,"config_fe_"+str(gamestate.config.game_id)+".json"]), 'w')
     fe_json.write(json.dumps(jsonInfo, indent=4))
     fe_json.close()

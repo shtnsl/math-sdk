@@ -3,212 +3,212 @@ from collections import defaultdict
 from copy import copy, deepcopy
 
 
-def revealReducedBoardEvent(gameState):
-    boardForClient = []
-    for reel in range(len(gameState.board)):
-        boardForClient.append([gameState.board[reel][row].name for row in range(len(gameState.board[reel]))])
-    if gameState.config.includePaddingSymbols:
-        for reel in range(len(boardForClient)):
-            boardForClient[reel] = [gameState.topSymbols[reel].name]+boardForClient[reel]
-            boardForClient[reel].append(gameState.bottomSymbols[reel].name)
+def reveal_reduced_board_event(gamestate):
+    board_client = []
+    for reel in range(len(gamestate.board)):
+        board_client.append([gamestate.board[reel][row].name for row in range(len(gamestate.board[reel]))])
+    if gamestate.config.include_padding:
+        for reel in range(len(board_client)):
+            board_client[reel] = [gamestate.top_symbols[reel].name]+board_client[reel]
+            board_client[reel].append(gamestate.bottom_symbols[reel].name)
     
-    printSpecials = defaultdict(list)
-    for prop in gameState.specialSymbolsOnBoard:
-        if len(gameState.specialSymbolsOnBoard[prop]) >0:
-            for sym in gameState.specialSymbolsOnBoard[prop]:
-                if gameState.config.includePadding:
-                    if gameState.board[sym['reel']][sym['row']].checkAttribute(prop) and (gameState.board[sym['reel']][sym['row']].getAttribute(prop) == True or type(gameState.board[sym['reel']][sym['row']].getAttribute(prop)) != bool):
-                        printSpecials[prop].append({'reel':sym['reel'], 'row':sym['row']+1, str(prop): gameState.board[sym['reel']][sym['row']].getAttribute(prop)})
+    print_specials = defaultdict(list)
+    for prop in gamestate.special_syms_on_board:
+        if len(gamestate.special_syms_on_board[prop]) >0:
+            for sym in gamestate.special_syms_on_board[prop]:
+                if gamestate.config.include_padding:
+                    if gamestate.board[sym['reel']][sym['row']].check_attribute(prop) and (gamestate.board[sym['reel']][sym['row']].get_attribute(prop) == True or type(gamestate.board[sym['reel']][sym['row']].get_attribute(prop)) != bool):
+                        print_specials[prop].append({'reel':sym['reel'], 'row':sym['row']+1, str(prop): gamestate.board[sym['reel']][sym['row']].get_attribute(prop)})
                 else:
-                    if gameState.board[sym['reel']][sym['row']].checkAttribute(prop) and (gameState.board[sym['reel']][sym['row']].getAttribute(prop) == True or type(gameState.board[sym['reel']][sym['row']].getAttribute(prop)) != bool):
-                        printSpecials[prop].append({'reel':sym['reel'], 'row':sym['row'], str(prop): gameState.board[sym['reel']][sym['row']].getAttribute(prop)})
+                    if gamestate.board[sym['reel']][sym['row']].check_attribute(prop) and (gamestate.board[sym['reel']][sym['row']].get_attribute(prop) == True or type(gamestate.board[sym['reel']][sym['row']].get_attribute(prop)) != bool):
+                        print_specials[prop].append({'reel':sym['reel'], 'row':sym['row'], str(prop): gamestate.board[sym['reel']][sym['row']].get_attribute(prop)})
 
     event = {
-        "index": len(gameState.book['events']), 
+        "index": len(gamestate.book['events']), 
         "type": REVEAL,
-        "board": boardForClient,
-        "specials": printSpecials,
-        "paddingPositions": gameState.reelPositions,
-        "gameType": gameState.gameType,
-        "anticipation": gameState.anticipation,
+        "board": board_client,
+        "specials": print_specials,
+        "padding_positions": gamestate.reel_positions,
+        "gameType": gamestate.gametype,
+        "anticipation": gamestate.anticipation,
     }
 
-    gameState.book["events"] += [deepcopy(event)]
+    gamestate.book["events"] += [deepcopy(event)]
 
-def jsonReadySymbol(symbol:object, specialAttributes:list=None):
-    assert specialAttributes is not None
+def json_ready_sym(symbol:object, special_attributes:list=None):
+    assert special_attributes is not None
     printSym = {'name': symbol.name}
     attrs = vars(symbol)
     for key,val in attrs.items():
-        if key in specialAttributes and symbol.getAttribute(key) != False:
+        if key in special_attributes and symbol.get_attribute(key) != False:
             printSym[key] = val 
     return printSym
 
-def revealBoardEvent(gameState):
-    boardForClient = []
-    specialAttributes = list(gameState.config.specialSymbols.keys())
-    for reel in range(len(gameState.board)):
-        boardForClient.append([])
-        for row in range(len(gameState.board[reel])):
-            boardForClient[reel].append(jsonReadySymbol(gameState.board[reel][row], specialAttributes))
+def reveal_event(gamestate):
+    board_client = []
+    special_attributes = list(gamestate.config.special_symbols.keys())
+    for reel in range(len(gamestate.board)):
+        board_client.append([])
+        for row in range(len(gamestate.board[reel])):
+            board_client[reel].append(json_ready_sym(gamestate.board[reel][row], special_attributes))
 
-    if gameState.config.includePaddingSymbols:
-        for reel in range(len(boardForClient)):
-            boardForClient[reel] = [jsonReadySymbol(gameState.topSymbols[reel],specialAttributes)]+boardForClient[reel]
-            boardForClient[reel].append(jsonReadySymbol(gameState.bottomSymbols[reel], specialAttributes))
+    if gamestate.config.include_padding:
+        for reel in range(len(board_client)):
+            board_client[reel] = [json_ready_sym(gamestate.top_symbols[reel],special_attributes)]+board_client[reel]
+            board_client[reel].append(json_ready_sym(gamestate.bottom_symbols[reel], special_attributes))
     
     event = {
-        "index": len(gameState.book['events']), 
+        "index": len(gamestate.book['events']), 
         "type": REVEAL,
-        "board": boardForClient,
-        "paddingPositions": gameState.reelPositions,
-        "gameType": gameState.gameType,
-        "anticipation": gameState.anticipation,
+        "board": board_client,
+        "padding_positions": gamestate.reel_positions,
+        "gameType": gamestate.gametype,
+        "anticipation": gamestate.anticipation,
     }
 
-    gameState.book["events"] += [event]
+    gamestate.book["events"] += [event]
 
-def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:bool=None, freeGameTrigger:bool=None):
-    assert baseGameTrigger != freeGameTrigger, "must set either baseGameTrigger or freeSpinTrigger to = True"
+def fs_trigger_event(gamestate, includePaddingIndex=True, basegame_trigger:bool=None, freeGameTrigger:bool=None):
+    assert basegame_trigger != freeGameTrigger, "must set either basegame_trigger or freeSpinTrigger to = True"
     event = {}
-    scatterPositions = gameState.specialSymbolsOnBoard['scatter']
+    scatterPositions = gamestate.special_syms_on_board['scatter']
     if includePaddingIndex:
         for pos in scatterPositions:
             pos["row"] += 1
 
-    if baseGameTrigger:
+    if basegame_trigger:
         event = {
-            "index": len(gameState.book["events"]),
+            "index": len(gamestate.book["events"]),
             "type": FREESPINTRIGGER,
-            "totalFs": gameState.totFs,
+            "totalFs": gamestate.totFs,
             "positions": scatterPositions
         }
     elif freeGameTrigger:
         event = {
-            "index": len(gameState.book["events"]),
+            "index": len(gamestate.book["events"]),
             "type": FREESPINRETRIGGER,
-            "totalFs": gameState.totFs,
+            "totalFs": gamestate.totFs,
             "positions": scatterPositions
         }
 
-    assert gameState.totFs >0, "total freespins (gameState.totFs) must be >0"
-    gameState.book["events"] += [deepcopy(event)]
+    assert gamestate.totFs >0, "total freespins (gamestate.totFs) must be >0"
+    gamestate.book["events"] += [deepcopy(event)]
 
-def setWinEvent(gameState, winLevelKey: str = "standard"):
-    if not(gameState.winCapTriggered):
-        event = {"index": len(gameState.book['events']),
+def set_win_event(gamestate, winLevelKey: str = "standard"):
+    if not(gamestate.wincap_triggered):
+        event = {"index": len(gamestate.book['events']),
                 "type": SET_WIN,
-                "amount": int(min(round(gameState.winManager.spinWin*100,0), gameState.config.winCap*100)),
-                "winLevel": gameState.config.getWinLevel(gameState.winManager.spinWin, winLevelKey)
+                "amount": int(min(round(gamestate.win_manager.spinWin*100,0), gamestate.config.wincap*100)),
+                "win_level": gamestate.config.get_win_level(gamestate.win_manager.spinWin, winLevelKey)
         }
-        gameState.book["events"] += [event]
+        gamestate.book["events"] += [event]
 
-def setTotalWinEvent(gameState):
-    event = {"index": len(gameState.book['events']),
+def set_total_event(gamestate):
+    event = {"index": len(gamestate.book['events']),
              "type": SET_TOTAL_WIN,
-             "amount" :int(round(min(gameState.winManager.runningBetWin, gameState.config.winCap)*100, 0))
+             "amount" :int(round(min(gamestate.win_manager.running_bet_win, gamestate.config.wincap)*100, 0))
     }
-    gameState.book["events"] += [event]
+    gamestate.book["events"] += [event]
 
-def setTumbleWinEvent(gameState):
-    event = {"index": len(gameState.book['events']),
+def set_tumble_event(gamestate):
+    event = {"index": len(gamestate.book['events']),
              "type": SET_TUMBLE_WIN,
-             "amount": int(round(min(gameState.tumbleWin, gameState.config.winCap)*100))
+             "amount": int(round(min(gamestate.tumble_win, gamestate.config.wincap)*100))
              }
-    gameState.book["events"] += [event]
+    gamestate.book["events"] += [event]
 
-def winCapEvent(gameState):
+def wincap_event(gamestate):
     event = {
-        "index": len(gameState.book['events']), 
+        "index": len(gamestate.book['events']), 
         "type": WINCAP,
-        "amount": int(round(min(gameState.winManager.runningBetWin, gameState.config.winCap)*100, 0))
+        "amount": int(round(min(gamestate.win_manager.running_bet_win, gamestate.config.wincap)*100, 0))
     }
-    gameState.book["events"] += [event]
+    gamestate.book["events"] += [event]
 
-def winInfoEvent(gameState, includePaddingIndex=True):
+def win_info_event(gamestate, includePaddingIndex=True):
     """
     includePaddingIndex: starts winning-symbol poasitions at row=1, to account for top/bottom symbol inclusion in board
     """
-    winDataCopy = {}    
-    winDataCopy["wins"] = deepcopy(gameState.winData["wins"])
-    for idx,w in enumerate(winDataCopy["wins"]):
+    win_data_copy = {}    
+    win_data_copy["wins"] = deepcopy(gamestate.winData["wins"])
+    for idx,w in enumerate(win_data_copy["wins"]):
         if includePaddingIndex:
-            newPositions = []
+            new_positions = []
             for p in w["positions"]:
-                newPositions.append({"reel":p["reel"], "row": p["row"]+1})
+                new_positions.append({"reel":p["reel"], "row": p["row"]+1})
         else:
-            newPositions = w["positions"]
+            new_positions = w["positions"]
 
-        winDataCopy["wins"][idx]["win"] = int(round(min(winDataCopy["wins"][idx]["win"], gameState.config.winCap)*100,0))
-        winDataCopy["wins"][idx]["positions"] = newPositions   
-        winDataCopy["wins"][idx]["meta"] = winDataCopy["wins"][idx]["meta"]
-        winDataCopy["wins"][idx]["meta"]["winWithoutMult"] = int(round(min(winDataCopy["wins"][idx]["meta"]["winWithoutMult"], gameState.config.winCap)*100, 0))
+        win_data_copy["wins"][idx]["win"] = int(round(min(win_data_copy["wins"][idx]["win"], gamestate.config.wincap)*100,0))
+        win_data_copy["wins"][idx]["positions"] = new_positions   
+        win_data_copy["wins"][idx]["meta"] = win_data_copy["wins"][idx]["meta"]
+        win_data_copy["wins"][idx]["meta"]["winWithoutMult"] = int(round(min(win_data_copy["wins"][idx]["meta"]["winWithoutMult"], gamestate.config.wincap)*100, 0))
         
-    dictData = {
-        "index": len(gameState.book['events']),
+    dict_data = {
+        "index": len(gamestate.book['events']),
         "type": WIN_DATA,
-        "totalWin": int(round(min(gameState.winData['totalWin'], gameState.config.winCap)*100, 0)),
-        "wins": winDataCopy["wins"],
+        "totalWin": int(round(min(gamestate.winData['totalWin'], gamestate.config.wincap)*100, 0)),
+        "wins": win_data_copy["wins"],
     }
-    gameState.book['events'] += [deepcopy(dictData)]
+    gamestate.book['events'] += [deepcopy(dict_data)]
 
-def updateTumbleWinEvent(gameState):
+def update_tunble_win_event(gamestate):
     event = {
-        "index": len(gameState.book['events']),
+        "index": len(gamestate.book['events']),
         "type": UPDATE_TUMBLE_WIN,
-        "amount": int(round(min(gameState.winManager.spinWin, gameState.config.winCap)*100, 0))
+        "amount": int(round(min(gamestate.win_manager.spinWin, gamestate.config.wincap)*100, 0))
     }
-    gameState.book['events'] += [event]
+    gamestate.book['events'] += [event]
 
-def updateFreeSpinEvent(gameState):
+def update_freepsin_event(gamestate):
     event = {
-        "index": len(gameState.book['events']), 
+        "index": len(gamestate.book['events']), 
         "type": UPDATE_FS, 
-        "amount": int(gameState.fs),
-        "total": int(gameState.totFs)}
-    gameState.book["events"] += [event]
+        "amount": int(gamestate.fs),
+        "total": int(gamestate.totFs)}
+    gamestate.book["events"] += [event]
 
-def freeSpinEndEvent(gameState):
-    event = {"index": len(gameState.book['events']), 
+def freespin_end_event(gamestate):
+    event = {"index": len(gamestate.book['events']), 
              "type": FREE_SPIN_END, 
-             "amount": int(round(min(gameState.freeGameWins, gameState.config.winCap)*100, 0))
+             "amount": int(round(min(gamestate.freegame_wins, gamestate.config.wincap)*100, 0))
     }
-    gameState.book["events"] += [event]
+    gamestate.book["events"] += [event]
 
-def finalWinEvent(gameState):
-    event = {"index": len(gameState.book['events']), 
+def final_win_event(gamestate):
+    event = {"index": len(gamestate.book['events']), 
              "type": FINAL_WIN,
-             "amount": int(round(min(gameState.finalWin, gameState.config.winCap)*100, 0))
+             "amount": int(round(min(gamestate.finalWin, gamestate.config.wincap)*100, 0))
     }
-    gameState.book["events"] += [event]
+    gamestate.book["events"] += [event]
 
-def updateGlobalMultEvent(gameState):
+def update_global_mult_event(gamestate):
     event = {"index": 
-             len(gameState.book['events']), 
+             len(gamestate.book['events']), 
              "type": UPDATE_GLOBAL_MULT, 
-             "globalMult": int(gameState.globalMultiplier)}
+             "globalMult": int(gamestate.global_multiplier)}
     
-    gameState.book["events"] += [event]
+    gamestate.book["events"] += [event]
 
-def tumbleBoardEvent(gameState):
-    specialAttributes = list(gameState.config.specialSymbols.keys())
-    if gameState.config.includePaddingSymbols:
+def tumeble_board_event(gamestate):
+    special_attributes = list(gamestate.config.special_symbols.keys())
+    if gamestate.config.include_padding:
         exploding = []
-        for sym in gameState.explodingSymbols:
+        for sym in gamestate.explodingSymbols:
             exploding.append({'reel':sym['reel'], "row": sym['row'] + 1})
     else:
-        exploding = gameState.explodingSymbols
+        exploding = gamestate.explodingSymbols
     
     exploding = sorted(exploding, key=lambda x: x['reel'])
 
-    newSymbols = [[] for _ in range(gameState.config.numReels)]
-    for r in range(len(gameState.newSymbolsFromTumble)):
-        if len(gameState.newSymbolsFromTumble[r]) > 0:
-            newSymbols[r] = [jsonReadySymbol(s, specialAttributes) for s in gameState.newSymbolsFromTumble[r]]
+    new_symbols = [[] for _ in range(gamestate.config.num_reels)]
+    for r in range(len(gamestate.new_symbols_from_tumble)):
+        if len(gamestate.new_symbols_from_tumble[r]) > 0:
+            new_symbols[r] = [json_ready_sym(s, special_attributes) for s in gamestate.new_symbols_from_tumble[r]]
 
-    gameState.book["events"] += deepcopy([{
-        "index": len(gameState.book['events']),
+    gamestate.book["events"] += deepcopy([{
+        "index": len(gamestate.book['events']),
         "type": TUMBLE_BOARD,
-        "newSymbols": newSymbols,
+        "newSymbols": new_symbols,
         "explodingSymbols": exploding
     }])

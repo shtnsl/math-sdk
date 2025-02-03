@@ -10,16 +10,16 @@ from game_calculations import *
 
 class GameState(GameStateOverride):
 
-    def runSpin(self, sim):
+    def run_spin(self, sim):
         self.resetSeed(sim)
         self.repeat = True
         while self.repeat:
-            self.resetBook()
+            self.reset_book()
 
             self.evaluateFinalWin()
 
-        self.imprintWins()
+        self.imprint_wins()
 
-    def runFreeSpin(self):
-        self.resetFsSpin()
+    def run_freespin(self):
+        self.reset_fs_spin()
         pass

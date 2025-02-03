@@ -6,19 +6,19 @@ from src.config.bet_mode import BetMode
 class GameConfig(Config):
     def __init__(self):
         super().__init__()
-        self.gameId = "0_0_lines"
-        self.providerNumber = int(self.gameId.split("_")[0])
-        self.workingName = "Sample Lines Game"
-        self.winCap = 5000.0
-        self.winType = "lines"
+        self.game_id = "0_0_lines"
+        self.provider_numer = int(self.game_id.split("_")[0])
+        self.working_name = "Sample Lines Game"
+        self.wincap = 5000.0
+        self.win_type = "lines"
         self.rtp = 0.9700
-        self.constructFilePaths(self.gameId)
+        self.construct_paths(self.game_id)
         
         # Game Dimensions
-        self.numReels = 5
-        self.numRows = [3]*self.numReels
+        self.num_reels = 5
+        self.num_rows = [3]*self.num_reels
         #Board and Symbol Properties
-        self.payTable = {
+        self.paytable = {
             (5, 'W'): 20, (4, 'W'): 10,	(3, 'W'): 5,
             (5, 'H1'): 20, (4, 'H1'): 10,	(3, 'H1'): 5,
             (5, 'H2'): 15,	(4, 'H2'): 5,	(3, 'H2'): 3,
@@ -31,7 +31,7 @@ class GameConfig(Config):
             (5, 'L5'): 1,	(4, 'L5'): 0.3,	(3, 'L5'): 0.1
         }
 
-        self.payLines = {
+        self.pay_lines = {
             1:	[	0,	0,	0,	0,	0,	],
             2:	[	1,	1,	1,	1,	1,	],
             3:	[	2,	2,	2,	2,	2,	],
@@ -55,20 +55,20 @@ class GameConfig(Config):
 
         }
     
-        self.includePadding = True
-        self.specialSymbols = {
+        self.include_padding = True
+        self.special_symbols = {
             "wild": ["W"],
             "scatter": ["S"],
             "multiplier": ["W"]
         }
 
         self.freeSpinTriggers = {
-           self.baseGameType : {3: 8, 4: 12, 5: 15},
-           self.freeGameType: {2: 3, 3:5, 4: 8, 5: 12}
+           self.base_game_type : {3: 8, 4: 12, 5: 15},
+           self.free_game_type: {2: 3, 3:5, 4: 8, 5: 12}
         }
-        self.anticipationTriggers = {
-            self.baseGameType : min(self.freeSpinTriggers[self.baseGameType ].keys())-1,
-            self.freeGameType: min(self.freeSpinTriggers[self.freeGameType].keys())-1
+        self.anticipation_triggers = {
+            self.base_game_type : min(self.freeSpinTriggers[self.base_game_type ].keys())-1,
+            self.free_game_type: min(self.freeSpinTriggers[self.free_game_type].keys())-1
         }
         #Reels
         reels = {
@@ -77,63 +77,63 @@ class GameConfig(Config):
         }
         self.reels = {}
         for r,f in reels.items():
-            self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,f]))
+            self.reels[r] = self.read_reels_csv(str.join("/",[self.reelsPath,f]))
 
-        self.paddingReels[self.baseGameType] = self.reels["BR0"]
-        self.paddingReels[self.freeGameType] = self.reels["FR0"]
+        self.padding_reels[self.base_game_type] = self.reels["BR0"]
+        self.padding_reels[self.free_game_type] = self.reels["FR0"]
 
-        self.betModes = [
+        self.bet_modes = [
             BetMode(
                 name = "base",
                 title= "standard game entry",
                 description = "default game entry type",
                 cost = 1.0,
                 rtp = self.rtp,
-                maxWin = self.winCap,
-                autoCloseDisabled = False,
-                isFeature = True,
-                isEnhancedMode = False,
-                isBuyBonus = False,
+                max_win = self.wincap,
+                auto_close_disables = False,
+                is_feature = True,
+                is_enhanced_mode = False,
+                is_buy_bonus = False,
                 distributions = [
                     Distribution(
                         criteria="winCap", 
                         quota=0.001, 
-                        # winCriteria=self.winCap, 
+                        # winCriteria=self.wincap, 
                         conditions = {
-                            "reelWeights": {self.baseGameType : {"BR0":1}, self.freeGameType: {"FR0":1}},
-                            "multiplierValues": {self.baseGameType: {1:1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "reel_weights": {self.base_game_type : {"BR0":1}, self.free_game_type: {"FR0":1}},
+                            "multiplierValues": {self.base_game_type: {1:1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
                             "scatterTriggers": {4:1, 5:2},
-                            "forceWinCap": True,
-                            "forceFreeSpins": True
+                            "force_wincap": True,
+                            "force_freespins": True
                         }),
                     Distribution(
                         criteria="freeGame", 
                         quota=0.1, 
                         conditions= {
-                            "reelWeights": {self.baseGameType: {"BR0": 1}, self.freeGameType: {"FR0":1}},
+                            "reel_weights": {self.base_game_type: {"BR0": 1}, self.free_game_type: {"FR0":1}},
                             "scatterTriggers": {3:20, 4:5, 5:1},
-                            "multiplierValues": {self.baseGameType: {1:1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
-                            "forceWinCap": False,
-                            "forceFreeSpins": True
+                            "multiplierValues": {self.base_game_type: {1:1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "force_wincap": False,
+                            "force_freespins": True
                         }),
                     Distribution(
                         criteria="0", 
                         quota=0.4, 
                         winCriteria=0.0, 
                         conditions= {
-                            "reelWeights": {self.baseGameType: {"BR0": 1}},
-                            "multiplierValues": {self.baseGameType: {1:1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
-                            "forceWinCap": False,
-                            "forceFreeSpins": False
+                            "reel_weights": {self.base_game_type: {"BR0": 1}},
+                            "multiplierValues": {self.base_game_type: {1:1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "force_wincap": False,
+                            "force_freespins": False
                         }),
                     Distribution(
                         criteria="baseGame", 
                         quota=0.5, 
                         conditions= {
-                            "reelWeights": {self.baseGameType: {"BR0": 1}},
-                            "multiplierValues": {self.baseGameType: {1:1}},
-                            "forceWinCap": False,
-                            "forceFreeSpins": False
+                            "reel_weights": {self.base_game_type: {"BR0": 1}},
+                            "multiplierValues": {self.base_game_type: {1:1}},
+                            "force_wincap": False,
+                            "force_freespins": False
                     })
                 ]
             ),
@@ -143,32 +143,32 @@ class GameConfig(Config):
                 description = "default game entry type",
                 cost = 100.0,
                 rtp = self.rtp,
-                maxWin = self.winCap,
-                autoCloseDisabled = False,
-                isFeature = False,
-                isEnhancedMode = False,
-                isBuyBonus = True,
+                max_win = self.wincap,
+                auto_close_disables = False,
+                is_feature = False,
+                is_enhanced_mode = False,
+                is_buy_bonus = True,
                 distributions = [
                     Distribution(
                         criteria="winCap", 
                         quota=0.001, 
-                        # winCriteria=self.winCap, 
+                        # winCriteria=self.wincap, 
                         conditions = {
-                            "reelWeights": {self.baseGameType : {"BR0":1}, self.freeGameType: {"FR0":1}},
-                            "multiplierValues": {self.baseGameType: {1:1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "reel_weights": {self.base_game_type : {"BR0":1}, self.free_game_type: {"FR0":1}},
+                            "multiplierValues": {self.base_game_type: {1:1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
                             "scatterTriggers": {4:1, 5:2},
-                            "forceWinCap": True,
-                            "forceFreeSpins": True
+                            "force_wincap": True,
+                            "force_freespins": True
                         }),
                     Distribution(
                         criteria="freeGame", 
                         quota=0.999, 
                         conditions= {
-                            "reelWeights": {self.baseGameType: {"BR0": 1}, self.freeGameType: {"FR0":1}},
+                            "reel_weights": {self.base_game_type: {"BR0": 1}, self.free_game_type: {"FR0":1}},
                             "scatterTriggers": {3:20, 4:5, 5:1},
-                            "multiplierValues": {self.baseGameType: {1:1}, self.freeGameType: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
-                            "forceWinCap": False,
-                            "forceFreeSpins": True
+                            "multiplierValues": {self.base_game_type: {1:1}, self.free_game_type: {2:100, 3:80, 4: 50, 5: 20, 10: 10, 20: 5, 50: 1}},
+                            "force_wincap": False,
+                            "force_freespins": True
                         })
                 ]
             )

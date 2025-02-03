@@ -6,34 +6,34 @@ from src.config.bet_mode import BetMode
 class GameConfig(Config):
     def __init__(self):
         super().__init__()
-        self.gameId = ""
-        self.providerNumber = 0
-        self.workingName = ""
-        self.winCap = 0
-        self.winType = ""
+        self.game_id = ""
+        self.provider_numer = 0
+        self.working_name = ""
+        self.wincap = 0
+        self.win_type = ""
         self.rtp = 0
-        self.constructFilePaths(self.gameId)
+        self.construct_paths(self.game_id)
         
         # Game Dimensions
-        self.numReels = 0
-        self.numRows = [0]*self.numReels #Optionally include variable number of rows per reel
+        self.num_reels = 0
+        self.num_rows = [0]*self.num_reels #Optionally include variable number of rows per reel
         #Board and Symbol Properties
-        self.payTable = {}
+        self.paytable = {}
     
-        self.includePadding = True
-        self.specialSymbols = {
+        self.include_padding = True
+        self.special_symbols = {
             "wild": [],
             "scatter": [],
             "multiplier": []
         }
 
-        self.freeSpinTriggers = {
-           self.baseGameType : {},
-           self.freeGameType: {}
+        self.freespin_triggers = {
+           self.base_game_type : {},
+           self.free_game_type: {}
         }
-        self.anticipationTriggers = {
-            self.baseGameType : 0,
-            self.freeGameType:0
+        self.anticipation_triggers = {
+            self.base_game_type : 0,
+            self.free_game_type:0
         }
         #Reels
         reels = {
@@ -42,56 +42,56 @@ class GameConfig(Config):
         }
         self.reels = {}
         for r,f in reels.items():
-            self.reels[r] = self.readReelsFromCSV(str.join("/",[self.reelsPath,f]))
+            self.reels[r] = self.read_reels_csv(str.join("/",[self.reelsPath,f]))
 
-        self.betModes = [
+        self.bet_modes = [
             BetMode(
                 name = "base",
                 title= "standard game entry",
                 description = "default game entry type",
                 cost = 1.0,
                 rtp = self.rtp,
-                maxWin = self.winCap,
-                autoCloseDisabled = False,
-                isFeature = True,
-                isEnhancedMode = False,
-                isBuyBonus = False,
+                max_win = self.wincap,
+                auto_close_disables = False,
+                is_feature = True,
+                is_enhanced_mode = False,
+                is_buy_bonus = False,
                 distributions = [
                     Distribution(
                         criteria="winCap", 
                         quota=0.001, 
-                        winCriteria=self.winCap, 
+                        winCriteria=self.wincap, 
                         conditions = {
-                            "reelWeights": {self.baseGameType : {"BR0":1}, self.freeGameType: {"FR0":1}},
+                            "reel_weights": {self.base_game_type : {"BR0":1}, self.free_game_type: {"FR0":1}},
                             "scatterTriggers": {},
-                            "forceWinCap": True,
-                            "forceFreeSpins": True
+                            "force_wincap": True,
+                            "force_freespins": True
                         }),
                     Distribution(
                         criteria="freeGame", 
                         quota=0.1, 
                         conditions= {
-                            "reelWeights": {self.baseGameType: {"BR0": 1}, self.freeGameType: {"FR0":1}},
+                            "reel_weights": {self.base_game_type: {"BR0": 1}, self.free_game_type: {"FR0":1}},
                             "scatterTriggers": {},
-                            "forceWinCap": False,
-                            "forceFreeSpins": True
+                            "force_wincap": False,
+                            "force_freespins": True
                         }),
                     Distribution(
                         criteria="0", 
                         quota=0.4, 
                         winCriteria=0.0, 
                         conditions= {
-                            "reelWeights": {self.baseGameType: {"BR0": 1}},
-                            "forceWinCap": False,
-                            "forceFreeSpins": False
+                            "reel_weights": {self.base_game_type: {"BR0": 1}},
+                            "force_wincap": False,
+                            "force_freespins": False
                         }),
                     Distribution(
                         criteria="baseGame", 
                         quota=0.5, 
                         conditions= {
-                            "reelWeights": {self.baseGameType: {"BR0": 1}},
-                            "forceWinCap": False,
-                            "forceFreeSpins": False
+                            "reel_weights": {self.base_game_type: {"BR0": 1}},
+                            "force_wincap": False,
+                            "force_freespins": False
                     })
                 ]
             ),

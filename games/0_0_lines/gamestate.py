@@ -9,41 +9,41 @@ from game_calculations import *
 
 class GameState(GameStateOverride):
 
-    def runSpin(self, sim):
+    def run_spin(self, sim):
         self.resetSeed(sim)
         self.repeat = True
         while self.repeat:
-            self.resetBook()
+            self.reset_book()
             self.drawBoard()
 
             self.winData = self.getLineWinData(recordWins=True)
-            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.win_manager.updateSpinWin(self.winData['totalWin'])
             self.emitLineWinEvents()
             
-            self.winManager.updateGameTypeWins(self.gameType)
-            if self.checkFreespinCondition():
+            self.win_manager.updateGameTypeWins(self.gametype)
+            if self.check_fs_condition():
                 self.runFreeSpinFromBaseGame()
 
             self.evaluateFinalWin()
-            self.checkRepeat()
+            self.check_repeat()
 
-        self.imprintWins()
+        self.imprint_wins()
     
-    def runFreeSpin(self):
-        self.resetFsSpin()
+    def run_freespin(self):
+        self.reset_fs_spin()
         while self.fs < self.totFs:
             self.updateFreeSpin()
             self.drawBoard()
 
             self.winData = self.getLineWinData(recordWins=True)
-            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.win_manager.updateSpinWin(self.winData['totalWin'])
             self.emitLineWinEvents()
 
-            if self.checkFreespinCondition():
-                self.updateFreeSpinRetriggerAmount()
+            if self.check_fs_condition():
+                self.update_fs_retrigger_amt()
 
-            self.winManager.updateGameTypeWins(self.gameType)
+            self.win_manager.updateGameTypeWins(self.gametype)
 
-            if self.checkFreespinCondition():
-                self.updateFreeSpinRetriggerAmount()
+            if self.check_fs_condition():
+                self.update_fs_retrigger_amt()
 

@@ -12,11 +12,11 @@ class BetMode:
     description="Starting Game Mode",
     rtp=0.97,
     cost=1.0,
-    autoCloseDisabled=False,
-    isFeature = False,
-    isEnhancedMode=False,
-    isBuyBonus=False,
-    maxWin=self.winCap,
+    auto_close_disables=False,
+    is_feature = False,
+    is_enhanced_mode=False,
+    is_buy_bonus=False,
+    max_win=self.wincap,
     """
     def __init__(
         self, 
@@ -25,11 +25,11 @@ class BetMode:
         description: str,
         cost: float, 
         rtp: float,
-        maxWin: float,
-        autoCloseDisabled: bool, 
-        isFeature:bool, 
-        isEnhancedMode: bool, 
-        isBuyBonus: bool, 
+        max_win: float,
+        auto_close_disables: bool, 
+        is_feature:bool, 
+        is_enhanced_mode: bool, 
+        is_buy_bonus: bool, 
         distributions: object
         ):
 
@@ -37,11 +37,11 @@ class BetMode:
         self._title = title 
         self._description = description
         self._cost = cost
-        self._maxWin = maxWin
-        self._autoCloseBetDisabled = autoCloseDisabled
-        self._isFeature = isFeature
-        self._isEnhancedMode = isEnhancedMode
-        self._isBuyBonus = isBuyBonus
+        self._maxWin = max_win
+        self._autoCloseBetDisabled = auto_close_disables
+        self._isFeature = is_feature
+        self._isEnhancedMode = is_enhanced_mode
+        self._isBuyBonus = is_buy_bonus
         self._distributions = distributions
         self.checkAndSetRTP(rtp)
         self.setForceKeys()
@@ -49,8 +49,8 @@ class BetMode:
     def __repr__(self):
         return (
             f"BetMode(name={self._name},  title={self._title}, description={self._description}"
-            f"cost={self._cost}, maxWin={self._maxWin}, rtp={self._rtp}, autoCloseDisabled={self._autoCloseBetDisabled} "
-            f"isFeature={self._isFeature}, isEnhancedMode={self._isEnhancedMode}, isBuyBonus={self._isBuyBonus} "
+            f"cost={self._cost}, max_win={self._maxWin}, rtp={self._rtp}, auto_close_disables={self._autoCloseBetDisabled} "
+            f"is_feature={self._isFeature}, is_enhanced_mode={self._isEnhancedMode}, is_buy_bonus={self._isBuyBonus} "
         )
         
     def checkAndSetRTP(self, rtp:float) -> None:
@@ -107,4 +107,4 @@ class BetMode:
         for d in self.getDistributions():
             if d._criteria == targetCriteria:
                 return d._conditions
-        return RuntimeError(f"target critera: {targetCriteria} not found in betMode-distributions.")
+        return RuntimeError(f"target critera: {targetCriteria} not found in bet_mode-distributions.")

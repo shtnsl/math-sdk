@@ -1,20 +1,20 @@
 
 from gamestate import GameConfig, GameState
-from src.write_data.write_data import createBooks
+from src.write_data.write_data import create_books
 
 if __name__ == '__main__':
     
-    numThreads = 1
-    rustThreads = 20
-    batchingSize = 5000
-    compression = False
-    profiling = False
+    NUM_THREADS = 1
+    RUST_THREADS = 20
+    BATCHING_SIZE = 5000
+    COMPRESSION = False
+    PROFILING = False
 
-    numSimArgs = {
+    num_sim_args = {
         "base":int(1e2),
          }
     
     config = GameConfig()
-    gameState = GameState(config)
+    gamestate = GameState(config)
 
-    createBooks(gameState, config, numSimArgs, batchingSize, numThreads, compression, profiling)
+    create_books(gamestate, config, num_sim_args, BATCHING_SIZE, NUM_THREADS, COMPRESSION, PROFILING)

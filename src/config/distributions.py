@@ -7,7 +7,7 @@ class Distribution:
         quota: int = 0, 
         winCriteria: Union[float, None] = None, 
         conditions:dict = {}, 
-        requiredDistribtionConditions:list = ["reelWeights", "forceWinCap", "forceFreeSpins"],
+        requiredDistribtionConditions:list = ["reel_weights", "force_wincap", "force_freespins"],
         ):
 
         assert quota > 0, "non-zero quota value must be assigned"

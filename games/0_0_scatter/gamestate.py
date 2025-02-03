@@ -9,54 +9,54 @@ if os.getcwd() not in sys.path:
 
 class GameState(GameStateOverride):
 
-    def runSpin(self, sim):
+    def run_spin(self, sim):
         self.resetSeed(sim)
         self.repeat = True
         while self.repeat:
-            self.resetBook()
+            self.reset_book()
             self.drawBoard()
 
             self.winData = self.getScatterPayWinData(recordWins=True)
-            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.win_manager.updateSpinWin(self.winData['totalWin'])
             self.emitTumbleWinEvents()
 
-            while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
+            while self.winData['totalWin'] > 0 and not(self.wincap_triggered):
                 self.winData = self.getScatterPayWinData(recordWins=True)
-                self.winManager.updateSpinWin(self.winData['totalWin'])
+                self.win_manager.updateSpinWin(self.winData['totalWin'])
                 self.emitTumbleWinEvents()
 
-            self.setEndOfTumbleWins()
-            self.winManager.updateGameTypeWins(self.gameType)
+            self.set_end_tumble_event()
+            self.win_manager.updateGameTypeWins(self.gametype)
             
-            if self.checkFreespinCondition() and self.checkFreeSpinEntry():
+            if self.check_fs_condition() and self.checkFreeSpinEntry():
                 self.runFreeSpinFromBaseGame()
 
             self.evaluateFinalWin()
-            self.checkRepeat()
+            self.check_repeat()
 
-        self.imprintWins()
+        self.imprint_wins()
 
-    def runFreeSpin(self):
-        self.resetFsSpin()
+    def run_freespin(self):
+        self.reset_fs_spin()
         while self.fs < self.totFs:
             #Resets global multiplier at each spin
             self.updateFreeSpin()
             self.drawBoard()
 
             self.winData = self.getScatterPayWinData(recordWins=True)
-            self.winManager.updateSpinWin(self.winData['totalWin'])
+            self.win_manager.updateSpinWin(self.winData['totalWin'])
             self.emitTumbleWinEvents()
-            while self.winData['totalWin'] > 0 and not(self.winCapTriggered):
-                self.updateGlobalMult() #Special mechanic - increase multiplier with every tumble
+            while self.winData['totalWin'] > 0 and not(self.wincap_triggered):
+                self.update_global_mult() #Special mechanic - increase multiplier with every tumble
                 self.winData = self.getScatterPayWinData()
-                self.winManager.updateSpinWin(self.winData['totalWin'])
+                self.win_manager.updateSpinWin(self.winData['totalWin'])
                 self.emitTumbleWinEvents()
                 
-            self.setEndOfTumbleWins()
-            self.winManager.updateGameTypeWins(self.gameType)
+            self.set_end_tumble_event()
+            self.win_manager.updateGameTypeWins(self.gametype)
     
-            if self.checkFreespinCondition():
-                self.updateFreeSpinRetriggerAmount()
+            if self.check_fs_condition():
+                self.update_fs_retrigger_amt()
 
 
 

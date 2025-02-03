@@ -1,5 +1,5 @@
 from game_executables import *
-from src.calculations.statistics import getRandomOutcome
+from src.calculations.statistics import get_random_outcome
 
 class GameStateOverride(GameExecutables):
     """
@@ -7,23 +7,23 @@ class GameStateOverride(GameExecutables):
     e.g: A specific game may have custom book properties to reset 
     """
 
-    def resetBook(self):
+    def reset_book(self):
         #Reset global values used across multiple projects
-        super().resetBook()
+        super().reset_book()
         #Reset parameters relevant to local game only
 
-    def assignSpecialSymbolFunctions(self):
-        self.specialSymbolFunctions = {
+    def assign_special_sym_function(self):
+        self.special_symbol_functions = {
             'W': []
         }
 
-    def assignMultiplierProperty(self, symbol):
-        multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
-        symbol.assignAttribute({"multiplier":multiplierValue})
+    def assign_mult_property(self, symbol):
+        multiplier_value = get_random_outcome(self.get_current_distribution_conditions()["multiplierValues"][self.gametype])
+        symbol.assign_attribute({"multiplier":multiplier_value})
     
-    def checkGameRepeat(self):
+    def check_game_repeat(self):
         if self.repeat == False:
-            winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()
+            winCriteria = self.get_current_betmode_distributions().getWinCriteria()
             if winCriteria is not None and self.finalWin != winCriteria:
                 self.repeat = True 
             

@@ -4,15 +4,15 @@ from src.executables.executables import Executables
 
 class GameCalculations(Executables):
 
-    def getBoardMultipliers(self, multiplierKey: str = "multiplier") -> list:
-        boardMult = 0
-        numMults = 0
-        multInfo = []
+    def get_board_multipliers(self, multiplier_key: str = "multiplier") -> list:
+        board_mult = 0
+        num_mults = 0
+        mult_info = []
         for reel in range(len(self.board)):
             for row in range(len(self.board[reel])):
-                if self.board[reel][row].checkAttribute(multiplierKey):
-                    boardMult += self.board[reel][row].getAttribute(multiplierKey)
-                    numMults += 1
-                    multInfo.append({'reel': reel, 'row': row, 'value': self.board[reel][row].getAttribute(multiplierKey)})
+                if self.board[reel][row].check_attribute(multiplier_key):
+                    board_mult += self.board[reel][row].get_attribute(multiplier_key)
+                    num_mults += 1
+                    mult_info.append({'reel': reel, 'row': row, 'value': self.board[reel][row].get_attribute(multiplier_key)})
     
-        return max(1, boardMult), multInfo
+        return max(1, board_mult), mult_info

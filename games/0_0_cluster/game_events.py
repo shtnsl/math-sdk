@@ -5,22 +5,22 @@ from src.events.events import *
 APPLY_TUMBLE_MULTIPLIER = "applyMultiplierToTumble"
 UPDATE_GRID = "updateGrid"
 
-def applyMutToTumbleWinEvent(gameState):
-    event = {"index": len(gameState.book['events']),
+def applyMutToTumbleWinEvent(gamestate):
+    event = {"index": len(gamestate.book['events']),
              "type": APPLY_TUMBLE_MULTIPLIER,
-             "amount" :int(round(min(gameState.runningBetWin, gameState.config.winCap)*100, 0)),
+             "amount" :int(round(min(gamestate.running_bet_win, gamestate.config.wincap)*100, 0)),
              "meta": {
-                "baseAmount": gameState.tumbleWin,
-                "tumbleMultiplier": gameState.globalMult        
+                "baseAmount": gamestate.tumble_win,
+                "tumbleMultiplier": gamestate.globalMult        
              }
     }
-    gameState.book["events"] += [deepcopy(event)]
+    gamestate.book["events"] += [deepcopy(event)]
 
-def updateGridMultiplierEvent(gameState):
+def updateGridMultiplierEvent(gamestate):
    event = {
-      "index": len(gameState.book['events']),
+      "index": len(gamestate.book['events']),
       "type": UPDATE_GRID,
-      "gridMultipliers": gameState.positionMultipliers
+      "gridMultipliers": gamestate.position_multipliers
    }
-   gameState.book["events"] += [deepcopy(event)]
+   gamestate.book["events"] += [deepcopy(event)]
     

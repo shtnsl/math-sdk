@@ -1,24 +1,24 @@
 from gamestate import GameConfig, GameState
-from src.write_data.write_data import createBooks
-from src.write_data.write_configs import generateConfigs
+from src.write_data.write_data import create_books
+from src.write_data.write_configs import generate_configs
 from src.wins.win_manager import WinManager
 
 if __name__ == '__main__':
     
-    numThreads = 1
-    rustThreads = 20
-    batchingSize = 5000
-    compression = True
-    profiling = False
+    NUM_THREADS = 10
+    RUST_THREADS = 20
+    BATCHING_SIZE = 5000
+    COMPRESSION = True
+    PROFILING = False
 
-    numSimArgs = {
-        "base":int(1e2),
-        "bonus":int(1e2), 
+    num_sim_args = {
+        "base":int(1e3),
+        "bonus":int(1e3), 
         }
     
     config = GameConfig()
-    winManager = WinManager(config.baseGameType, config.freeGameType)
-    gameState = GameState(config)
+    winManager = WinManager(config.base_game_type, config.free_game_type)
+    gamestate = GameState(config)
 
-    createBooks(gameState, config, numSimArgs, batchingSize, numThreads, compression, profiling)
-    # generateConfigs(gameState)
+    create_books(gamestate, config, num_sim_args, BATCHING_SIZE, NUM_THREADS, COMPRESSION, PROFILING)
+    generate_configs(gamestate)

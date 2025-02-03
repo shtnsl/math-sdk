@@ -1,14 +1,13 @@
 import random
-from typing import List 
 import numpy as np 
-
+from typing import List 
 from src.state.state_conditions import Conditions
 from src.calculations.board import Board
 from src.calculations.lines import LineWins
 from src.calculations.cluster import ClusterWins
 from src.calculations.scatter import ScatterWins
 from src.calculations.tumble import Tumble
-from src.calculations.statistics import getRandomOutcome
+from src.calculations.statistics import get_random_outcome
 from src.events.events import *
 
 class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble):
@@ -18,26 +17,26 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
     """
 
     def drawBoard(self, emitEvent:bool = True) -> None:
-        if self.getCurrentDistributionConditions()["forceFreeSpins"] and self.gameType == self.config.baseGameType:
-            numScatters = getRandomOutcome(self.getCurrentDistributionConditions()["scatterTriggers"])
+        if self.get_current_distribution_conditions()["force_freespins"] and self.gametype == self.config.base_game_type:
+            numScatters = get_random_outcome(self.get_current_distribution_conditions()["scatterTriggers"])
             self.forceSpecialBoard('scatter', numScatters)
         else:
-            self.createBoardFromReelStrips()
-            while self.countSpecialSymbols('scatter') >= min(self.config.freeSpinTriggers[self.gameType].keys()):
-                self.createBoardFromReelStrips()
+            self.create_board_reelstrips()
+            while self.count_special_symbols('scatter') >= min(self.config.freeSpinTriggers[self.gametype].keys()):
+                self.create_board_reelstrips()
         if emitEvent:
-            revealBoardEvent(self)
+            reveal_event(self)
 
     def forceSpecialBoard(self, forceCriteria: str, numForceSymbols: int) -> None:
-        reelStripId = getRandomOutcome(self.getCurrentDistributionConditions()['reelWeights'][self.gameType])
+        reelStripId = get_random_outcome(self.get_current_distribution_conditions()['reel_weights'][self.gametype])
         reelStops = self.getSymbolLocationsOnReel(reelStripId, forceCriteria)
 
         symbolProb = []
-        for x in range(self.config.numReels):
+        for x in range(self.config.num_reels):
             symbolProb.append(len(reelStops[x])/len(self.config.reels[reelStripId][x]))
         forceStopPositions = {}
         while len(forceStopPositions) != numForceSymbols:
-            chosenReel = random.choices(list(np.arange(0,self.config.numReels)),symbolProb)[0]
+            chosenReel = random.choices(list(np.arange(0,self.config.num_reels)),symbolProb)[0]
             chosenStop = random.choice(reelStops[chosenReel])
             symbolProb[chosenReel] = 0
             forceStopPositions[int(chosenReel)] = int(chosenStop)
@@ -48,10 +47,10 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
 
     def getSymbolLocationsOnReel(self, reelId:str, targetSymbol:str) -> List[List]:
         reel = self.config.reels[reelId]
-        reelStopPositions = [[] for _ in range(self.config.numReels)]
-        for r in range(self.config.numReels):
+        reelStopPositions = [[] for _ in range(self.config.num_reels)]
+        for r in range(self.config.num_reels):
             for s in range(len(reel[r])):
-                if reel[r][s] in self.config.specialSymbols[targetSymbol]: 
+                if reel[r][s] in self.config.special_symbols[targetSymbol]: 
                     reelStopPositions[r].append(s)
 
         return reelStopPositions
@@ -59,70 +58,70 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
 
     #Line pays game logic and events
     def emitLineWinEvents(self) -> None:
-        if self.winManager.spinWin > 0:
-            winInfoEvent(self)
+        if self.win_manager.spinWin > 0:
+            win_info_event(self)
             self.evaluateWinCap()
-            setWinEvent(self)
-        setTotalWinEvent(self)
+            set_win_event(self)
+        set_total_event(self)
 
     #Tumble (scatter/cluster) game logic and events
     def emitTumbleWinEvents(self, tumbleAfterWins: bool = True) -> None:
         if self.winData['totalWin'] >0:
-            winInfoEvent(self)
-            updateTumbleWinEvent(self)
+            win_info_event(self)
+            update_tunble_win_event(self)
             self.evaluateWinCap()
             if tumbleAfterWins:
                 self.tumbleBoard()
-                tumbleBoardEvent(self)
+                tumeble_board_event(self)
 
     def evaluateWinCap(self) -> None:
-        if self.winManager.runningBetWin >= self.config.winCap and not(self.winCapTriggered):
-            self.winCapTriggered = True
-            winCapEvent(self)
+        if self.win_manager.running_bet_win >= self.config.wincap and not(self.wincap_triggered):
+            self.wincap_triggered = True
+            wincap_event(self)
             return True
         return False
 
-    def countSpecialSymbols(self, specialSymbolCriteria:str) -> bool:
-        return len(self.specialSymbolsOnBoard[specialSymbolCriteria])
+    def count_special_symbols(self, specialSymbolCriteria:str) -> bool:
+        return len(self.special_syms_on_board[specialSymbolCriteria])
 
-    def checkFreespinCondition(self, scatterKey:str = 'scatter') -> bool:
-        if self.countSpecialSymbols(scatterKey) >= min(self.config.freeSpinTriggers[self.gameType].keys()) and not(self.repeat):
+    def check_fs_condition(self, scatterKey:str = 'scatter') -> bool:
+        if self.count_special_symbols(scatterKey) >= min(self.config.freeSpinTriggers[self.gametype].keys()) and not(self.repeat):
             return True 
         return False
     
     def checkFreeSpinEntry(self, scatterKey:str = "scatter"):
-        if not(self.getCurrentDistributionConditions()['forceFreeSpins']) and len(self.specialSymbolsOnBoard[scatterKey])>=min(self.config.freeSpinTriggers[self.gameType].keys()):
+        if not(self.get_current_distribution_conditions()['force_freespins']) and len(self.special_syms_on_board[scatterKey])>=min(self.config.freeSpinTriggers[self.gametype].keys()):
             self.repeat = True
             return False 
         return True
     
     def runFreeSpinFromBaseGame(self, scatterKey:str = 'scatter') -> None:
-        self.record({"kind": self.countSpecialSymbols(scatterKey), "symbol": scatterKey, "gameType": self.gameType})
-        self.updateTotalFreeSpinAmount()
-        self.runFreeSpin()
+        self.record({"kind": self.count_special_symbols(scatterKey), "symbol": scatterKey, "gameType": self.gametype})
+        self.update_freespin_amount()
+        self.run_freespin()
         
-    def updateTotalFreeSpinAmount(self, scatterKey:str = 'scatter') -> None:
-        self.totFs = self.config.freeSpinTriggers[self.gameType][self.countSpecialSymbols(scatterKey)]
-        if self.gameType == self.config.baseGameType:
-            baseGameTrigger, freeGameTrigger = True, False 
+    def update_freespin_amount(self, scatterKey:str = 'scatter') -> None:
+        self.totFs = self.config.freeSpinTriggers[self.gametype][self.count_special_symbols(scatterKey)]
+        if self.gametype == self.config.base_game_type:
+            basegame_trigger, freeGameTrigger = True, False 
         else:
-            baseGameTrigger, freeGameTrigger = False, True
-        freeSpinsTriggerEvent(self, baseGameTrigger=baseGameTrigger, freeGameTrigger=freeGameTrigger)
+            basegame_trigger, freeGameTrigger = False, True
+        fs_trigger_event(self, basegame_trigger=basegame_trigger, freeGameTrigger=freeGameTrigger)
 
-    def updateFreeSpinRetriggerAmount(self, scatterKey:str = 'scatter') -> None:
-        self.totFs += self.config.freeSpinTriggers[self.gameType][self.countSpecialSymbols(scatterKey)]
-        freeSpinsTriggerEvent(self, freeGameTrigger=True, baseGameTrigger=False)
+    def update_fs_retrigger_amt(self, scatterKey:str = 'scatter') -> None:
+        self.totFs += self.config.freeSpinTriggers[self.gametype][self.count_special_symbols(scatterKey)]
+        fs_trigger_event(self, freeGameTrigger=True, basegame_trigger=False)
 
     def updateFreeSpin(self) -> None:
-        updateFreeSpinEvent(self)
-        self.winManager.resetSpinWin()
+        update_freepsin_event(self)
+        self.win_manager.reset_spin_win()
         self.tumbleWinMultiplier = 0
         self.winData = {}
         self.fs += 1 
-        self.globalMultiplier = 1
+        self.global_multiplier = 1
 
     def endFreeSpin(self) -> None:
-        freeSpinEndEvent(self)
+        freespin_end_event(self)
 
     def enforceCriteriaConditions(self) -> None:
         """
@@ -131,5 +130,5 @@ class Executables(Conditions, Board, LineWins, ClusterWins, ScatterWins, Tumble)
         self.repeat = False
 
     def evaluateFinalWin(self) -> None:
-        self.updateFinalWin()
-        finalWinEvent(self)
+        self.update_final_win()
+        final_win_event(self)

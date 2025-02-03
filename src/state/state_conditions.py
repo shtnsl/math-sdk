@@ -9,17 +9,17 @@ class Conditions(GeneralGameState):
     
     def inMode(self, *args):
         for arg in args:
-            if self.betMode == arg:
+            if self.bet_mode == arg:
                 return True 
         return False 
     
     def isMaxWin(self):
-        if self.runningBetWin >= self.config.winCap:
+        if self.running_bet_win >= self.config.wincap:
             return True 
         return False
     
     def isInGameType(self, *args):
         for arg in args:
-            if self.gameType == arg:
+            if self.gametype == arg:
                 return True 
         return False

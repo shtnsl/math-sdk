@@ -1,5 +1,5 @@
 from game_executables import *
-from src.calculations.statistics import getRandomOutcome
+from src.calculations.statistics import get_random_outcome
 
 class GameStateOverride(GameExecutables):
     """
@@ -7,31 +7,31 @@ class GameStateOverride(GameExecutables):
     e.g: A specific game may have custom book properties to reset 
     """
 
-    def resetBook(self):
+    def reset_book(self):
         #Reset global values used across multiple projects
-        super().resetBook()
+        super().reset_book()
         #Reset parameters relevant to local game only
-        self.emitWinEvent = True
+        self.emit_win_event = True
         self.cumulativePrize = 0
 
-    def assignSpecialSymbolFunctions(self):
-        self.specialSymbolFunctions = {
-            'M': [self.assignMultiplierProperty],
-            'W': [self.assignMultiplierProperty]
+    def assign_special_sym_function(self):
+        self.special_symbol_functions = {
+            'M': [self.assign_mult_property],
+            'W': [self.assign_mult_property]
         }
 
-    def assignMultiplierProperty(self, symbol):
-        if self.gameType == self.config.freeGameType:
-            multiplierValue = getRandomOutcome(self.getCurrentDistributionConditions()["multiplierValues"][self.gameType])
-            symbol.assignAttribute({'multiplier': multiplierValue})
-        elif self.gameType == self.config.baseGameType:
-            symbol.assignAttribute({'multiplier': 1})
+    def assign_mult_property(self, symbol):
+        if self.gametype == self.config.free_game_type:
+            multiplier_value = get_random_outcome(self.get_current_distribution_conditions()["multiplierValues"][self.gametype])
+            symbol.assign_attribute({'multiplier': multiplier_value})
+        elif self.gametype == self.config.base_game_type:
+            symbol.assign_attribute({'multiplier': 1})
 
     
-    def checkRepeat(self):
-        super().checkRepeat()
+    def check_repeat(self):
+        super().check_repeat()
         if self.repeat == False:
-            winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()
+            winCriteria = self.get_current_betmode_distributions().getWinCriteria()
             if winCriteria is not None and self.finalWin != winCriteria:
                 self.repeat = True 
                 return 

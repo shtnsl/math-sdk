@@ -12,38 +12,38 @@ class GeneralGameState(ABC):
     def __init__(self, config):
         self.config = config
         self.library = {}
-        self.recordedEvents = {}
+        self.recorded_events = {}
         self.tempWins = []  
-        self.createSymbolHashMap()
-        self.assignSpecialSymbolFunctions()
-        self.setWinManager()
+        self.create_symbol_map()
+        self.assign_special_sym_function()
+        self.set_win_manager()
 
-    def createSymbolHashMap(self) -> None:
+    def create_symbol_map(self) -> None:
         allSymbolsList = set()
-        for key,_ in self.config.payTable.items():
+        for key,_ in self.config.paytable.items():
             allSymbolsList.add(key[1])
 
-        for key in self.config.specialSymbols:
-            for sym in self.config.specialSymbols[key]:
+        for key in self.config.special_symbols:
+            for sym in self.config.special_symbols[key]:
                 allSymbolsList.add(sym)
         
         allSymbolsList = list(allSymbolsList)
         self.symbolStorage = SymbolStorage(self.config, allSymbolsList)   
 
     @abstractmethod
-    def assignSpecialSymbolFunctions(self):
+    def assign_special_sym_function(self):
         warn("No special symbol functions are defined")
 
-    def setWinManager(self):
-        self.winManager = WinManager(self.config.baseGameType, self.config.freeGameType)
+    def set_win_manager(self):
+        self.win_manager = WinManager(self.config.base_game_type, self.config.free_game_type)
 
-    def resetBook(self) -> None:
+    def reset_book(self) -> None:
         """
         Reset global simulation variables
         """
-        self.board = [[[] for _ in range(self.config.numRows[x])] for x in range(self.config.numReels)]
-        self.topSymbols = None 
-        self.bottomSymbols = None
+        self.board = [[[] for _ in range(self.config.num_rows[x])] for x in range(self.config.num_reels)]
+        self.top_symbols = None 
+        self.bottom_symbols = None
         self.bookId = self.sim + 1
         self.book = {
             "id": self.bookId,
@@ -51,53 +51,53 @@ class GeneralGameState(ABC):
             "events": [],
             "criteria": self.criteria
         }
-        self.winManager.resetEndOfRoundWins()
-        self.globalMultiplier = 1
+        self.win_manager.reset_end_round_wins()
+        self.global_multiplier = 1
         self.totFs = 0
         self.fs = 0
-        self.winCapTriggered = False
-        self.triggeredFreeSpins = False
-        self.gameType = self.config.baseGameType
+        self.wincap_triggered = False
+        self.triggered_freespins = False
+        self.gametype = self.config.base_game_type
         self.repeat = False
-        self.anticipation = [0]*self.config.numReels
+        self.anticipation = [0]*self.config.num_reels
         
     def resetSeed(self,sim) -> None:
         random.seed(sim+1)
         self.sim = sim
     
-    def resetFsSpin(self) -> None:
-        self.triggeredFreeSpins = True
+    def reset_fs_spin(self) -> None:
+        self.triggered_freespins = True
         self.fs = 0
-        self.gameType = self.config.freeGameType
-        self.winManager.resetSpinWin()
+        self.gametype = self.config.free_game_type
+        self.win_manager.reset_spin_win()
         
-    def getBetMode(self, modeNameToSelect) -> BetMode:
-        for betMode in self.config.betModes:
-            if betMode.getName() == modeNameToSelect:
-                return betMode
+    def get_betmode(self, modeNameToSelect) -> BetMode:
+        for bet_mode in self.config.bet_modes:
+            if bet_mode.getName() == modeNameToSelect:
+                return bet_mode
         print("\nWarning: betmode couldn't be retrieved\n")
 
-    def getCurrentBetMode(self) -> object:
-        for betMode in self.config.betModes:
-            if betMode.getName() == self.betMode:
-                return betMode
+    def get_current_betmode(self) -> object:
+        for bet_mode in self.config.bet_modes:
+            if bet_mode.getName() == self.bet_mode:
+                return bet_mode
             
-    def getCurrentBetModeDistribution(self) -> object:
-        dist = self.getCurrentBetMode().getDistributions()
+    def get_current_betmode_distributions(self) -> object:
+        dist = self.get_current_betmode().getDistributions()
         for c in dist:
             if c._criteria == self.criteria:
                 return c 
         raise RuntimeError("could not locate criteria distribtuion")
         
-    def getCurrentDistributionConditions(self) -> dict:
-        for d in self.getBetMode(self.betMode).getDistributions():
+    def get_current_distribution_conditions(self) -> dict:
+        for d in self.get_betmode(self.bet_mode).getDistributions():
             if d._criteria == self.criteria:
                 return d._conditions
-        return RuntimeError ("could not locate betMode conditions")
+        return RuntimeError ("could not locate bet_mode conditions")
     
     #State verifications/checks
-    def getWinCapTriggered(self) -> bool:
-        if self.winCapTriggered:
+    def get_wincap_triggered(self) -> bool:
+        if self.wincap_triggered:
             return True
         return False 
     
@@ -116,36 +116,36 @@ class GeneralGameState(ABC):
         self.tempWins.append(description)
         self.tempWins.append(self.bookId)
 
-    def checkForceKeys(self, description) -> None:
+    def check_force_keys(self, description) -> None:
         """
         Check and append unique force-key paramaters
         """
-        currentModeForceKeys = self.getCurrentBetMode().getForceKeys()  # type:ignore
+        currentModeForceKeys = self.get_current_betmode().getForceKeys()  # type:ignore
         for keyValue in description:
             if keyValue[0] not in currentModeForceKeys:
-                self.getCurrentBetMode().addForceKey(keyValue[0])  # type:ignore
+                self.get_current_betmode().addForceKey(keyValue[0])  # type:ignore
                 
-    def combine(self, modes, betModeName) -> None:
+    def combine(self, modes, betmode_name) -> None:
         for modeConfig in modes:
-            for betMode in modeConfig:
-                if betMode.getName() == betModeName:
+            for bet_mode in modeConfig:
+                if bet_mode.getName() == betmode_name:
                     break
-            forceKeys = betMode.getForceKeys()  # type:ignore
+            forceKeys = bet_mode.getForceKeys()  # type:ignore
             for key in forceKeys:
-                if key not in self.getBetMode(betModeName).getForceKeys():  # type:ignore
-                    self.getBetMode(betModeName).addForceKey(key)  # type:ignore
+                if key not in self.get_betmode(betmode_name).getForceKeys():  # type:ignore
+                    self.get_betmode(betmode_name).addForceKey(key)  # type:ignore
 
-    def imprintWins(self) -> None:
+    def imprint_wins(self) -> None:
         for tempWinIndex in range(int(len(self.tempWins)/2)):
             description = tuple(sorted(self.tempWins[2*tempWinIndex].items()))
             bookId = self.tempWins[2*tempWinIndex+1]
             try:
-                if bookId not in self.recordedEvents[description]["bookIds"]:
-                    self.recordedEvents[description]["timesTriggered"] += 1
-                    self.recordedEvents[description]["bookIds"] += [bookId]
+                if bookId not in self.recorded_events[description]["bookIds"]:
+                    self.recorded_events[description]["timesTriggered"] += 1
+                    self.recorded_events[description]["bookIds"] += [bookId]
             except:
-                self.checkForceKeys(description)
-                self.recordedEvents[description] = {
+                self.check_force_keys(description)
+                self.recorded_events[description] = {
                     "timesTriggered": 1,
                     "bookIds": [bookId]
                 }
@@ -156,63 +156,63 @@ class GeneralGameState(ABC):
         # print("TODO: get unique wins")
         self.tempWins = []
         self.library[self.sim+1] = copy(self.book)
-        self.winManager.updateEndRoundWins()
+        self.win_manager.update_end_round_wins()
 
-    def updateFinalWin(self) -> None:
-        self.finalWin = round(min(self.winManager.runningBetWin, self.config.winCap),2)
+    def update_final_win(self) -> None:
+        self.finalWin = round(min(self.win_manager.running_bet_win, self.config.wincap),2)
         self.book["payoutMultiplier"] = self.finalWin
-        self.book["baseGameWins"] = float(round(min(self.winManager.baseGameWins,self.config.winCap),2))
-        self.book["freeGameWins"] = float(round(min(self.winManager.freeGameWins,self.config.winCap),2))
+        self.book["baseGameWins"] = float(round(min(self.win_manager.base_game_wins,self.config.wincap),2))
+        self.book["freeGameWins"] = float(round(min(self.win_manager.freegame_wins,self.config.wincap),2))
 
-        assert min(round(self.winManager.baseGameWins + self.winManager.freeGameWins ,2),self.config.winCap) == round(self.winManager.runningBetWin, 2), "Base + Free game payout mismatch!"
-        assert min(round(self.book["baseGameWins"]  + self.book["freeGameWins"] ,2),self.config.winCap) == round(self.book["payoutMultiplier"],2), "Base + Free game payout mismatch!"
+        assert min(round(self.win_manager.base_game_wins + self.win_manager.freegame_wins ,2),self.config.wincap) == round(self.win_manager.running_bet_win, 2), "Base + Free game payout mismatch!"
+        assert min(round(self.book["baseGameWins"]  + self.book["freeGameWins"] ,2),self.config.wincap) == round(self.book["payoutMultiplier"],2), "Base + Free game payout mismatch!"
   
-    def updateGameModeWins(self, winAmount: float) -> None:
+    def update_mode_wins(self, winAmount: float) -> None:
         if winAmount > 0:
-            if self.gameType == self.config.baseGameType:
-                self.baseGameWins += winAmount
-            elif self.gameType == self.config.freeGameType:
-                self.freeGameWins += winAmount
+            if self.gametype == self.config.base_game_type:
+                self.base_game_wins += winAmount
+            elif self.gametype == self.config.free_game_type:
+                self.freegame_wins += winAmount
             else:
-                raise RuntimeError(f"{self.gameType} not a reconised game-type")
+                raise RuntimeError(f"{self.gametype} not a reconised game-type")
             
-    def checkRepeat(self) -> None:
+    def check_repeat(self) -> None:
         if self.repeat == False:
-            winCriteria = self.getCurrentBetModeDistribution().getWinCriteria()
+            winCriteria = self.get_current_betmode_distributions().getWinCriteria()
             if winCriteria is not None and self.finalWin != winCriteria:
                 self.repeat = True 
             
-            if (self.getCurrentDistributionConditions()['forceFreeSpins'] and not(self.triggeredFreeSpins)):
+            if (self.get_current_distribution_conditions()['force_freespins'] and not(self.triggered_freespins)):
                 self.repeat = True
 
     @abstractmethod
-    def runSpin(self, sim):
+    def run_spin(self, sim):
         print("Base Game is not implemented in this game. Currently passing when calling runSpin.")
         pass
 
     @abstractmethod
-    def runFreeSpin(self):
-        print("gameState requires def runFreeSpin(), currently passing when calling runFreeSpin")
+    def run_freespin(self):
+        print("gamestate requires def run_freespin(), currently passing when calling runFreeSpin")
         pass
 
-    def runSims(self, betModesCopyList, betMode, simToCriteria, totalThreads, totalRepeats, numSims, threadIndex, repeatCount, compress=True, writeEventList=False) -> None:
-        self.betMode = betMode
-        self.numSims = numSims
-        for sim in range(threadIndex*numSims + (totalThreads*numSims)*repeatCount, (threadIndex+1)*numSims+(totalThreads*numSims)*repeatCount):
+    def run_sims(self, betmode_copy_list, bet_mode, simToCriteria, totalThreads, totalRepeats, num_sims, threadIndex, repeatCount, compress=True, write_event_list=False) -> None:
+        self.bet_mode = bet_mode
+        self.num_sims = num_sims
+        for sim in range(threadIndex*num_sims + (totalThreads*num_sims)*repeatCount, (threadIndex+1)*num_sims+(totalThreads*num_sims)*repeatCount):
             self.criteria = simToCriteria[sim]
-            self.runSpin(sim)
-        modeCost = self.getCurrentBetMode().getCost()
-        print("Thread "+str(threadIndex), "finished with", round(self.winManager.totalCumulativeWins/(numSims*modeCost), 3), "RTP.",
-              f"[baseGame: {round(self.winManager.cumulativeBaseWins/(numSims*modeCost), 3)}, freeGame: {round(self.winManager.cumulativeFreeWins/(numSims*modeCost), 3)}]",
+            self.run_spin(sim)
+        modeCost = self.get_current_betmode().getCost()
+        print("Thread "+str(threadIndex), "finished with", round(self.win_manager.totalCumulativeWins/(num_sims*modeCost), 3), "RTP.",
+              f"[baseGame: {round(self.win_manager.cumulativeBaseWins/(num_sims*modeCost), 3)}, freeGame: {round(self.win_manager.cumulativeFreeWins/(num_sims*modeCost), 3)}]",
               flush=True)
         lastFileWrite = threadIndex == totalThreads-1 and repeatCount == totalRepeats - 1
         firstFileWrite = threadIndex == 0 and repeatCount == 0
 
-        writeJsonFile(self, list(self.library.values()), "temp_multi_threaded_files/books_"+betMode+"_"+str(threadIndex)+"_"+str(repeatCount)+".json", firstFileWrite, lastFileWrite, compress)
-        printRecordedWins(self, betMode+"_"+str(threadIndex)+"_"+str(repeatCount))
-        makeLookUpTable(self, "lookUpTable_"+betMode+"_"+str(threadIndex)+"_"+str(repeatCount))
-        makeLookUpTableIdToCriteria(self, "lookUpTableIdToCriteria_"+betMode+"_"+str(threadIndex)+"_"+str(repeatCount))
-        makeLookUpTablePaySplit(self, "lookUpTableSegmented"+"_"+str(betMode)+"_"+str(threadIndex)+"_"+str(repeatCount))
-        if writeEventList == True:
-            writeLibraryEvents(self, list(self.library.values()), betMode)
-        betModesCopyList.append(self.config.betModes)
+        write_json(self, list(self.library.values()), "temp_multi_threaded_files/books_"+bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount)+".json", firstFileWrite, lastFileWrite, compress)
+        print_recorded_wins(self, bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount))
+        make_lookup_tables(self, "lookUpTable_"+bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount))
+        make_lookup_to_criteria(self, "lookUpTableIdToCriteria_"+bet_mode+"_"+str(threadIndex)+"_"+str(repeatCount))
+        make_lookup_pay_split(self, "lookUpTableSegmented"+"_"+str(bet_mode)+"_"+str(threadIndex)+"_"+str(repeatCount))
+        if write_event_list == True:
+            write_library_events(self, list(self.library.values()), bet_mode)
+        betmode_copy_list.append(self.config.bet_modes)

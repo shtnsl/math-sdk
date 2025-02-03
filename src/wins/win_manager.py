@@ -9,51 +9,51 @@ class WinManager:
         self.cumulativeFreeWins = 0
 
         #Base-game and free-game wins for a specific simulation
-        self.runningBetWin = 0.0
+        self.running_bet_win = 0.0
 
         #Controls wins for a specific simulation number
-        self.baseGameWins = 0.0
-        self.freeGameWins = 0.0
+        self.base_game_wins = 0.0
+        self.freegame_wins = 0.0
 
         #Controls wins for all actions within a 'Reveal' event
         self.spinWin = 0.0
-        self.tumbleWin = 0.0 
+        self.tumble_win = 0.0 
 
     def updateSpinWin(self, winAmount:float):
         self.spinWin += winAmount 
-        self.runningBetWin += winAmount
+        self.running_bet_win += winAmount
 
-    def setSpinWin(self, winAmount:float):
+    def set_spin_win(self, winAmount:float):
         runningDiff = (winAmount - self.spinWin)
         self.spinWin = winAmount
-        self.runningBetWin += runningDiff
+        self.running_bet_win += runningDiff
 
-    def resetSpinWin(self):
+    def reset_spin_win(self):
         self.spinWin = 0.0
 
     def updateGameTypeWins(self, gameType: str):
         if self.baseGameMode.lower() == gameType.lower():
-            self.baseGameWins += self.spinWin 
+            self.base_game_wins += self.spinWin 
         elif self.freeGameMode.lower() == gameType.lower():
-            self.freeGameWins += self.spinWin 
+            self.freegame_wins += self.spinWin 
         else:
             raise RuntimeError("Must define a valid gameType")
 
-    def updateEndRoundWins(self):
-        self.totalCumulativeWins += (self.baseGameWins + self.freeGameWins)
-        self.cumulativeBaseWins += self.baseGameWins 
-        self.cumulativeFreeWins += self.freeGameWins  
+    def update_end_round_wins(self):
+        self.totalCumulativeWins += (self.base_game_wins + self.freegame_wins)
+        self.cumulativeBaseWins += self.base_game_wins 
+        self.cumulativeFreeWins += self.freegame_wins  
 
-    def resetEndOfRoundWins(self):
-        self.baseGameWins = 0.0
-        self.freeGameWins = 0.0
+    def reset_end_round_wins(self):
+        self.base_game_wins = 0.0
+        self.freegame_wins = 0.0
        
-        self.runningBetWin = 0.0
+        self.running_bet_win = 0.0
         self.spinWin = 0.0 
-        self.tumbleWin = 0.0 
+        self.tumble_win = 0.0 
 
     def resetEndOfSpinWin(self):
         self.spinWin = 0.0 
     
     def resetTumbleWin(self):
-        self.tumbleWin = 0.0
+        self.tumble_win = 0.0
