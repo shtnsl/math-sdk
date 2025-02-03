@@ -9,7 +9,7 @@ SET_TOTAL_WIN = "setTotalWin"
 WINCAP = "winCap"
 
 #Freespin events
-UPDATE_FS = "update_free_spin"
+UPDATE_FS = "updateFreeSpin"
 FREESPINTRIGGER = "freeSpinTrigger"
 FREESPINRETRIGGER = "freeSpinRetrigger"
 FREE_SPIN_END = "freeSpinEnd"

@@ -10,8 +10,8 @@ if __name__ == '__main__':
     profiling = False
 
     numSimArgs = {
-        "base":int(1e4),
-        "bonus": int(1e4)
+        "base":int(1e3),
+        "bonus": int(1e3)
          }
     
     config = GameConfig()

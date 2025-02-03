@@ -70,6 +70,7 @@ def revealBoardEvent(gameState):
 
 def freeSpinsTriggerEvent(gameState, includePaddingIndex=True, baseGameTrigger:bool=None, freeGameTrigger:bool=None):
     assert baseGameTrigger != freeGameTrigger, "must set either baseGameTrigger or freeSpinTrigger to = True"
+    event = {}
     scatterPositions = gameState.specialSymbolsOnBoard['scatter']
     if includePaddingIndex:
         for pos in scatterPositions:
@@ -159,7 +160,7 @@ def updateTumbleWinEvent(gameState):
     }
     gameState.book['events'] += [event]
 
-def update_free_spinEvent(gameState):
+def updateFreeSpinEvent(gameState):
     event = {
         "index": len(gameState.book['events']), 
         "type": UPDATE_FS, 

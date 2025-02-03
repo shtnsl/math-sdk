@@ -30,14 +30,14 @@ class GameState(GameStateOverride):
             if self.checkFreespinCondition() and self.checkFreeSpinEntry():
                 self.runFreeSpinFromBaseGame()
 
-            self.evaluate_final_win()
+            self.evaluateFinalWin()
 
         self.imprintWins()
 
     def runFreeSpin(self):
         self.resetFsSpin()
         while self.fs < self.totFs:
-            self.update_free_spin()
+            self.updateFreeSpin()
             self.drawBoard()
             #Apply game-specific actions (i.e special symbol attributes before or after evaluation)
             
@@ -56,7 +56,7 @@ class GameState(GameStateOverride):
             self.winManager.updateGameTypeWins(self.gameType)
 
             if self.checkFreespinCondition():
-                self.update_free_spin_retrigger_amount()
+                self.updateFreeSpinRetriggerAmount()
 
     #Make a game which has multipliers on the wilds (like juice monster)
     #Mining game clone for scattery-pays (can also have symbol mults?)
