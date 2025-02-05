@@ -11,7 +11,7 @@ from game_calculations import *
 class GameState(GameStateOverride):
 
     def run_spin(self, sim):
-        self.resetSeed(sim)
+        self.reset_seed(sim)
         self.repeat = True
         while self.repeat:
             self.reset_book()

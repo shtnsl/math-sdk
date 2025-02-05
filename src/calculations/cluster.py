@@ -1,103 +1,186 @@
 from collections import defaultdict
 from abc import ABC, abstractmethod
-class ClusterWins:
+from src.calculations.board import Board
 
-    def getNeighbours(self, reel, row, localChecked) -> list:
+
+class ClusterWins(Board):
+    """
+    BFS cluster finding algorithm and win-evaluation.
+    """
+
+    def get_neighbours(self, reel, row, local_checked) -> list:
+        """All neighbouring symbols within board range."""
         neighbours = []
         if reel > 0:
-            if (reel-1, row) not in localChecked:
-                neighbours += [(reel-1, row)]
-                localChecked += [(reel-1, row)]
-        if reel < len(self.board)-1:
-            if (reel+1, row) not in localChecked:
-                neighbours += [(reel+1, row)]
-                localChecked += [(reel+1, row)]
+            if (reel - 1, row) not in local_checked:
+                neighbours += [(reel - 1, row)]
+                local_checked += [(reel - 1, row)]
+        if reel < len(self.board) - 1:
+            if (reel + 1, row) not in local_checked:
+                neighbours += [(reel + 1, row)]
+                local_checked += [(reel + 1, row)]
         if row > 0:
-            if (reel, row-1) not in localChecked:
-                neighbours += [(reel, row-1)]
-                localChecked += [(reel, row-1)]
-        if row < len(self.board[reel])-1:
-            if (reel, row+1) not in localChecked:
-                neighbours += [(reel, row+1)]
-                localChecked += [(reel, row+1)]
+            if (reel, row - 1) not in local_checked:
+                neighbours += [(reel, row - 1)]
+                local_checked += [(reel, row - 1)]
+        if row < len(self.board[reel]) - 1:
+            if (reel, row + 1) not in local_checked:
+                neighbours += [(reel, row + 1)]
+                local_checked += [(reel, row + 1)]
         return neighbours
 
-    def inCluster(self, reel: int, row: int, og_symbol: str, wild_key: str='wild') -> bool:
-        if self.board[reel][row].check_attribute(wild_key) or og_symbol == self.board[reel][row].name:
+    def in_cluster(
+        self, reel: int, row: int, og_symbol: str, wild_key: str = "wild"
+    ) -> bool:
+        """Checks if a symbol (including wilds) match cluster type."""
+        if (
+            self.board[reel][row].check_attribute(wild_key)
+            or og_symbol == self.board[reel][row].name
+        ):
             return True
 
-    def checkAllNeighbours(self, alreadyChecked: list, localChecked: list, potentialCluster: list, reel, row, og_symbol: str, wild_key: str='wild'):
-        neighbours = self.getNeighbours(reel, row, localChecked)
+    def check_all_neighbours(
+        self,
+        already_checked: list,
+        local_checked: list,
+        potential_cluster: list,
+        reel,
+        row,
+        og_symbol: str,
+        wild_key: str = "wild",
+    ):
+        """Recursively check neights for like-symbols."""
+        neighbours = self.get_neighbours(reel, row, local_checked)
         for reel_, row_ in neighbours:
-            if self.inCluster(reel_, row_, og_symbol, wild_key):
-                potentialCluster += [(reel_, row_)]
-                alreadyChecked += [(reel_, row_)]
-                self.checkAllNeighbours(alreadyChecked, localChecked, potentialCluster, reel_, row_, og_symbol, wild_key)
+            if self.in_cluster(reel_, row_, og_symbol, wild_key):
+                potential_cluster += [(reel_, row_)]
+                already_checked += [(reel_, row_)]
+                self.check_all_neighbours(
+                    already_checked,
+                    local_checked,
+                    potential_cluster,
+                    reel_,
+                    row_,
+                    og_symbol,
+                    wild_key,
+                )
 
-    def getClusters(self, wild_key: str = "wild") -> dict:
-        alreadyChecked = []
+    def get_clusters(self, wild_key: str = "wild") -> dict:
+        """Return all symbol clusters of size >= 1."""
+        already_checked = []
         clusters = defaultdict(list)
-        for reel in range(len(self.board)):
-            for row in range(len(self.board[reel])):
-                if not(self.board[reel][row].special) and (reel, row) not in alreadyChecked:
-                    potentialCluster = [(reel, row)]
-                    alreadyChecked += [(reel, row)]
-                    localChecked = [(reel, row)]
+        for reel, _ in enumerate(self.board):
+            for row, _ in enumerate(self.board[reel]):
+                if (
+                    not (self.board[reel][row].special)
+                    and (reel, row) not in already_checked
+                ):
+                    potential_cluster = [(reel, row)]
+                    already_checked += [(reel, row)]
+                    local_checked = [(reel, row)]
                     symbol = self.board[reel][row].name
-                    self.checkAllNeighbours(alreadyChecked, localChecked, potentialCluster, reel, row, symbol, wild_key)
-                    clusters[symbol].append(potentialCluster)
+                    self.check_all_neighbours(
+                        already_checked,
+                        local_checked,
+                        potential_cluster,
+                        reel,
+                        row,
+                        symbol,
+                        wild_key,
+                    )
+                    clusters[symbol].append(potential_cluster)
 
         return clusters
-    
-    def evaluateAllClusters(self, clusters:dict, multiplier_key:str = "multiplier", returnData: dict = {"totalWin": 0, "wins": []}) -> type:
-        explodingSymbols = []
-        totalWin = 0
+
+    def evaluate_clusters(
+        self,
+        clusters: dict,
+        multiplier_key: str = "multiplier",
+        return_data: dict = {"totalWin": 0, "wins": []},
+    ) -> type:
+        """Eetermine payout amount from cluster, including symbol multiplier and global multiplier value."""
+        exploding_symbols = []
+        total_win = 0
         for sym in clusters:
             for cluster in clusters[sym]:
                 numSymsInCluster = len(cluster)
                 if (numSymsInCluster, sym) in self.config.paytable:
-                    clusterMult = 0
+                    cluster_mult = 0
                     for positions in cluster:
-                        if self.board[positions[0]][positions[1]].check_attribute(multiplier_key):
-                            if int(self.board[positions[0]][positions[1]].get_attribute(multiplier_key)) > 0:
-                                clusterMult += self.board[positions[0]][positions[1]].multiplier
-                    clusterMult = max(clusterMult, 1)
-                    symWin = self.config.paytable[(numSymsInCluster, sym)]
-                    symWinMult = symWin*clusterMult*self.global_multiplier
-                    totalWin += symWinMult
+                        if self.board[positions[0]][positions[1]].check_attribute(
+                            multiplier_key
+                        ):
+                            if (
+                                int(
+                                    self.board[positions[0]][
+                                        positions[1]
+                                    ].get_attribute(multiplier_key)
+                                )
+                                > 0
+                            ):
+                                cluster_mult += self.board[positions[0]][
+                                    positions[1]
+                                ].multiplier
+                    cluster_mult = max(cluster_mult, 1)
+                    symwin = self.config.paytable[(numSymsInCluster, sym)]
+                    symwin_mult = symwin * cluster_mult * self.global_multiplier
+                    total_win += symwin_mult
                     jsonPositions = [{"reel": p[0], "row": p[1]} for p in cluster]
-                    returnData['wins'] += [{"symbol": sym, "clusterSize": numSymsInCluster, "win": symWinMult, "positions": jsonPositions, "meta": {"multiplier": clusterMult, 'winWithoutMult': symWin, "globalMultiplier": self.global_multiplier, "clusterMultiplier": clusterMult}}]
+                    return_data["wins"] += [
+                        {
+                            "symbol": sym,
+                            "clusterSize": numSymsInCluster,
+                            "win": symwin_mult,
+                            "positions": jsonPositions,
+                            "meta": {
+                                "multiplier": cluster_mult,
+                                "winWithoutMult": symwin,
+                                "globalMult": self.global_multiplier,
+                                "clusterMultiplier": cluster_mult,
+                            },
+                        }
+                    ]
 
                     for positions in cluster:
                         self.board[positions[0]][positions[1]].explode = True
-                        if {'reel':positions[0], 'row':positions[1]} not in explodingSymbols:
-                            explodingSymbols.append({"reel": positions[0], "row": positions[1]})
-        
-        return returnData, explodingSymbols, totalWin
+                        if {
+                            "reel": positions[0],
+                            "row": positions[1],
+                        } not in exploding_symbols:
+                            exploding_symbols.append(
+                                {"reel": positions[0], "row": positions[1]}
+                            )
 
+        return return_data, exploding_symbols, total_win
 
-    def getClusterWinData(self, multiplier_key:str = 'multiplier', wild_key:str = 'wild') -> None:
-        clusters = self.getClusters(wild_key)
-        returnData = {
+    def get_cluster_data(
+        self, multiplier_key: str = "multiplier", wild_key: str = "wild"
+    ) -> None:
+        """Event-ready win information."""
+        clusters = self.get_clusters(wild_key)
+        return_data = {
             "totalWin": 0,
             "wins": [],
         }
-        returnData, explodingSymbols, totalWin = self.evaluateAllClusters(clusters, multiplier_key, returnData)
+        return_data, exploding_symbols, total_win = self.evaluate_clusters(
+            clusters, multiplier_key, return_data
+        )
 
-        returnData['totalWin'] += totalWin
+        return_data["totalWin"] += total_win
         self.clusters = clusters
-        self.win_manager.tumble_win = totalWin
-        self.explodingSymbols = explodingSymbols
+        self.win_manager.tumble_win = total_win
+        self.exploding_symbols = exploding_symbols
 
-        return returnData
-    
+        return return_data
+
     def recordClusterWins(self) -> None:
-        for win in self.winData['wins']:
-            self.record({
-                "clusterSize": win["clusterSize"],
-                "symbol": win["symbol"],
-                "totalMultiplier": win["meta"]["multiplier"],
-                "gameType": self.gametype
-            })
-
-
+        """Force_for_rob win description keys."""
+        for win in self.win_data["wins"]:
+            self.record(
+                {
+                    "clusterSize": win["clusterSize"],
+                    "symbol": win["symbol"],
+                    "mult": win["meta"]["multiplier"],
+                    "gametype": self.gametype,
+                }
+            )

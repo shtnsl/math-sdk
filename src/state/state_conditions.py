@@ -1,25 +1,32 @@
 from src.state.state import GeneralGameState
 
+
 class Conditions(GeneralGameState):
-    def inFence(self, *args):
+    """queries current gamestate"""
+
+    def in_criteria(self, *args):
+        """check is current criteria is within a given list"""
         for arg in args:
-            if self.fence == arg:
-                return True 
+            if self.criteria == arg:
+                return True
         return False
-    
-    def inMode(self, *args):
+
+    def in_mode(self, *args):
+        """check if current bet-mode mates a given list"""
         for arg in args:
             if self.bet_mode == arg:
-                return True 
-        return False 
-    
-    def isMaxWin(self):
-        if self.running_bet_win >= self.config.wincap:
-            return True 
+                return True
         return False
-    
-    def isInGameType(self, *args):
+
+    def is_wincap(self):
+        """checks if current basegame + freegame wins are >= max-win"""
+        if self.running_bet_win >= self.config.wincap:
+            return True
+        return False
+
+    def is_in_gametype(self, *args):
+        """check current gametype against possible list"""
         for arg in args:
             if self.gametype == arg:
-                return True 
+                return True
         return False

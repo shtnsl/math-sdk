@@ -1,131 +1,248 @@
-from typing import List, Tuple, Dict
+"""Evaluates and records winds for lines games."""
 
-class LineWins:
-    def addMultipliersInWinningPositions(self, winingPositions:List[Dict], multiplier_key:str = "multiplier"):
+from typing import List, Tuple, Dict
+from src.calculations.board import Board
+
+
+class LineWins(Board):
+    """Primary win evaluation and recording."""
+
+    def get_line_mults(
+        self, winingPositions: List[Dict], multiplier_key: str = "multiplier"
+    ):
+        """Searches symbol position for multiplier attributes."""
         multiplier = 0
         for pos in winingPositions:
-            if self.board[pos['reel']][pos['row']].check_attribute(multiplier_key):
-                multiplier += self.board[pos['reel']][pos['row']].get_attribute(multiplier_key)
+            if self.board[pos["reel"]][pos["row"]].check_attribute(multiplier_key):
+                multiplier += self.board[pos["reel"]][pos["row"]].get_attribute(
+                    multiplier_key
+                )
         return max(multiplier, 1)
-    
-    def getLineWin(self, kind:int, symName:str, multiplier_key:str, positions:list) -> List[type]:
-        mult = self.addMultipliersInWinningPositions(positions, multiplier_key)
-        win = self.config.paytable[(kind, symName)]*mult
-        baseWin = self.config.paytable[(kind, symName)]
-        
-        return baseWin, win, mult
 
-    def recordLineWin(self, kind:int, symbol:str, mult:int, gameType:str) -> None:
-        self.record({
-            "kind": kind,
-            "symbol": symbol,
-            "mult": mult,
-            "gameType": gameType
-        })
-    
-    def lineWinInfo(self, symbol: str, kind: int, win: float, positions: list, metaData: dict) -> dict:
+    def get_line_win(
+        self, kind: int, symName: str, multiplier_key: str, positions: list
+    ) -> List[type]:
+        """Find line wins and multipliers."""
+        mult = self.get_line_mults(positions, multiplier_key)
+        win = self.config.paytable[(kind, symName)] * mult
+        base_win = self.config.paytable[(kind, symName)]
+
+        return base_win, win, mult
+
+    def record_line_win(self, kind: int, symbol: str, mult: int, gametype: str) -> None:
+        """Force file description for line-win."""
+        self.record(
+            {"kind": kind, "symbol": symbol, "mult": mult, "gametype": gametype}
+        )
+
+    def line_win_info(
+        self, symbol: str, kind: int, win: float, positions: list, metaData: dict
+    ) -> dict:
+        """Construct line-win event key."""
         return {
             "symbol": symbol,
             "kind": kind,
             "win": win,
             "positions": positions,
-            "meta": metaData
+            "meta": metaData,
         }
 
-    def getLineWinData(self, wild_key:str = 'wild', multiplier_key:str = 'multiplier', recordWins:bool = None):
-        returnData = {
+    def get_line_data(
+        self,
+        wild_key: str = "wild",
+        multiplier_key: str = "multiplier",
+        record_wins: bool = None,
+    ):
+        """Primary function for finding line-wins on a game-board."""
+        return_data = {
             "totalWin": 0,
             "wins": [],
         }
-        for lineIndex in self.config.pay_lines:
-            winLine = []
-            for reel in range(len(self.board)):
-                winLine.append(self.board[reel][self.config.pay_lines[lineIndex][reel]])
-            
-            matches, wildMatches = 0, 0
-            firstSymNotWild = ""
-            finishedWildWins = False 
-            for sym in winLine:
-                if not(sym.check_attribute(wild_key)) or finishedWildWins:
-                    if firstSymNotWild == "":
-                        firstSymNotWild = sym 
-                        finishedWildWins = True
+        for line_index in self.config.pay_lines:
+            win_line = []
+            for reel, _ in enumerate(self.board):
+                win_line.append(
+                    self.board[reel][self.config.pay_lines[line_index][reel]]
+                )
+
+            matches, wild_matches = 0, 0
+            frist_non_wild = None
+            finished_wild_wins = False
+            for sym in win_line:
+                if not (sym.check_attribute(wild_key)) or finished_wild_wins:
+                    if frist_non_wild is None:
+                        frist_non_wild = sym
+                        finished_wild_wins = True
                         matches = 1
                     else:
-                        if sym.name == firstSymNotWild.name or sym.check_attribute(wild_key):
-                           matches += 1
+                        if sym.name == frist_non_wild.name or sym.check_attribute(
+                            wild_key
+                        ):
+                            matches += 1
                         else:
                             break
-                elif not(finishedWildWins):
-                    wildMatches += 1
+                elif not (finished_wild_wins):
+                    wild_matches += 1
 
             win = 0
-            if winLine[0].check_attribute(wild_key) and ((wildMatches, winLine[0].name) in self.config.paytable):
-                "check if all wilds, or first non-wild symbol is not paying"
-                if firstSymNotWild == "" or not((wildMatches+matches, firstSymNotWild.name) in self.config.paytable):
-                    positions = [{"reel": reel_, "row": self.config.pay_lines[lineIndex][reel_]} for reel_ in range(wildMatches)]
-                    baseWin, win, mult = self.getLineWin(wildMatches, firstSymNotWild.name, multiplier_key, positions)
+            if win_line[0].check_attribute(wild_key) and (
+                (wild_matches, win_line[0].name) in self.config.paytable
+            ):
+                # check if all wilds, or first non-wild symbol is not paying
+                if frist_non_wild == "" or not (
+                    (wild_matches + matches, frist_non_wild.name)
+                    in self.config.paytable
+                ):
+                    positions = [
+                        {"reel": reel_, "row": self.config.pay_lines[line_index][reel_]}
+                        for reel_ in range(wild_matches)
+                    ]
+                    base_win, win, mult = self.get_line_win(
+                        wild_matches, frist_non_wild.name, multiplier_key, positions
+                    )
                     mult *= self.global_multiplier
-                    winDict = self.lineWinInfo(winLine[0].name, 
-                                               wildMatches, 
-                                               win, 
-                                               positions, 
-                                               {"lineIndex": lineIndex, 
-                                                "multiplier": mult, 
-                                                "winWithoutMult": baseWin, 
-                                                "globalMultiplier": self.global_multiplier, 
-                                                "lineMultiplier": mult/self.global_multiplier})
-                    returnData['wins'].append(winDict)
-                    returnData['wins'] += [{"symbol": winLine[0].name, "kind": wildMatches, "win": win, "positions": positions, "meta": {"lineIndex": lineIndex, "multiplier": mult, "winWithoutMult": baseWin}}]
-                    if recordWins: self.recordLineWin(wildMatches, winLine[0].name, mult, self.gametype)
+                    win_dict = self.line_win_info(
+                        win_line[0].name,
+                        wild_matches,
+                        win,
+                        positions,
+                        {
+                            "lineIndex": line_index,
+                            "multiplier": mult,
+                            "winWithoutMult": base_win,
+                            "globalMult": self.global_multiplier,
+                            "lineMultiplier": mult / self.global_multiplier,
+                        },
+                    )
+                    return_data["wins"].append(win_dict)
+                    return_data["wins"] += [
+                        {
+                            "symbol": win_line[0].name,
+                            "kind": wild_matches,
+                            "win": win,
+                            "positions": positions,
+                            "meta": {
+                                "lineIndex": line_index,
+                                "multiplier": mult,
+                                "winWithoutMult": base_win,
+                            },
+                        }
+                    ]
+                    if record_wins:
+                        self.record_line_win(
+                            wild_matches, win_line[0].name, mult, self.gametype
+                        )
                 else:
-                    if self.config.paytable[(wildMatches, winLine[0].name)] > self.config.paytable[wildMatches+matches, firstSymNotWild.name]:
-                        positions = [{"reel": reel_, "row": self.config.pay_lines[lineIndex][reel_]} for reel_ in range(wildMatches)]
-                        baseWin, win, mult = self.getLineWin(wildMatches, firstSymNotWild.name, multiplier_key, positions)
+                    if (
+                        self.config.paytable[(wild_matches, win_line[0].name)]
+                        > self.config.paytable[
+                            wild_matches + matches, frist_non_wild.name
+                        ]
+                    ):
+                        positions = [
+                            {
+                                "reel": reel_,
+                                "row": self.config.pay_lines[line_index][reel_],
+                            }
+                            for reel_ in range(wild_matches)
+                        ]
+                        base_win, win, mult = self.get_line_win(
+                            wild_matches, frist_non_wild.name, multiplier_key, positions
+                        )
                         mult *= self.global_multiplier
-                        winDict = self.lineWinInfo(winLine[0].name, 
-                                                wildMatches, 
-                                                win, 
-                                                positions, 
-                                                {"lineIndex": lineIndex, 
-                                                    "multiplier": mult, 
-                                                    "winWithoutMult": baseWin, 
-                                                    "globalMultiplier": self.global_multiplier, 
-                                                    "lineMultiplier": mult/self.global_multiplier})
-                        returnData['wins'].append(winDict)
-                        if recordWins: self.recordLineWin(wildMatches, winLine[0].name, mult, self.gametype)
+                        win_dict = self.line_win_info(
+                            win_line[0].name,
+                            wild_matches,
+                            win,
+                            positions,
+                            {
+                                "lineIndex": line_index,
+                                "multiplier": mult,
+                                "winWithoutMult": base_win,
+                                "globalMult": self.global_multiplier,
+                                "lineMultiplier": mult / self.global_multiplier,
+                            },
+                        )
+                        return_data["wins"].append(win_dict)
+                        if record_wins:
+                            self.record_line_win(
+                                wild_matches, win_line[0].name, mult, self.gametype
+                            )
                     else:
-                        positions = [{"reel": reel_, "row": self.config.pay_lines[lineIndex][reel_]} for reel_ in range(wildMatches+matches)]
-                        baseWin, win, mult = self.getLineWin(wildMatches+matches, firstSymNotWild.name, multiplier_key, positions)
+                        positions = [
+                            {
+                                "reel": reel_,
+                                "row": self.config.pay_lines[line_index][reel_],
+                            }
+                            for reel_ in range(wild_matches + matches)
+                        ]
+                        base_win, win, mult = self.get_line_win(
+                            wild_matches + matches,
+                            frist_non_wild.name,
+                            multiplier_key,
+                            positions,
+                        )
                         mult *= self.global_multiplier
-                        winDict = self.lineWinInfo(firstSymNotWild.name, 
-                                                wildMatches+matches, 
-                                                win, 
-                                                positions, 
-                                                {"lineIndex": lineIndex, 
-                                                    "multiplier": mult, 
-                                                    "winWithoutMult": baseWin, 
-                                                    "globalMultiplier": self.global_multiplier, 
-                                                    "lineMultiplier": mult/self.global_multiplier})
-                        returnData['wins'].append(winDict)
-                        if recordWins: self.recordLineWin(wildMatches+matches,firstSymNotWild.name, mult, self.gametype)
+                        win_dict = self.line_win_info(
+                            frist_non_wild.name,
+                            wild_matches + matches,
+                            win,
+                            positions,
+                            {
+                                "lineIndex": line_index,
+                                "multiplier": mult,
+                                "winWithoutMult": base_win,
+                                "globalMult": self.global_multiplier,
+                                "lineMultiplier": mult / self.global_multiplier,
+                            },
+                        )
+                        return_data["wins"].append(win_dict)
+                        if record_wins:
+                            self.record_line_win(
+                                wild_matches + matches,
+                                frist_non_wild.name,
+                                mult,
+                                self.gametype,
+                            )
             else:
-                if firstSymNotWild != "" and (wildMatches+matches, firstSymNotWild.name) in self.config.paytable:
-                    positions = [{"reel": reel_, "row": self.config.pay_lines[lineIndex][reel_]} for reel_ in range(wildMatches+matches)]
-                    baseWin, win, mult = self.getLineWin(wildMatches+matches, firstSymNotWild.name, multiplier_key, positions)
+                if (
+                    frist_non_wild != ""
+                    and (wild_matches + matches, frist_non_wild.name)
+                    in self.config.paytable
+                ):
+                    positions = [
+                        {"reel": reel_, "row": self.config.pay_lines[line_index][reel_]}
+                        for reel_ in range(wild_matches + matches)
+                    ]
+                    base_win, win, mult = self.get_line_win(
+                        wild_matches + matches,
+                        frist_non_wild.name,
+                        multiplier_key,
+                        positions,
+                    )
                     mult *= self.global_multiplier
-                    winDict = self.lineWinInfo(firstSymNotWild.name, 
-                                            wildMatches+matches, 
-                                            win, 
-                                            positions, 
-                                            {"lineIndex": lineIndex, 
-                                            "multiplier": mult, 
-                                            "winWithoutMult": baseWin, 
-                                            "globalMultiplier": self.global_multiplier, 
-                                            "lineMultiplier": int(mult/self.global_multiplier)})
-                    returnData['wins'].append(winDict)
-                    if recordWins: self.recordLineWin(wildMatches+matches,firstSymNotWild.name, mult, self.gametype)
+                    win_dict = self.line_win_info(
+                        frist_non_wild.name,
+                        wild_matches + matches,
+                        win,
+                        positions,
+                        {
+                            "lineIndex": line_index,
+                            "multiplier": mult,
+                            "winWithoutMult": base_win,
+                            "globalMult": self.global_multiplier,
+                            "lineMultiplier": int(mult / self.global_multiplier),
+                        },
+                    )
+                    return_data["wins"].append(win_dict)
+                    if record_wins:
+                        self.record_line_win(
+                            wild_matches + matches,
+                            frist_non_wild.name,
+                            mult,
+                            self.gametype,
+                        )
 
-            returnData['totalWin'] += win
+            return_data["totalWin"] += win
 
-        return returnData
+        return return_data

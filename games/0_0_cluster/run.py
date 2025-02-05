@@ -1,20 +1,27 @@
+"""Main file for generating results for sample cluster-pay game."""
+
 from gamestate import GameConfig, GameState
 from src.write_data.write_data import create_books
 
-if __name__ == '__main__':
-    
-    NUM_THREADS = 10
-    RUST_THREADS = 20
-    BATCHING_SIZE = 5000
-    COMPRESSION = True
-    PROFILING = False
+if __name__ == "__main__":
 
-    num_sim_args = {
-        "base":int(1e3),
-        "bonus": int(1e3)
-         }
-    
+    NUM_THREADS = 1
+    RUST_THREADS = 20
+    batching_size = 5000
+    COMPRESSION = False
+    profiling = False
+
+    num_sim_args = {"base": int(50), "bonus": int(50)}
+
     config = GameConfig()
     gamestate = GameState(config)
 
-    create_books(gamestate, config, num_sim_args, BATCHING_SIZE, NUM_THREADS, COMPRESSION, PROFILING)
+    create_books(
+        gamestate,
+        config,
+        num_sim_args,
+        batching_size,
+        NUM_THREADS,
+        COMPRESSION,
+        profiling,
+    )

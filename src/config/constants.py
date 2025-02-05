@@ -7,7 +7,7 @@ ANTEMAPPING = {
     "bonusBattle": False,
     "bonusBattleOpposing": False,
     "featureSpin": False,
-    "superFeatureSoin": False
+    "superFeatureSoin": False,
 }
 
 ISBUYBONUSMAPPING = {
@@ -24,5 +24,5 @@ ISFEATUREMAPPING = {
     "ante": True,
     "superAnte": True,
     "bonus": False,
-    "super": False
+    "super": False,
 }

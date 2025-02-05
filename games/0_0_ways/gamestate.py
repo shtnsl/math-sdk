@@ -11,14 +11,14 @@ from game_calculations import *
 class GameState(GameStateOverride):
 
     def run_spin(self, sim):
-        self.resetSeed(sim)
+        self.reset_seed(sim)
         self.repeat = True
         while self.repeat:
             self.reset_book()
-            self.drawBoard(emitEvent=True)
+            self.draw_board(emit_event=True)
             
-            self.winData = self.getWaysWinData()
-            self.win_manager.updateSpinWin(self.winData['totalWin'])
+            self.win_data = self.getWaysWinData()
+            self.win_manager.update_spinwin(self.win_data['totalWin'])
 
             self.evaluate_final_win()
 
@@ -26,4 +26,3 @@ class GameState(GameStateOverride):
 
     def run_freespin(self):
         self.reset_fs_spin()
-        pass

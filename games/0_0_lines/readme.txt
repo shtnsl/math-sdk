@@ -1,6 +1,6 @@
 This is an example of a simple lines-game-win
 
-Wilds have multipliers in the freeGame and have the effect of multipling a given line win the the additative values attached to Wild symbols, 
+Wilds have multipliers in the freeGame and have the effect of multipling a given line win the the additative multiplier values attached to Wild symbols, 
 only when the multiplier value is > 1.
 
 Basegame:
@@ -16,4 +16,4 @@ Notes:
 Wilds only pay on 5-Kind. If the paytable is chosen such that 3/4 Kind Wilds pay, the line
 calculation will assign the highest base-win symbols as winning. For example if there is a 3-Kind
 Wild is on the same line as a 5-Kind L4, the 3-Kind wild will be chosen, regardless of the multiplier
-on the final Wild since 3W > 5L4
+on the final Wild since the base payout 3W > 5L4

@@ -15,81 +15,85 @@ class BetMode:
     auto_close_disables=False,
     is_feature = False,
     is_enhanced_mode=False,
-    is_buy_bonus=False,
+    is_buybonus=False,
     max_win=self.wincap,
     """
+
     def __init__(
-        self, 
-        name: str, 
+        self,
+        name: str,
         title: str,
         description: str,
-        cost: float, 
+        cost: float,
         rtp: float,
         max_win: float,
-        auto_close_disables: bool, 
-        is_feature:bool, 
-        is_enhanced_mode: bool, 
-        is_buy_bonus: bool, 
-        distributions: object
-        ):
+        auto_close_disables: bool,
+        is_feature: bool,
+        is_buybonus: bool,
+        distributions: object,
+    ):
 
-        self._name = name 
-        self._title = title 
+        self._name = name
+        self._title = title
         self._description = description
         self._cost = cost
-        self._maxWin = max_win
-        self._autoCloseBetDisabled = auto_close_disables
-        self._isFeature = is_feature
-        self._isEnhancedMode = is_enhanced_mode
-        self._isBuyBonus = is_buy_bonus
+        self._max_win = max_win
+        self._auto_close_disabled = auto_close_disables
+        self._is_feature = is_feature
+        self._is_buybonus = is_buybonus
         self._distributions = distributions
-        self.checkAndSetRTP(rtp)
-        self.setForceKeys()
-        
+        self.set_rtp(rtp)
+        self.set_force_keys()
+
     def __repr__(self):
         return (
             f"BetMode(name={self._name},  title={self._title}, description={self._description}"
-            f"cost={self._cost}, max_win={self._maxWin}, rtp={self._rtp}, auto_close_disables={self._autoCloseBetDisabled} "
-            f"is_feature={self._isFeature}, is_enhanced_mode={self._isEnhancedMode}, is_buy_bonus={self._isBuyBonus} "
+            f"cost={self._cost}, max_win={self._max_win}, rtp={self._rtp}, auto_close_disables={self._auto_close_disabled} "
+            f"is_feature={self._is_feature}, is_enhanced_mode={self._is_enhanced_mode}, is_buybonus={self._is_buybonus} "
         )
-        
-    def checkAndSetRTP(self, rtp:float) -> None:
+
+    def set_rtp(self, rtp: float) -> None:
+        """Set mode RTP."""
         if rtp >= 1.0:
             raise Warning(f"Return To Player is >=1.0!: {rtp}")
         self._rtp = rtp
 
-    def setForceKeys(self):
+    def set_force_keys(self):
+        """Initialize force keys."""
         self._force_keys = []
 
-    def addForceKey(self, forceKey: list):
+    def add_force_key(self, forceKey: list):
+        """Update force keys."""
         self._force_keys.append(str(forceKey))  # type:ignore
 
-    def lockForceKeys(self):
+    def lock_force_keys(self):
+        """Fialise force keys."""
         self._force_keys = tuple(sorted(self._force_keys))
 
-    def getForceKeys(self):
+    def get_force_keys(self):
+        """Return current force keys."""
         return self._force_keys
 
-    def getName(self):
+    def get_name(self):
+        """Return mode name."""
         return self._name
 
-    def getCost(self):
+    def get_cost(self):
+        """Return mode cost."""
         return self._cost
 
-    def getFeature(self):
-        return self._isFeature
-
-    def getEnhancedMode(self):
-        return self._isEnhancedMode
+    def get_feature(self):
+        """Return feature."""
+        return self._is_feature
 
     def getAutoCloseDisabled(self):
-        return self._autoCloseBetDisabled
+        return self._auto_close_disabled
 
     def getBuyBonus(self):
-        return self._isBuyBonus
+        return self._is_buybonus
 
     def getMaxWin(self):
-        return self._maxWin
+        return self._max_win
 
     def getTitle(self):
         return self._title
@@ -102,9 +106,11 @@ class BetMode:
 
     def getDistributions(self):
         return self._distributions
-    
+
     def getDistributionConditions(self, targetCriteria: str) -> dict:
         for d in self.getDistributions():
             if d._criteria == targetCriteria:
                 return d._conditions
-        return RuntimeError(f"target critera: {targetCriteria} not found in bet_mode-distributions.")
+        return RuntimeError(
+            f"target critera: {targetCriteria} not found in bet_mode-distributions."
+        )
