@@ -8,11 +8,11 @@ class LineWins(Board):
     """Primary win evaluation and recording."""
 
     def get_line_mults(
-        self, winingPositions: List[Dict], multiplier_key: str = "multiplier"
+        self, winning_positions: List[Dict], multiplier_key: str = "multiplier"
     ):
         """Searches symbol position for multiplier attributes."""
         multiplier = 0
-        for pos in winingPositions:
+        for pos in winning_positions:
             if self.board[pos["reel"]][pos["row"]].check_attribute(multiplier_key):
                 multiplier += self.board[pos["reel"]][pos["row"]].get_attribute(
                     multiplier_key
@@ -20,12 +20,12 @@ class LineWins(Board):
         return max(multiplier, 1)
 
     def get_line_win(
-        self, kind: int, symName: str, multiplier_key: str, positions: list
+        self, kind: int, sym_name: str, multiplier_key: str, positions: list
     ) -> List[type]:
         """Find line wins and multipliers."""
         mult = self.get_line_mults(positions, multiplier_key)
-        win = self.config.paytable[(kind, symName)] * mult
-        base_win = self.config.paytable[(kind, symName)]
+        win = self.config.paytable[(kind, sym_name)] * mult
+        base_win = self.config.paytable[(kind, sym_name)]
 
         return base_win, win, mult
 
@@ -36,7 +36,7 @@ class LineWins(Board):
         )
 
     def line_win_info(
-        self, symbol: str, kind: int, win: float, positions: list, metaData: dict
+        self, symbol: str, kind: int, win: float, positions: list, meta_data: dict
     ) -> dict:
         """Construct line-win event key."""
         return {
@@ -44,7 +44,7 @@ class LineWins(Board):
             "kind": kind,
             "win": win,
             "positions": positions,
-            "meta": metaData,
+            "meta": meta_data,
         }
 
     def get_line_data(
@@ -53,7 +53,7 @@ class LineWins(Board):
         multiplier_key: str = "multiplier",
         record_wins: bool = None,
     ):
-        """Primary function for finding line-wins on a game-board."""
+        """Primary function for finding line wins on the active game board."""
         return_data = {
             "totalWin": 0,
             "wins": [],
@@ -66,16 +66,16 @@ class LineWins(Board):
                 )
 
             matches, wild_matches = 0, 0
-            frist_non_wild = None
+            first_non_wild = None
             finished_wild_wins = False
             for sym in win_line:
                 if not (sym.check_attribute(wild_key)) or finished_wild_wins:
-                    if frist_non_wild is None:
-                        frist_non_wild = sym
+                    if first_non_wild is None:
+                        first_non_wild = sym
                         finished_wild_wins = True
                         matches = 1
                     else:
-                        if sym.name == frist_non_wild.name or sym.check_attribute(
+                        if sym.name == first_non_wild.name or sym.check_attribute(
                             wild_key
                         ):
                             matches += 1
@@ -88,9 +88,8 @@ class LineWins(Board):
             if win_line[0].check_attribute(wild_key) and (
                 (wild_matches, win_line[0].name) in self.config.paytable
             ):
-                # check if all wilds, or first non-wild symbol is not paying
-                if frist_non_wild == "" or not (
-                    (wild_matches + matches, frist_non_wild.name)
+                if first_non_wild == "" or not (
+                    (wild_matches + matches, first_non_wild.name)
                     in self.config.paytable
                 ):
                     positions = [
@@ -98,7 +97,7 @@ class LineWins(Board):
                         for reel_ in range(wild_matches)
                     ]
                     base_win, win, mult = self.get_line_win(
-                        wild_matches, frist_non_wild.name, multiplier_key, positions
+                        wild_matches, first_non_wild.name, multiplier_key, positions
                     )
                     mult *= self.global_multiplier
                     win_dict = self.line_win_info(
@@ -136,7 +135,7 @@ class LineWins(Board):
                     if (
                         self.config.paytable[(wild_matches, win_line[0].name)]
                         > self.config.paytable[
-                            wild_matches + matches, frist_non_wild.name
+                            wild_matches + matches, first_non_wild.name
                         ]
                     ):
                         positions = [
@@ -147,7 +146,7 @@ class LineWins(Board):
                             for reel_ in range(wild_matches)
                         ]
                         base_win, win, mult = self.get_line_win(
-                            wild_matches, frist_non_wild.name, multiplier_key, positions
+                            wild_matches, first_non_wild.name, multiplier_key, positions
                         )
                         mult *= self.global_multiplier
                         win_dict = self.line_win_info(
@@ -178,13 +177,13 @@ class LineWins(Board):
                         ]
                         base_win, win, mult = self.get_line_win(
                             wild_matches + matches,
-                            frist_non_wild.name,
+                            first_non_wild.name,
                             multiplier_key,
                             positions,
                         )
                         mult *= self.global_multiplier
                         win_dict = self.line_win_info(
-                            frist_non_wild.name,
+                            first_non_wild.name,
                             wild_matches + matches,
                             win,
                             positions,
@@ -200,14 +199,14 @@ class LineWins(Board):
                         if record_wins:
                             self.record_line_win(
                                 wild_matches + matches,
-                                frist_non_wild.name,
+                                first_non_wild.name,
                                 mult,
                                 self.gametype,
                             )
             else:
                 if (
-                    frist_non_wild != ""
-                    and (wild_matches + matches, frist_non_wild.name)
+                    first_non_wild != ""
+                    and (wild_matches + matches, first_non_wild.name)
                     in self.config.paytable
                 ):
                     positions = [
@@ -216,13 +215,13 @@ class LineWins(Board):
                     ]
                     base_win, win, mult = self.get_line_win(
                         wild_matches + matches,
-                        frist_non_wild.name,
+                        first_non_wild.name,
                         multiplier_key,
                         positions,
                     )
                     mult *= self.global_multiplier
                     win_dict = self.line_win_info(
-                        frist_non_wild.name,
+                        first_non_wild.name,
                         wild_matches + matches,
                         win,
                         positions,
@@ -238,7 +237,7 @@ class LineWins(Board):
                     if record_wins:
                         self.record_line_win(
                             wild_matches + matches,
-                            frist_non_wild.name,
+                            first_non_wild.name,
                             mult,
                             self.gametype,
                         )

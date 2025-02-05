@@ -1,3 +1,4 @@
+from typing import List, Dict
 from collections import defaultdict
 from src.calculations.board import Board
 
@@ -7,7 +8,27 @@ class ScatterWins(Board):
     Scatter (pay-anywhere) class for handling wins win calculations and recording.
     """
 
-    def recordScatterWins(
+    def get_central_position(
+        self, rows_for_overlay: List, winning_positions: List[Dict]
+    ) -> tuple:
+        """Return position on screen to display win amount."""
+        closest_to_middle = 100
+        reel_to_overlay = -1
+        row_to_overlay = -1
+        for pos in winning_positions:
+            reel, row = pos["reel"], pos["row"]
+            dist_from_middle = (reel - self.config.num_reels / 2) ** 2 + (
+                row - self.config.num_rows[reel] / 2
+            ) ** 2
+            if dist_from_middle < closest_to_middle and row not in rows_for_overlay:
+                closest_to_middle = dist_from_middle
+                reel_to_overlay = reel
+                row_to_overlay = row
+
+        assert all([row_to_overlay >= 0, reel_to_overlay >= 0])
+        return (reel_to_overlay, row_to_overlay)
+
+    def record_scatter_wins(
         self, num_winning_syms: int, symbol: int, total_multiplier: int, gametype: str
     ) -> None:
         """Force-file description key generator."""
@@ -26,11 +47,13 @@ class ScatterWins(Board):
         wild_key: str = "wild",
         multiplier_key: str = "multiplier",
     ) -> dict:
+        """Return win data for all paying symbols"""
         return_data = {
             "totalWin": 0,
             "wins": [],
         }
         exploding_symbols = []
+        rows_for_overlay = []
         symbols_on_board = defaultdict(list)
         wild_positions = []
         total_win = 0.0
@@ -43,36 +66,36 @@ class ScatterWins(Board):
                 else:
                     wild_positions.append({"reel": reel_idx, "row": row_idx})
 
-        # Update all symbol positons with wilds, as this symbol is shared
+        # Update all symbol positions with wilds, as this symbol is shared
         for sym in symbols_on_board:
             if len(wild_positions) > 0:
                 symbols_on_board[sym].append(wild_positions)
             win_size = len(symbols_on_board[sym])
             if (win_size, sym) in self.config.paytable:
                 symbol_mult = 0
-                for positions in symbols_on_board[sym]:
-                    if self.board[positions["reel"]][positions["row"]].check_attribute(
-                        multiplier_key
-                    ):
-                        symbol_mult += self.board[positions["reel"]][
-                            positions["row"]
-                        ].get_attribute(multiplier_key)
+                for p in symbols_on_board[sym]:
+                    if self.board[p["reel"]][p["row"]].check_attribute(multiplier_key):
+                        symbol_mult += self.board[p["reel"]][p["row"]].get_attribute(
+                            multiplier_key
+                        )
                     symbol_mult = max(symbol_mult, 1)
 
-                    self.board[positions["reel"]][positions["row"]].assign_attribute(
-                        {"explode": True}
-                    )
+                    self.board[p["reel"]][p["row"]].assign_attribute({"explode": True})
                     # Account for special symbols, such as wilds which can apply to multiple groups
-                    if positions not in exploding_symbols:
-                        exploding_symbols.append(positions)
+                    if p not in exploding_symbols:
+                        exploding_symbols.append(p)
 
                 if record_wins:
-                    self.recordScatterWins(
+                    self.record_scatter_wins(
                         win_size,
                         sym,
                         symbol_mult * self.global_multiplier,
                         self.gametype,
                     )
+                overlay_position = self.get_central_position(
+                    rows_for_overlay, symbols_on_board[sym]
+                )
+                rows_for_overlay.append(overlay_position[1])
                 symbol_win_data = {
                     "symbol": sym,
                     "win": self.config.paytable[(win_size, sym)]
@@ -81,8 +104,12 @@ class ScatterWins(Board):
                     "positions": symbols_on_board[sym],
                     "meta": {
                         "globalMult": self.global_multiplier,
-                        "symbolMult": symbol_mult,
+                        "clusterMult": symbol_mult,
                         "winWithoutMult": self.config.paytable[(win_size, sym)],
+                        "overlay": {
+                            "reel": overlay_position[0],
+                            "row": overlay_position[1],
+                        },
                     },
                 }
                 total_win += symbol_win_data["win"]

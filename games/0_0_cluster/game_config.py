@@ -1,7 +1,9 @@
+"""Cluster game configuration file/setup"""
+
 from src.config.config import Config
 from src.config.distributions import Distribution, DistributionConditions
 from src.write_data.force import *
-from src.config.bet_mode import BetMode
+from src.config.betmode import BetMode
 
 
 class GameConfig(Config):
@@ -82,8 +84,6 @@ class GameConfig(Config):
         self.bet_modes = [
             BetMode(
                 name="base",
-                title="standard game entry",
-                description="default game entry type",
                 cost=1.0,
                 rtp=self.rtp,
                 max_win=self.wincap,
@@ -133,7 +133,7 @@ class GameConfig(Config):
                                 self.basegame_type: {"BR0": 1},
                                 self.freegame_type: {"FR0": 1},
                             },
-                            "scatter_triggers": {3: 20, 4: 5, 5: 1},
+                            "scatter_triggers": {4: 5, 5: 1},
                             "mult_values": {
                                 self.basegame_type: {
                                     2: 100,
@@ -212,8 +212,6 @@ class GameConfig(Config):
             ),
             BetMode(
                 name="bonus",
-                title="standard game entry",
-                description="default game entry type",
                 cost=200,
                 rtp=self.rtp,
                 max_win=self.wincap,
@@ -263,7 +261,7 @@ class GameConfig(Config):
                                 self.basegame_type: {"BR0": 1},
                                 self.freegame_type: {"FR0": 1},
                             },
-                            "scatter_triggers": {3: 20, 4: 5, 5: 1},
+                            "scatter_triggers": {4: 5, 5: 1},
                             "mult_values": {
                                 self.basegame_type: {
                                     2: 100,

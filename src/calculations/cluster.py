@@ -29,14 +29,9 @@ class ClusterWins(Board):
                 local_checked += [(reel, row + 1)]
         return neighbours
 
-    def in_cluster(
-        self, reel: int, row: int, og_symbol: str, wild_key: str = "wild"
-    ) -> bool:
+    def in_cluster(self, reel: int, row: int, og_symbol: str, wild_key: str = "wild") -> bool:
         """Checks if a symbol (including wilds) match cluster type."""
-        if (
-            self.board[reel][row].check_attribute(wild_key)
-            or og_symbol == self.board[reel][row].name
-        ):
+        if self.board[reel][row].check_attribute(wild_key) or og_symbol == self.board[reel][row].name:
             return True
 
     def check_all_neighbours(
@@ -71,10 +66,7 @@ class ClusterWins(Board):
         clusters = defaultdict(list)
         for reel, _ in enumerate(self.board):
             for row, _ in enumerate(self.board[reel]):
-                if (
-                    not (self.board[reel][row].special)
-                    and (reel, row) not in already_checked
-                ):
+                if not (self.board[reel][row].special) and (reel, row) not in already_checked:
                     potential_cluster = [(reel, row)]
                     already_checked += [(reel, row)]
                     local_checked = [(reel, row)]
@@ -107,20 +99,11 @@ class ClusterWins(Board):
                 if (numSymsInCluster, sym) in self.config.paytable:
                     cluster_mult = 0
                     for positions in cluster:
-                        if self.board[positions[0]][positions[1]].check_attribute(
-                            multiplier_key
-                        ):
-                            if (
-                                int(
-                                    self.board[positions[0]][
-                                        positions[1]
-                                    ].get_attribute(multiplier_key)
+                        if self.board[positions[0]][positions[1]].check_attribute(multiplier_key):
+                            if int(self.board[positions[0]][positions[1]].get_attribute(multiplier_key)) > 0:
+                                cluster_mult += self.board[positions[0]][positions[1]].get_attribute(
+                                    multiplier_key
                                 )
-                                > 0
-                            ):
-                                cluster_mult += self.board[positions[0]][
-                                    positions[1]
-                                ].multiplier
                     cluster_mult = max(cluster_mult, 1)
                     symwin = self.config.paytable[(numSymsInCluster, sym)]
                     symwin_mult = symwin * cluster_mult * self.global_multiplier
@@ -147,24 +130,18 @@ class ClusterWins(Board):
                             "reel": positions[0],
                             "row": positions[1],
                         } not in exploding_symbols:
-                            exploding_symbols.append(
-                                {"reel": positions[0], "row": positions[1]}
-                            )
+                            exploding_symbols.append({"reel": positions[0], "row": positions[1]})
 
         return return_data, exploding_symbols, total_win
 
-    def get_cluster_data(
-        self, multiplier_key: str = "multiplier", wild_key: str = "wild"
-    ) -> None:
+    def get_cluster_data(self, multiplier_key: str = "multiplier", wild_key: str = "wild") -> None:
         """Event-ready win information."""
         clusters = self.get_clusters(wild_key)
         return_data = {
             "totalWin": 0,
             "wins": [],
         }
-        return_data, exploding_symbols, total_win = self.evaluate_clusters(
-            clusters, multiplier_key, return_data
-        )
+        return_data, exploding_symbols, total_win = self.evaluate_clusters(clusters, multiplier_key, return_data)
 
         return_data["totalWin"] += total_win
         self.clusters = clusters

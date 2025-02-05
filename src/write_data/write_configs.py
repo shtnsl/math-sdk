@@ -20,9 +20,8 @@ def pass_fe_betmode(betmode):
     modeInfo["cost"] = betmode.get_cost()
     modeInfo["feature"] = betmode.get_feature()
     modeInfo["buyBonus"] = betmode.getBuyBonus()
-    modeInfo["rtp"] = betmode.getRTP()
-    modeInfo["max_win"] = betmode.getMaxWin()
-    modeInfo["description"] = betmode.getDescription()
+    modeInfo["rtp"] = betmode.get_rtp()
+    modeInfo["max_win"] = betmode.get_wincap()
 
     return {betmode.get_name(): modeInfo}
 
@@ -46,8 +45,8 @@ def make_fe_config(gamestate, json_padding=True, assign_properties=True, **kwarg
     jsonInfo["numRows"] = gamestate.config.num_rows
 
     jsonInfo["betModes"] = {}
-    for bet_mode in gamestate.config.bet_modes:
-        bmInfo = pass_fe_betmode(bet_mode)
+    for betmode in gamestate.config.bet_modes:
+        bmInfo = pass_fe_betmode(betmode)
         modeName = next(iter(bmInfo))
         jsonInfo["betModes"][modeName] = bmInfo[modeName]
 

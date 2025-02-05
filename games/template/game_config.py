@@ -1,7 +1,9 @@
+"""Template game configuration file, detailing required user-specified inputs."""
+
 from src.config.config import Config
 from src.config.distributions import Distribution, DistributionConditions
 from src.write_data.force import *
-from src.config.bet_mode import BetMode
+from src.config.betmode import BetMode
 
 
 class GameConfig(Config):
@@ -37,14 +39,11 @@ class GameConfig(Config):
         self.bet_modes = [
             BetMode(
                 name="base",
-                title="standard game entry",
-                description="default game entry type",
                 cost=1.0,
                 rtp=self.rtp,
                 max_win=self.wincap,
                 auto_close_disables=False,
                 is_feature=True,
-                is_enhanced_mode=False,
                 is_buybonus=False,
                 distributions=[
                     Distribution(

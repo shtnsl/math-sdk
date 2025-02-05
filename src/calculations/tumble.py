@@ -15,46 +15,35 @@ class Tumble(Board):
 
         for reel, _ in enumerate(static_board):
             exploding_symbols = 0
-            copyReel = static_board[reel]
+            copy_reel = static_board[reel]
             for row in range(len(static_board[reel])):
                 if static_board[reel][-1 - row].check_attribute("explode"):
                     exploding_symbols += 1
 
             for i in range(exploding_symbols):
-                newReelPos = (self.reel_positions[reel] - 1) % len(self.reelstrip[reel])
-                self.reel_positions[reel] = newReelPos
+                reel_pos = (self.reel_positions[reel] - 1) % len(self.reelstrip[reel])
+                self.reel_positions[reel] = reel_pos
                 if i == 0 and self.config.include_padding:
-                    insertSym = self.top_symbols[reel]
+                    insert_sym = self.top_symbols[reel]
                 else:
-                    insertSym = self.create_symbol(
-                        str(
-                            self.reelstrip[reel][
-                                (newReelPos) % len(self.reelstrip[reel])
-                            ]
-                        )
-                    )
-                copyReel.insert(0, insertSym)
-                self.new_symbols_from_tumble[reel].append(insertSym)
+                    nme = self.reelstrip[reel][(reel_pos) % len(self.reelstrip[reel])]
+                    insert_sym = self.create_symbol(nme)
+                copy_reel.insert(0, insert_sym)
+                self.new_symbols_from_tumble[reel].append(insert_sym)
 
-            copyReel = [
-                copy(sym) for sym in copyReel if not sym.check_attribute("explode")
-            ]
-            if len(copyReel) != self.config.num_rows[reel]:
+            copy_reel = [copy(sym) for sym in copy_reel if not sym.check_attribute("explode")]
+            if len(copy_reel) != self.config.num_rows[reel]:
                 raise RuntimeError(
-                    f"new reel length must match expected board size:\n expected: {self.config.num_rows[reel]} \n actual: {len(copyReel)}"
+                    f"new reel length must match expected board size:\n expected: {self.config.num_rows[reel]} \n actual: {len(copy_reel)}"
                 )
-            static_board[reel] = copyReel
+            static_board[reel] = copy_reel
 
         # update topSymbol positions
         if self.config.include_padding:
             self.top_symbols = [[] for _ in range(self.config.num_reels)]
             for reel in range(self.config.num_reels):
                 self.top_symbols[reel] = self.create_symbol(
-                    str(
-                        self.reelstrip[reel][
-                            (self.reel_positions[reel] - 1) % len(self.reelstrip[reel])
-                        ]
-                    )
+                    str(self.reelstrip[reel][(self.reel_positions[reel] - 1) % len(self.reelstrip[reel])])
                 )
 
         self.get_special_symbols_on_board()

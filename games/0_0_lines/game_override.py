@@ -13,11 +13,9 @@ class GameStateOverride(GameExecutables):
         super().reset_book()
         # Reset parameters relevant to local game only
         self.emit_win_event = True
-        self.cumulativePrize = 0
 
     def assign_special_sym_function(self):
         self.special_symbol_functions = {
-            "M": [self.assign_mult_property],
             "W": [self.assign_mult_property],
         }
 
@@ -32,11 +30,11 @@ class GameStateOverride(GameExecutables):
 
     def check_repeat(self):
         super().check_repeat()
-        if self.repeat == False:
+        if self.repeat is False:
             win_criteria = self.get_current_betmode_distributions().get_win_criteria()
             if win_criteria is not None and self.final_win != win_criteria:
                 self.repeat = True
                 return
-            if win_criteria == None and self.final_win == 0:
+            if win_criteria is None and self.final_win == 0:
                 self.repeat = True
                 return

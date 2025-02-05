@@ -52,11 +52,7 @@ def makeForceJson(gamestate: object):
 
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
-        if (
-            os.path.isfile(file_path)
-            and filename.endswith(".json")
-            and filename.startswith("force_for_rob_")
-        ):
+        if os.path.isfile(file_path) and filename.endswith(".json") and filename.startswith("force_for_rob_"):
             with open(file_path, mode="r", encoding="utf-8") as file:
                 data = json.load(file)
 
@@ -93,9 +89,7 @@ def make_lookup_tables(gamestate: object, name: str):
     sims.sort()
     for sim in sims:
         file.write(
-            "{},1,{:.2f}\n".format(
-                gamestate.library[sim]["id"], gamestate.library[sim]["payoutMultiplier"]
-            )
+            "{},1,{:.2f}\n".format(gamestate.library[sim]["id"], gamestate.library[sim]["payoutMultiplier"])
         )
     file.close()
 
@@ -106,12 +100,7 @@ def make_lookup_to_criteria(gamestate: object, name: str):
     sims = list(gamestate.library.keys())
     sims.sort()
     for sim in sims:
-        file.write(
-            str(gamestate.library[sim]["id"])
-            + ","
-            + str(gamestate.library[sim]["criteria"])
-            + "\n"
-        )
+        file.write(str(gamestate.library[sim]["id"]) + "," + str(gamestate.library[sim]["criteria"]) + "\n")
     file.close()
 
 
@@ -133,7 +122,7 @@ def make_lookup_pay_split(gamestate: object, name: str):
 
 
 def write_library_events(gamestate: object, library: list, gametype: str):
-    """Write all unique event types."""
+    """Write all unique events within a given mode - with one example application."""
     unique_event = []
     event_items = {}
     for event in library:
@@ -142,15 +131,11 @@ def write_library_events(gamestate: object, library: list, gametype: str):
             if lib_event not in unique_event:
                 unique_event.append(lib_event)
                 item_keys = instance.keys()
-                dict_details = {
-                    key: instance[key] for key in item_keys if key != "index"
-                }
+                dict_details = {key: instance[key] for key in item_keys if key != "index"}
                 event_items[lib_event] = dict_details
     json_object = json.dumps(event_items, indent=4)
     with open(
-        str.join(
-            "/", [gamestate.config.config_path, "event_config_" + gametype + ".json"]
-        ),
+        str.join("/", [gamestate.config.config_path, "event_config_" + gametype + ".json"]),
         "w",
     ) as f:
         f.write(json_object)
@@ -160,15 +145,16 @@ def output_lookup_and_force_files(
     threads: int,
     batching_size: int,
     game_id: str,
-    bet_mode: str,
+    betmode: str,
     gamestate: object,
     num_sims: int = 1000000,
     compress: bool = True,
 ):
-    print("Saving books for", game_id, "in", bet_mode)
+    """Combine temporary lookup tables and force files into a single output."""
+    print("Saving books for", game_id, "in", betmode)
     num_repeats = max(int(round(num_sims / threads / batching_size, 0)), 1)
     file_list = []
-    for repeatIndex in range(num_repeats):
+    for repeat_index in range(num_repeats):
         for thread in range(threads):
             file_list.append(
                 str.join(
@@ -176,11 +162,11 @@ def output_lookup_and_force_files(
                     [
                         gamestate.config.temp_path,
                         "books_"
-                        + bet_mode
+                        + betmode
                         + "_"
                         + str(thread)
                         + "_"
-                        + str(repeatIndex)
+                        + str(repeat_index)
                         + ".json"
                         + ".zst" * compress,
                     ],
@@ -193,7 +179,7 @@ def output_lookup_and_force_files(
                 "/",
                 [
                     gamestate.config.compressed_path,
-                    "books_" + bet_mode + ".json.zst",
+                    "books_" + betmode + ".json.zst",
                 ],
             ),
             "wb",
@@ -203,69 +189,57 @@ def output_lookup_and_force_files(
                     outfile.write(infile.read())
     else:
         with open(
-            str.join("/", [gamestate.config.book_path, "books_" + bet_mode + ".json"]),
+            str.join("/", [gamestate.config.book_path, "books_" + betmode + ".json"]),
             "w",
         ) as outfile:
             for filename in file_list:
                 with open(filename, "r") as infile:
                     outfile.write(infile.read())
 
-    print("Saving force files for", game_id, "in", bet_mode)
-    forceResultsDictionary = {}
+    print("Saving force files for", game_id, "in", betmode)
+    force_results_dict = {}
     file_list = []
-    for repeatIndex in range(num_repeats):
+    for repeat_index in range(num_repeats):
         for thread in range(threads):
             file_list.append(
                 str.join(
                     "/",
                     [
                         gamestate.config.temp_path,
-                        "force_"
-                        + bet_mode
-                        + "_"
-                        + str(thread)
-                        + "_"
-                        + str(repeatIndex)
-                        + ".json",
+                        "force_" + betmode + "_" + str(thread) + "_" + str(repeat_index) + ".json",
                     ],
                 )
             )
 
     for filename in file_list:
-        forceChunk = ast.literal_eval(json.load(open(filename, "r")))
-        for key in forceChunk:
-            if forceResultsDictionary.get(key) != None:
-                forceResultsDictionary[key]["timesTriggered"] += forceChunk[key][
-                    "timesTriggered"
-                ]
-                forceResultsDictionary[key]["bookIds"] += forceChunk[key]["bookIds"]
+        force_chunk = ast.literal_eval(json.load(open(filename, "r")))
+        for key in force_chunk:
+            if force_results_dict.get(key) != None:
+                force_results_dict[key]["timesTriggered"] += force_chunk[key]["timesTriggered"]
+                force_results_dict[key]["bookIds"] += force_chunk[key]["bookIds"]
             else:
-                forceResultsDictionary[key] = forceChunk[key]
+                force_results_dict[key] = force_chunk[key]
 
-    forceResultsDictionaryJustForRob = []
-    for forceCombination in forceResultsDictionary:
-        searchDict = {}
-        for key in forceCombination:
-            searchDict[key[0]] = key[1]
-        forceDict = {
-            "search": searchDict,
-            "timesTriggered": forceResultsDictionary[forceCombination][
-                "timesTriggered"
-            ],
-            "bookIds": forceResultsDictionary[forceCombination]["bookIds"],
+    force_results_dict_just_for_rob = []
+    for force_combination in force_results_dict:
+        search_dict = {}
+        for key in force_combination:
+            search_dict[key[0]] = key[1]
+        force_dict = {
+            "search": search_dict,
+            "timesTriggered": force_results_dict[force_combination]["timesTriggered"],
+            "bookIds": force_results_dict[force_combination]["bookIds"],
         }
-        forceResultsDictionaryJustForRob.append(forceDict)
-    json_object_for_rob = json.dumps(forceResultsDictionaryJustForRob, indent=4)
+        force_results_dict_just_for_rob.append(force_dict)
+    json_object_for_rob = json.dumps(force_results_dict_just_for_rob, indent=4)
     file = open(
-        str.join(
-            "/", [gamestate.config.force_path, "force_for_rob_" + bet_mode + ".json"]
-        ),
+        str.join("/", [gamestate.config.force_path, "force_for_rob_" + betmode + ".json"]),
         "w",
     )
     file.write(json_object_for_rob)
     file.close()
 
-    forceResultKeys = get_force_options(forceResultsDictionary)
+    forceResultKeys = get_force_options(force_results_dict)
     json_file_path = str.join("/", [gamestate.config.force_path, "force.json"])
     try:
         with open(json_file_path, "r") as file:
@@ -280,20 +254,15 @@ def output_lookup_and_force_files(
     weights_plus_wins_file_list = []
     id_to_criteria_file_list = []
     segmented_lut_file_list = []
-    print("Saving LUTs for", game_id, "in", bet_mode)
-    for repeatIndex in range(num_repeats):
+    print("Saving LUTs for", game_id, "in", betmode)
+    for repeat_index in range(num_repeats):
         for thread in range(threads):
             weights_plus_wins_file_list += [
                 str.join(
                     "/",
                     [
                         gamestate.config.temp_path,
-                        "lookUpTable_"
-                        + bet_mode
-                        + "_"
-                        + str(thread)
-                        + "_"
-                        + str(repeatIndex),
+                        "lookUpTable_" + betmode + "_" + str(thread) + "_" + str(repeat_index),
                     ],
                 )
             ]
@@ -302,12 +271,7 @@ def output_lookup_and_force_files(
                     "/",
                     [
                         gamestate.config.temp_path,
-                        "lookUpTableIdToCriteria_"
-                        + bet_mode
-                        + "_"
-                        + str(thread)
-                        + "_"
-                        + str(repeatIndex),
+                        "lookUpTableIdToCriteria_" + betmode + "_" + str(thread) + "_" + str(repeat_index),
                     ],
                 )
             ]
@@ -316,19 +280,12 @@ def output_lookup_and_force_files(
                     "/",
                     [
                         gamestate.config.temp_path,
-                        "lookUpTableSegmented_"
-                        + bet_mode
-                        + "_"
-                        + str(thread)
-                        + "_"
-                        + str(repeatIndex),
+                        "lookUpTableSegmented_" + betmode + "_" + str(thread) + "_" + str(repeat_index),
                     ],
                 )
             ]
     with open(
-        str.join(
-            "/", [gamestate.config.lookup_path, "lookUpTable_" + bet_mode + ".csv"]
-        ),
+        str.join("/", [gamestate.config.lookup_path, "lookUpTable_" + betmode + ".csv"]),
         "w",
     ) as outfile:
         for filename in weights_plus_wins_file_list:
@@ -337,7 +294,7 @@ def output_lookup_and_force_files(
     with open(
         str.join(
             "/",
-            [gamestate.config.lookup_path, "lookUpTableSegmented_" + bet_mode + ".csv"],
+            [gamestate.config.lookup_path, "lookUpTableSegmented_" + betmode + ".csv"],
         ),
         "w",
     ) as outfile:
@@ -349,7 +306,7 @@ def output_lookup_and_force_files(
             "/",
             [
                 gamestate.config.lookup_path,
-                "lookUpTableIdToCriteria_" + bet_mode + ".csv",
+                "lookUpTableIdToCriteria_" + betmode + ".csv",
             ],
         ),
         "w",
@@ -359,8 +316,15 @@ def output_lookup_and_force_files(
                 outfile.write(infile.read())
 
 
-def write_json(gamestate, library, name, frist_file_write, last_file_write, compress):
-    # Convert the list of dictionaries to a JSON-encoded string and compress it in chunks
+def write_json(
+    gamestate: object,
+    library: dict,
+    name: str,
+    frist_file_write: bool,
+    last_file_write: bool,
+    compress: bool,
+):
+    """Convert the list of dictionaries to a JSON-encoded string and compress it in chunks."""
     chunk = json.dumps(library)
     if not (frist_file_write):
         chunk = chunk[1:]
@@ -376,18 +340,24 @@ def write_json(gamestate, library, name, frist_file_write, last_file_write, comp
     file.close()
 
 
-def print_recorded_wins(gamestate, name=""):
+def print_recorded_wins(gamestate: object, name: str = ""):
+    """Temporary file generation for wins/recorded results."""
     json_object = json.dumps(str(gamestate.recorded_events), indent=4)
-    file = open(
-        str.join("/", [gamestate.config.temp_path, "force_" + name + ".json"]), "w"
-    )
+    file = open(str.join("/", [gamestate.config.temp_path, "force_" + name + ".json"]), "w")
     file.write(json_object)
     file.close()
 
 
 def create_books(
-    gamestate, config, num_sim_args, batch_size, threads, compress, profiling
+    gamestate: object,
+    config: object,
+    num_sim_args: dict,
+    batch_size: int,
+    threads: int,
+    compress: bool,
+    profiling: bool,
 ):
+    """Main run-function for simulating game outcomes and outputting all files."""
     for ns in num_sim_args.values():
         if all([ns > 0, ns > batch_size * batch_size]):
             assert (
@@ -398,15 +368,13 @@ def create_books(
         warn("Generating large number of uncompressed books!")
 
     if profiling and threads > 1:
-        raise RuntimeError(
-            "Multithread profiling not supported, threads must = 1 with profiling enabled"
-        )
+        raise RuntimeError("Multithread profiling not supported, threads must = 1 with profiling enabled")
 
     startTime = time.time()
     print("\nCreating books...")
     for betmode_name in num_sim_args:
         if num_sim_args[betmode_name] > 0:
-            gamestate.bet_mode = betmode_name
+            gamestate.betmode = betmode_name
             run_multi_process_sims(
                 threads,
                 batch_size,
@@ -431,13 +399,10 @@ def create_books(
     print("\nFinished creating books in", time.time() - startTime, "seconds.\n")
 
 
-def get_sim_splits(
-    gamestate: object, num_sims: int, betmode_name: str
-) -> Dict[str, int]:
-    betmode_distributions = gamestate.get_betmode(betmode_name).getDistributions()
-    num_sims_criteria = {
-        d._criteria: max(int(num_sims * d._quota), 1) for d in betmode_distributions
-    }
+def get_sim_splits(gamestate: object, num_sims: int, betmode_name: str) -> Dict[str, int]:
+    """Ensure assignment of criteria to all simulations numbers."""
+    betmode_distributions = gamestate.get_betmode(betmode_name).get_distributions()
+    num_sims_criteria = {d._criteria: max(int(num_sims * d._quota), 1) for d in betmode_distributions}
     total_sims = sum(num_sims_criteria.values())
     reduce_sims = total_sims > num_sims
     listedCriteria = [d._criteria for d in betmode_distributions]
@@ -453,10 +418,9 @@ def get_sim_splits(
     return num_sims_criteria
 
 
-def assing_sim_criteria(num_sims_criteria: Dict[str, int], sims: int) -> Dict[int, str]:
-    simAllocation = [
-        criteria for criteria, count in num_sims_criteria.items() for _ in range(count)
-    ]
+def assign_sim_criteria(num_sims_criteria: Dict[str, int], sims: int) -> Dict[int, str]:
+    """Assign criteria randomly to simulations based on quota defined in config."""
+    simAllocation = [criteria for criteria, count in num_sims_criteria.items() for _ in range(count)]
     random.shuffle(simAllocation)
     return {i: simAllocation[i] for i in range(min(sims, len(simAllocation)))}
 
@@ -465,7 +429,7 @@ async def profile_and_visualize(
     game_id,
     gamestate,
     all_betmode_configs,
-    bet_mode,
+    betmode,
     sim_allocation,
     threads,
     num_repeats,
@@ -474,9 +438,10 @@ async def profile_and_visualize(
     compress,
     write_event_list,
 ):
-    output_string = f"games/{game_id}/simulationProfile_{bet_mode}.prof"
+    """Create flame-graph, automatically opens output on localhost."""
+    output_string = f"games/{game_id}/simulationProfile_{betmode}.prof"
     cProfile.runctx(
-        "gamestate.run_sims(all_betmode_configs, bet_mode, sim_allocation, threads, num_repeats, sims_per_thread, 0, repeat, compress, write_event_list)",
+        "gamestate.run_sims(all_betmode_configs, betmode, sim_allocation, threads, num_repeats, sims_per_thread, 0, repeat, compress, write_event_list)",
         globals(),
         locals(),
         output_string,
@@ -488,7 +453,7 @@ def run_multi_process_sims(
     threads: int,
     batching_size: int,
     game_id: str,
-    bet_mode: str,
+    betmode: str,
     gamestate: object,
     num_sims: int = 1000000,
     compress: bool = True,
@@ -496,11 +461,11 @@ def run_multi_process_sims(
     profiling: bool = False,
 ):
     """Setup multiprocessing manager for running all game-mode simulations."""
-    print("\nCreating books for", game_id, "in", bet_mode)
+    print("\nCreating books for", game_id, "in", betmode)
     num_repeats = max(int(round(num_sims / threads / batching_size, 0)), 1)
     sims_per_thread = int(num_sims / threads / num_repeats)
-    num_sims_criteria = get_sim_splits(gamestate, num_sims, bet_mode)
-    sim_allocation = assing_sim_criteria(num_sims_criteria, num_sims)
+    num_sims_criteria = get_sim_splits(gamestate, num_sims, betmode)
+    sim_allocation = assign_sim_criteria(num_sims_criteria, num_sims)
     for repeat in range(num_repeats):
         print("Batch", repeat + 1, "of", num_repeats)
         processes = []
@@ -512,7 +477,7 @@ def run_multi_process_sims(
                     game_id=game_id,
                     gamestate=gamestate,
                     all_betmode_configs=all_betmode_configs,
-                    bet_mode=bet_mode,
+                    betmode=betmode,
                     sim_allocation=sim_allocation,
                     threads=threads,
                     num_repeats=num_repeats,
@@ -525,7 +490,7 @@ def run_multi_process_sims(
         elif threads == 1:
             gamestate.run_sims(
                 all_betmode_configs,
-                bet_mode,
+                betmode,
                 sim_allocation,
                 threads,
                 num_repeats,
@@ -541,7 +506,7 @@ def run_multi_process_sims(
                     target=gamestate.run_sims,
                     args=(
                         all_betmode_configs,
-                        bet_mode,
+                        betmode,
                         sim_allocation,
                         threads,
                         num_repeats,
@@ -559,5 +524,5 @@ def run_multi_process_sims(
             for process in processes:
                 process.join()
             print("Finished joining threads.")
-            gamestate.combine(all_betmode_configs, bet_mode)
-            gamestate.get_betmode(bet_mode).lock_force_keys()
+            gamestate.combine(all_betmode_configs, betmode)
+            gamestate.get_betmode(betmode).lock_force_keys()

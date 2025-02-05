@@ -22,8 +22,6 @@ class BetMode:
     def __init__(
         self,
         name: str,
-        title: str,
-        description: str,
         cost: float,
         rtp: float,
         max_win: float,
@@ -32,12 +30,9 @@ class BetMode:
         is_buybonus: bool,
         distributions: object,
     ):
-
         self._name = name
-        self._title = title
-        self._description = description
         self._cost = cost
-        self._max_win = max_win
+        self._wincap = max_win
         self._auto_close_disabled = auto_close_disables
         self._is_feature = is_feature
         self._is_buybonus = is_buybonus
@@ -47,9 +42,9 @@ class BetMode:
 
     def __repr__(self):
         return (
-            f"BetMode(name={self._name},  title={self._title}, description={self._description}"
-            f"cost={self._cost}, max_win={self._max_win}, rtp={self._rtp}, auto_close_disables={self._auto_close_disabled} "
-            f"is_feature={self._is_feature}, is_enhanced_mode={self._is_enhanced_mode}, is_buybonus={self._is_buybonus} "
+            f"BetMode(name={self._name},"
+            f"cost={self._cost}, max_win={self._wincap}, rtp={self._rtp}, auto_close_disables={self._auto_close_disabled} "
+            f"is_feature={self._is_feature}, is_buybonus={self._is_buybonus} "
         )
 
     def set_rtp(self, rtp: float) -> None:
@@ -86,31 +81,25 @@ class BetMode:
         """Return feature."""
         return self._is_feature
 
-    def getAutoCloseDisabled(self):
+    def get_auto_close_disabled(self):
         return self._auto_close_disabled
 
     def getBuyBonus(self):
         return self._is_buybonus
 
-    def getMaxWin(self):
-        return self._max_win
+    def get_wincap(self):
+        return self._wincap
 
-    def getTitle(self):
-        return self._title
-
-    def getDescription(self):
-        return self._description
-
-    def getRTP(self):
+    def get_rtp(self):
         return self._rtp
 
-    def getDistributions(self):
+    def get_distributions(self):
         return self._distributions
 
-    def getDistributionConditions(self, targetCriteria: str) -> dict:
-        for d in self.getDistributions():
+    def get_distribution_conditions(self, targetCriteria: str) -> dict:
+        for d in self.get_distributions():
             if d._criteria == targetCriteria:
                 return d._conditions
         return RuntimeError(
-            f"target critera: {targetCriteria} not found in bet_mode-distributions."
+            f"target critera: {targetCriteria} not found in betmode-distributions."
         )

@@ -1,10 +1,8 @@
 import os, sys
-from game_override import *
-from src.state.state import *
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from game_config import *
+from game_override import GameStateOverride
 from game_executables import *
 from game_calculations import *
 
@@ -20,13 +18,13 @@ class GameState(GameStateOverride):
 
             self.win_data = self.get_line_data(record_wins=True)
             self.win_manager.update_spinwin(self.win_data["totalWin"])
-            self.emitLineWinEvents()
+            self.emit_linewin_events()
 
             self.win_manager.update_gametype_wins(self.gametype)
             if self.check_fs_condition():
-                self.runFreeSpinFromBaseGame()
+                self.run_freespin_from_base()
 
-            self.evaluateFinalWin()
+            self.evaluate_finalwin()
             self.check_repeat()
 
         self.imprint_wins()
@@ -39,7 +37,7 @@ class GameState(GameStateOverride):
 
             self.win_data = self.get_line_data(record_wins=True)
             self.win_manager.update_spinwin(self.win_data["totalWin"])
-            self.emitLineWinEvents()
+            self.emit_linewin_events()
 
             if self.check_fs_condition():
                 self.update_fs_retrigger_amt()
@@ -48,3 +46,5 @@ class GameState(GameStateOverride):
 
             if self.check_fs_condition():
                 self.update_fs_retrigger_amt()
+
+        self.end_freespin()

@@ -9,9 +9,8 @@ class GameStateOverride(GameExecutables):
     """
 
     def reset_book(self):
-        # Reset global values used across multiple projects
+        """Reset game specific properties"""
         super().reset_book()
-        # Reset parameters relevant to local game only
 
     def assign_special_sym_function(self):
         self.special_symbol_functions = {

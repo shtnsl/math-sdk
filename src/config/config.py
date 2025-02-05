@@ -1,7 +1,7 @@
 """Set standard gamestate configuration with default values."""
 
 import pathlib, os, sys
-from src.config.bet_mode import BetMode
+from src.config.betmode import BetMode
 import pathlib
 from src.events.event_constants import *
 from src.write_data.force import *
@@ -31,7 +31,7 @@ class Config:
         self.row = 3
         self.paytable = {}  # Symbol information assumes ('kind','name) format
 
-        # Define special Symbols properties - list all possible symbol states during gameplay
+        # Define special Symbols properties - list all possible symbol states during game-play
         self.basegame_type = "basegame"
         self.freegame_type = "freeSpins"
 
@@ -43,9 +43,7 @@ class Config:
         # Static game files
         self.reel_location = ""
         self.reels = {}
-        self.padding_reels = (
-            {}  # symbol configuration desplayed before the board reveal
-        )
+        self.padding_reels = {}  # symbol configuration desplayed before the board reveal
 
         self.write_event_list = True
 
@@ -70,8 +68,8 @@ class Config:
                 4: (10.0, 20.0),
                 5: (20.0, 50.0),
                 6: (50.0, 100.0),
-                7: (200.0, 500.0),
-                8: (500.0, 2000.0),
+                7: (100.0, 500.0),
+                8: (500.0, 200.0),
                 9: (200.0, self.wincap),
                 10: (self.wincap, float("inf")),
             },
@@ -124,19 +122,9 @@ class Config:
                 split_line = line.strip().split(",")
                 for reelIndex in range(len(split_line)):
                     if count == 0:
-                        reelstrips.append(
-                            [
-                                "".join(
-                                    [ch for ch in split_line[reelIndex] if ch.isalnum()]
-                                )
-                            ]
-                        )
+                        reelstrips.append(["".join([ch for ch in split_line[reelIndex] if ch.isalnum()])])
                     else:
-                        reelstrips[reelIndex].append(
-                            "".join(
-                                [ch for ch in split_line[reelIndex] if ch.isalnum()]
-                            )
-                        )
+                        reelstrips[reelIndex].append("".join([ch for ch in split_line[reelIndex] if ch.isalnum()]))
 
                 count += 1
 

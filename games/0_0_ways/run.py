@@ -3,10 +3,10 @@ from src.write_data.write_data import create_books
 
 if __name__ == "__main__":
 
-    NUM_THREADS = 1
-    RUST_THREADS = 20
+    num_threads = 1
+    rust_threaeds = 20
     batching_size = 5000
-    COMPRESSION = False
+    compression = False
     profiling = False
 
     num_sim_args = {
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         config,
         num_sim_args,
         batching_size,
-        NUM_THREADS,
-        COMPRESSION,
+        num_threads,
+        compression,
         profiling,
     )

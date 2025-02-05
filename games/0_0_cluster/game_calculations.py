@@ -22,12 +22,12 @@ class GameCalculations(Executables):
             for cluster in clusters[sym]:
                 numSymsInCluster = len(cluster)
                 if (numSymsInCluster, sym) in self.config.paytable:
+                    # For this specific game there are no multipliers on the symbols
+                    # though we extract the multiplier from the board grid-positions
                     cluster_mult = 0
                     for positions in cluster:
                         if self.position_multipliers[positions[0]][positions[1]] > 1:
-                            cluster_mult += self.position_multipliers[positions[0]][
-                                positions[1]
-                            ]
+                            cluster_mult += self.position_multipliers[positions[0]][positions[1]]
 
                     cluster_mult = max(cluster_mult, 1)
                     symwin = self.config.paytable[(numSymsInCluster, sym)]
@@ -55,8 +55,6 @@ class GameCalculations(Executables):
                             "reel": positions[0],
                             "row": positions[1],
                         } not in exploding_symbols:
-                            exploding_symbols.append(
-                                {"reel": positions[0], "row": positions[1]}
-                            )
+                            exploding_symbols.append({"reel": positions[0], "row": positions[1]})
 
         return return_data, exploding_symbols, total_win

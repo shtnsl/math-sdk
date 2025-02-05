@@ -14,7 +14,7 @@ class Conditions(GeneralGameState):
     def in_mode(self, *args):
         """check if current bet-mode mates a given list"""
         for arg in args:
-            if self.bet_mode == arg:
+            if self.betmode == arg:
                 return True
         return False
 

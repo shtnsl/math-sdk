@@ -18,7 +18,7 @@ class WinManager:
         self.running_bet_win = 0.0
 
         # Controls wins for a specific simulation number
-        self.base_game_wins = 0.0
+        self.basegame_wins = 0.0
         self.freegame_wins = 0.0
 
         # Controls wins for all actions within a 'reveal' event
@@ -43,7 +43,7 @@ class WinManager:
     def update_gametype_wins(self, gametype: str):
         """Assigns wins to a specific gametype."""
         if self.base_game_mode.lower() == gametype.lower():
-            self.base_game_wins += self.spin_win
+            self.basegame_wins += self.spin_win
         elif self.free_game_mode.lower() == gametype.lower():
             self.freegame_wins += self.spin_win
         else:
@@ -51,13 +51,13 @@ class WinManager:
 
     def update_end_round_wins(self):
         """Accumulate total wins for a given betting round."""
-        self.total_cumulative_wins += self.base_game_wins + self.freegame_wins
-        self.cumulative_base_wins += self.base_game_wins
+        self.total_cumulative_wins += self.basegame_wins + self.freegame_wins
+        self.cumulative_base_wins += self.basegame_wins
         self.cumulative_free_wins += self.freegame_wins
 
     def reset_end_round_wins(self):
         """Reset wins at end of gameround/simulation."""
-        self.base_game_wins = 0.0
+        self.basegame_wins = 0.0
         self.freegame_wins = 0.0
 
         self.running_bet_win = 0.0

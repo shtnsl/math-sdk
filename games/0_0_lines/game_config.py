@@ -2,7 +2,7 @@
 
 from src.config.config import Config
 from src.config.distributions import Distribution
-from src.config.bet_mode import BetMode
+from src.config.betmode import BetMode
 
 
 class GameConfig(Config):
@@ -221,8 +221,6 @@ class GameConfig(Config):
         self.bet_modes = [
             BetMode(
                 name="base",
-                title="standard game entry",
-                description="default game entry type",
                 cost=1.0,
                 rtp=self.rtp,
                 max_win=self.wincap,
@@ -317,8 +315,6 @@ class GameConfig(Config):
             ),
             BetMode(
                 name="bonus",
-                title="buy bonus",
-                description="default game entry type",
                 cost=100.0,
                 rtp=self.rtp,
                 max_win=self.wincap,

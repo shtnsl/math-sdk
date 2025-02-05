@@ -13,7 +13,7 @@ dependencies = [
     "numpy"
 ]
 
-description = "math engines"
+description = "slot-game engine"
 readme = "README.md"
 
 [project.optional-dependencies] 
