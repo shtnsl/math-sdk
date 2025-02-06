@@ -1,3 +1,5 @@
+"""Handles generating game-boards from reelstrips"""
+
 import random
 from typing import List
 from src.state.state import *
@@ -140,7 +142,7 @@ class Board(GeneralGameState):
             self.top_symbols = top_symbols
             self.bottom_symbols = bottom_symbols
 
-    def create_symbol(self, name) -> object:
+    def create_symbol(self, name: str) -> object:
         """Create a new symbol and assign relevent attributes."""
         if name not in self.symbol_storage.symbols:
             raise ValueError(f"Symbol '{name}' is not registered.")

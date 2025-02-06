@@ -84,7 +84,6 @@ class Executables(Conditions, LineWins, ClusterWins, ScatterWins, Tumble, Board)
 
         return reelstop_positions
 
-    # Line pays game logic and events
     def emit_linewin_events(self) -> None:
         """Transmit win events asociated with lines wins."""
         if self.win_manager.spin_win > 0:
@@ -93,16 +92,17 @@ class Executables(Conditions, LineWins, ClusterWins, ScatterWins, Tumble, Board)
             set_win_event(self)
         set_total_event(self)
 
-    # Tumble (scatter/cluster) game logic and events
-    def emit_tumble_events(self, tumble_after_wins: bool = True) -> None:
+    def emit_tumble_win_events(self) -> None:
         """Transmit win and new board information upon tumble."""
         if self.win_data["totalWin"] > 0:
             win_info_event(self)
             update_tumble_win_event(self)
             self.evaluate_wincap()
-            if tumble_after_wins:
-                self.tumble_board()
-                tumble_board_event(self)
+
+    def tumble_game_board(self):
+        "Remove winning symbols from active board and replace."
+        self.tumble_board()
+        tumble_board_event(self)
 
     def evaluate_wincap(self) -> None:
         """Indicate spin functions should stop once wincap is reached."""

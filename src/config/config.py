@@ -1,8 +1,8 @@
 """Set standard gamestate configuration with default values."""
 
 import pathlib, os, sys
-from src.config.betmode import BetMode
 import pathlib
+from src.config.betmode import BetMode
 from src.events.event_constants import *
 from src.write_data.force import *
 from src.calculations.symbol import Symbol
@@ -18,7 +18,7 @@ class Config:
         self.rtp = 0.97
         self.game_id = "0_0_0"
         self.provider_name = "sample_provider"
-        self.provider_numer = int(self.game_id.split("_", maxsplit=1)[0])
+        self.provider_number = int(self.game_id.split("_", maxsplit=1)[0])
         self.game_name = "sample_lines"
         self.construct_paths(self.game_id)
 
@@ -43,7 +43,7 @@ class Config:
         # Static game files
         self.reel_location = ""
         self.reels = {}
-        self.padding_reels = {}  # symbol configuration desplayed before the board reveal
+        self.padding_reels = {}  # symbol configuration displayed before the board reveal
 
         self.write_event_list = True
 
@@ -165,7 +165,7 @@ class Config:
     def convert_range_table(self, pay_group: dict) -> dict:
         """
         requires self.pay_group to be defined
-        for each symbol, define a pay-range dict stucture: self.pay_group = {(x-y, 's'): z}
+        for each symbol, define a pay-range dict structure: self.pay_group = {(x-y, 's'): z}
         where x-y defines the paying cluster size on the closed interval [x,y].
         e.g (5-5,'L1'): 0.1 will pay 0.1x for clusters of exactly 5 elements
 

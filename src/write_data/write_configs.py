@@ -3,9 +3,7 @@
 import json
 
 
-def generate_configs(
-    gamestate: object, json_padding: bool = True, assign_properties: bool = True
-):
+def generate_configs(gamestate: object, json_padding: bool = True, assign_properties: bool = True):
     """Construct frontend, backend and optimisation-required configuration files."""
     make_fe_config(
         gamestate=gamestate,
@@ -32,9 +30,7 @@ def make_fe_config(gamestate, json_padding=True, assign_properties=True, **kwarg
     assign_properties will invode
     """
     if assign_properties:
-        assert (
-            json_padding is True
-        ), "json_padding must be `True` to invoke symbol properties in padding"
+        assert json_padding is True, "json_padding must be `True` to invoke symbol properties in padding"
 
     jsonInfo = {}
     jsonInfo["providerName"] = str(gamestate.config.provider_name)
@@ -77,21 +73,12 @@ def make_fe_config(gamestate, json_padding=True, assign_properties=True, **kwarg
     reelStripDictionaryJSON = {}
     if json_padding:
         for idx, reels in gamestate.config.padding_reels.items():
-            reelStripDictionaryJSON[idx] = [
-                [] for _ in range(gamestate.config.num_reels)
-            ]
+            reelStripDictionaryJSON[idx] = [[] for _ in range(gamestate.config.num_reels)]
             for c, _ in enumerate(reels):
                 column = reels[c]
                 for i, _ in enumerate(column):
                     reelStripDictionaryJSON[idx][c].append({"name": column[i]})
-                    if (
-                        len(
-                            gamestate.symbol_storage.symbols[
-                                column[i]
-                            ].special_functions
-                        )
-                        > 0
-                    ):
+                    if len(gamestate.symbol_storage.symbols[column[i]].special_functions) > 0:
                         pass
                         # s = Symbol(gamestate.config, column[i])
                         # s.apply_special_function()

@@ -1,32 +1,33 @@
+"""Main file for handling game logic and emitting events."""
+
 import os, sys
-from game_override import *
+from game_override import GameStateOverride
 from src.state.state import *
 from game_config import *
 from game_executables import *
 from game_calculations import *
-from src.events.events import freespin_end_event, tumble_board_event
-
-if os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
+from src.events.events import tumble_board_event
 
 
 class GameState(GameStateOverride):
+    """Gamestate for a single spin"""
 
-    def run_spin(self, sim):
+    def run_spin(self, sim: int):
         self.reset_seed(sim)
         self.repeat = True
         while self.repeat:
             self.reset_book()
             self.draw_board()
 
-            self.win_data = self.get_scatterpay_wins(record_wins=True)
-            self.win_manager.update_spinwin(self.win_data["totalWin"])
-            self.emit_tumble_events()
+            self.win_data = self.get_scatterpay_wins(record_wins=True)  # Evaluate wins
+            self.win_manager.update_spinwin(self.win_data["totalWin"])  # Update wallet
+            self.emit_tumble_win_events()  # Transmit win information
 
             while self.win_data["totalWin"] > 0 and not (self.wincap_triggered):
+                self.tumble_game_board()
                 self.win_data = self.get_scatterpay_wins(record_wins=True)
                 self.win_manager.update_spinwin(self.win_data["totalWin"])
-                self.emit_tumble_events()
+                self.emit_tumble_win_events()
 
             self.set_end_tumble_event()
             self.win_manager.update_gametype_wins(self.gametype)
@@ -48,16 +49,14 @@ class GameState(GameStateOverride):
 
             self.win_data = self.get_scatterpay_wins(record_wins=True)
             self.win_manager.update_spinwin(self.win_data["totalWin"])
-            self.emit_tumble_events(tumble_after_wins=False)
+            self.emit_tumble_win_events()
+
             while self.win_data["totalWin"] > 0 and not (self.wincap_triggered):
+                self.tumble_game_board()
                 self.update_global_mult()  # Special mechanic - increase multiplier with every tumble
-                if len(self.book["events"]) == 48:
-                    print("here")
-                self.tumble_board()
-                tumble_board_event(self)
                 self.win_data = self.get_scatterpay_wins()
                 self.win_manager.update_spinwin(self.win_data["totalWin"])
-                self.emit_tumble_events(tumble_after_wins=False)
+                self.emit_tumble_win_events()
 
             self.set_end_tumble_event()
             self.win_manager.update_gametype_wins(self.gametype)

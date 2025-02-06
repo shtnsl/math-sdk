@@ -1,7 +1,8 @@
 """Game-specific configuration file, inherits from src/config/config.py"""
 
 from src.config.config import Config
-from src.config.distributions import Distribution
+from src.config.distributions import Distribution, DistributionConditions
+from src.write_data.force import *
 from src.config.betmode import BetMode
 
 
@@ -9,7 +10,7 @@ class GameConfig(Config):
     def __init__(self):
         super().__init__()
         self.game_id = "0_0_lines"
-        self.provider_numer = int(self.game_id.split("_", maxsplit=1)[0])
+        self.provider_number = int(self.game_id.split("_", maxsplit=1)[0])
         self.working_name = "Sample Lines Game"
         self.wincap = 5000.0
         self.win_type = "lines"
@@ -204,10 +205,8 @@ class GameConfig(Config):
             self.freegame_type: {2: 3, 3: 5, 4: 8, 5: 12},
         }
         self.anticipation_triggers = {
-            self.basegame_type: min(self.freespin_triggers[self.basegame_type].keys())
-            - 1,
-            self.freegame_type: min(self.freespin_triggers[self.freegame_type].keys())
-            - 1,
+            self.basegame_type: min(self.freespin_triggers[self.basegame_type].keys()) - 1,
+            self.freegame_type: min(self.freespin_triggers[self.freegame_type].keys()) - 1,
         }
         # Reels
         reels = {"BR0": "BR0.csv", "FR0": "FR0.csv"}

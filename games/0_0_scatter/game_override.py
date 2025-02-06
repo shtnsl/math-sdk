@@ -12,9 +12,7 @@ class GameStateOverride(GameExecutables):
         # Reset global values used across multiple projects
         super().reset_book()
         # Reset parameters relevant to local game only
-        self.emit_win_event = False
         self.tumble_win = 0
-        self.tumbles = 0
 
     def reset_fs_spin(self):
         super().reset_fs_spin()

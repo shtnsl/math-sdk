@@ -3,6 +3,7 @@
 from gamestate import GameState
 from game_config import GameConfig
 from src.write_data.write_data import create_books
+from src.write_data.write_configs import generate_configs
 
 if __name__ == "__main__":
 
@@ -12,7 +13,10 @@ if __name__ == "__main__":
     compression = False
     profiling = False
 
-    num_sim_args = {"bonus": int(50)}  # "base": int(50),
+    num_sim_args = {
+        "base": int(50),
+        "bonus": int(50),
+    }
 
     config = GameConfig()
     gamestate = GameState(config)
@@ -26,3 +30,4 @@ if __name__ == "__main__":
         compression,
         profiling,
     )
+    generate_configs(gamestate)

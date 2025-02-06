@@ -1,10 +1,10 @@
 import os, sys
-from game_override import *
+from game_override import GameStateOverride
 from src.state.state import *
-from src.events.events import set_total_event, set_win_event
 from game_config import *
 from game_executables import *
 from game_calculations import *
+from src.events.events import set_total_event, set_win_event
 
 
 class GameState(GameStateOverride):
@@ -19,16 +19,17 @@ class GameState(GameStateOverride):
 
             self.win_data = self.get_cluster_data()
             self.win_manager.update_spinwin(self.win_data["totalWin"])
-            self.emit_tumble_events()
+            self.emit_tumble_win_events()
 
             while self.win_data["totalWin"] > 0 and not (self.wincap_triggered):
+                self.tumble_game_board()
                 self.win_data = self.get_cluster_data()
                 self.win_manager.update_spinwin(self.win_data["totalWin"])
-                self.emit_tumble_events()
+                self.emit_tumble_win_events()
 
             self.set_end_tumble_event()
-
             self.win_manager.update_gametype_wins(self.gametype)
+
             if self.check_fs_condition() and self.check_freespin_entry():
                 self.run_freespin_from_base()
 
@@ -45,14 +46,14 @@ class GameState(GameStateOverride):
 
             self.win_data = self.get_cluster_data()
             self.win_manager.update_spinwin(self.win_data["totalWin"])
-            self.emit_tumble_events()
-            self.update_grid_mults()
+            self.emit_tumble_win_events()
 
             while self.win_data["totalWin"] > 0 and not (self.wincap_triggered):
+                self.tumble_game_board()
+                self.update_grid_mults()
                 self.win_data = self.get_cluster_data()
                 self.win_manager.update_spinwin(self.win_data["totalWin"])
-                self.emit_tumble_events()
-                self.update_grid_mults()
+                self.emit_tumble_win_events()
 
             self.set_end_tumble_event()
             self.win_manager.update_gametype_wins(self.gametype)

@@ -1,8 +1,7 @@
 import os, sys
-
-if os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
 from game_override import GameStateOverride
+from src.state.state import *
+from game_config import *
 from game_executables import *
 from game_calculations import *
 
@@ -16,7 +15,7 @@ class GameState(GameStateOverride):
             self.reset_book()
             self.draw_board()
 
-            self.win_data = self.get_line_data(record_wins=True)
+            self.win_data = self.get_lines()
             self.win_manager.update_spinwin(self.win_data["totalWin"])
             self.emit_linewin_events()
 
@@ -35,7 +34,7 @@ class GameState(GameStateOverride):
             self.update_freespin()
             self.draw_board()
 
-            self.win_data = self.get_line_data(record_wins=True)
+            self.win_data = self.get_lines()
             self.win_manager.update_spinwin(self.win_data["totalWin"])
             self.emit_linewin_events()
 

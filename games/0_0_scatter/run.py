@@ -4,7 +4,6 @@ from gamestate import GameState
 from game_config import GameConfig
 from src.write_data.write_data import create_books
 from src.write_data.write_configs import generate_configs
-from src.wins.win_manager import WinManager
 
 if __name__ == "__main__":
 
@@ -20,7 +19,6 @@ if __name__ == "__main__":
     }
 
     config = GameConfig()
-    winManager = WinManager(config.basegame_type, config.freegame_type)
     gamestate = GameState(config)
 
     create_books(

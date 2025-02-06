@@ -15,7 +15,6 @@ class GameStateOverride(GameExecutables):
         self.reset_grid_mults()
         self.emit_win_event = False
         self.tumble_win = 0
-        self.tumbles = 0
 
     def reset_fs_spin(self):
         super().reset_fs_spin()

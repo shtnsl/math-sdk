@@ -10,7 +10,7 @@ class GameConfig(Config):
     def __init__(self):
         super().__init__()
         self.game_id = "0_0_cluster"
-        self.provider_numer = int(self.game_id.split("_", maxsplit=1)[0])
+        self.provider_number = int(self.game_id.split("_", maxsplit=1)[0])
         self.working_name = "Sample Cluster Game"
         self.wincap = 5000.0
         self.win_type = "cluster"
@@ -19,9 +19,7 @@ class GameConfig(Config):
 
         # Game Dimensions
         self.num_reels = 7
-        self.num_rows = [
-            7
-        ] * self.num_reels  # Optionally include variable number of rows per reel
+        self.num_rows = [7] * self.num_reels  # Optionally include variable number of rows per reel
         # Board and Symbol Properties
         t1, t2, t3, t4 = (5, 5), (6, 8), (9, 12), (13, 36)
         pay_group = {
@@ -68,10 +66,8 @@ class GameConfig(Config):
             self.freegame_type: {3: 5, 4: 8, 5: 10, 6: 12, 7: 15, 8: 18},
         }
         self.anticipation_triggers = {
-            self.basegame_type: min(self.freespin_triggers[self.basegame_type].keys())
-            - 1,
-            self.freegame_type: min(self.freespin_triggers[self.freegame_type].keys())
-            - 1,
+            self.basegame_type: min(self.freespin_triggers[self.basegame_type].keys()) - 1,
+            self.freegame_type: min(self.freespin_triggers[self.freegame_type].keys()) - 1,
         }
 
         self.maximum_board_mult = 512

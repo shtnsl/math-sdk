@@ -4,8 +4,9 @@ from src.events.events import (
     set_win_event,
     set_total_event,
     fs_trigger_event,
+    update_tumble_win_event,
 )
-from game_events import update_tumble_win_event, send_mult_info_event
+from game_events import send_mult_info_event
 from copy import copy
 
 
@@ -44,6 +45,4 @@ class GameExecutables(GameCalculations):
             basegame_trigger, freegame_trigger = True, False
         else:
             basegame_trigger, freegame_trigger = False, True
-        fs_trigger_event(
-            self, basegame_trigger=basegame_trigger, freegame_trigger=freegame_trigger
-        )
+        fs_trigger_event(self, basegame_trigger=basegame_trigger, freegame_trigger=freegame_trigger)
