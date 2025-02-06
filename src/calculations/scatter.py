@@ -1,16 +1,14 @@
 from typing import List, Dict
 from collections import defaultdict
-from src.calculations.board import Board
+from src.wins.multiplier_strategy import MultiplierStrategy
 
 
-class ScatterWins(Board):
+class ScatterWins(MultiplierStrategy):
     """
     Scatter (pay-anywhere) class for handling wins win calculations and recording.
     """
 
-    def get_central_position(
-        self, rows_for_overlay: List, winning_positions: List[Dict]
-    ) -> tuple:
+    def get_central_position(self, rows_for_overlay: List, winning_positions: List[Dict]) -> tuple:
         """Return position on screen to display win amount."""
         closest_to_middle = 100
         reel_to_overlay = -1
@@ -60,9 +58,7 @@ class ScatterWins(Board):
         for reel_idx, reel in enumerate(self.board):
             for row_idx, symbol in enumerate(reel):
                 if symbol.name not in self.config.special_symbols[wild_key]:
-                    symbols_on_board[symbol.name].append(
-                        {"reel": reel_idx, "row": row_idx}
-                    )
+                    symbols_on_board[symbol.name].append({"reel": reel_idx, "row": row_idx})
                 else:
                     wild_positions.append({"reel": reel_idx, "row": row_idx})
 
@@ -75,9 +71,7 @@ class ScatterWins(Board):
                 symbol_mult = 0
                 for p in symbols_on_board[sym]:
                     if self.board[p["reel"]][p["row"]].check_attribute(multiplier_key):
-                        symbol_mult += self.board[p["reel"]][p["row"]].get_attribute(
-                            multiplier_key
-                        )
+                        symbol_mult += self.board[p["reel"]][p["row"]].get_attribute(multiplier_key)
                     symbol_mult = max(symbol_mult, 1)
 
                     self.board[p["reel"]][p["row"]].assign_attribute({"explode": True})
@@ -92,15 +86,11 @@ class ScatterWins(Board):
                         symbol_mult * self.global_multiplier,
                         self.gametype,
                     )
-                overlay_position = self.get_central_position(
-                    rows_for_overlay, symbols_on_board[sym]
-                )
+                overlay_position = self.get_central_position(rows_for_overlay, symbols_on_board[sym])
                 rows_for_overlay.append(overlay_position[1])
                 symbol_win_data = {
                     "symbol": sym,
-                    "win": self.config.paytable[(win_size, sym)]
-                    * self.global_multiplier
-                    * symbol_mult,
+                    "win": self.config.paytable[(win_size, sym)] * self.global_multiplier * symbol_mult,
                     "positions": symbols_on_board[sym],
                     "meta": {
                         "globalMult": self.global_multiplier,

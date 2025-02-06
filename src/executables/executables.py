@@ -23,7 +23,13 @@ from src.events.events import (
 )
 
 
-class Executables(Conditions, LineWins, ClusterWins, ScatterWins, Tumble, Board):
+class Executables(
+    Conditions,
+    Tumble,
+    LineWins,
+    ClusterWins,
+    ScatterWins,
+):
     """
     The purpose of this Class is to group together common actions which are likely to be reused between games.
     These can be overridden in the GameExecutables or GameCalculations if game-specific alterations are required.

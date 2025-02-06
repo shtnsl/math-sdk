@@ -5,7 +5,7 @@ from src.calculations.board import Board
 from src.wins.multiplier_strategy import MultiplierStrategy
 
 
-class LineWins(Board, MultiplierStrategy):
+class LineWins(MultiplierStrategy):
     """Primary win evaluation and recording."""
 
     def record_line_win(self, kind: int, symbol: str, mult: int, gametype: str) -> None:

@@ -1,9 +1,9 @@
 from collections import defaultdict
 from abc import ABC, abstractmethod
-from src.calculations.board import Board
+from src.wins.multiplier_strategy import MultiplierStrategy
 
 
-class ClusterWins(Board):
+class ClusterWins(MultiplierStrategy):
     """
     BFS cluster finding algorithm and win-evaluation.
     """
