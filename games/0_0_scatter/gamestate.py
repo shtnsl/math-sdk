@@ -1,12 +1,6 @@
 """Main file for handling game logic and emitting events."""
 
-import os, sys
 from game_override import GameStateOverride
-from src.state.state import *
-from game_config import *
-from game_executables import *
-from game_calculations import *
-from src.events.events import tumble_board_event
 
 
 class GameState(GameStateOverride):

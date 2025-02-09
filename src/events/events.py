@@ -53,10 +53,14 @@ def fs_trigger_event(
     """Triggers feature game from the basegame."""
     assert basegame_trigger != freegame_trigger, "must set either basegame_trigger or freeSpinTrigger to = True"
     event = {}
-    scatter_positions = gamestate.special_syms_on_board["scatter"]
+    scatter_positions = []
+    for reel, _ in enumerate(gamestate.special_syms_on_board["scatter"]):
+        scatter_positions.append(gamestate.special_syms_on_board["scatter"][reel])
     if include_padding_index:
         for pos in scatter_positions:
             pos["row"] += 1
+            if pos["row"] > 5:
+                print("here")
 
     if basegame_trigger:
         event = {
@@ -139,7 +143,11 @@ def win_info_event(gamestate, include_padding_index=True):
     include_padding_index: starts winning-symbol positions at row=1, to account for top/bottom symbol inclusion in board
     """
     win_data_copy = {}
+    a = id(gamestate.win_data["wins"])
     win_data_copy["wins"] = deepcopy(gamestate.win_data["wins"])
+    b = id(win_data_copy["wins"])
+    if a == b:
+        print("copy error")
     for idx, w in enumerate(win_data_copy["wins"]):
         if include_padding_index:
             new_positions = []
@@ -225,12 +233,13 @@ def update_global_mult_event(gamestate):
         "globalMult": int(gamestate.global_multiplier),
     }
 
-    gamestate.book["events"] += [event]
+    gamestate.book["events"] += [deepcopy(event)]
 
 
 def tumble_board_event(gamestate):
     """States the symbol positions removed from a board during tumeble, and which new symbols should take their place."""
     special_attributes = list(gamestate.config.special_symbols.keys())
+
     if gamestate.config.include_padding:
         exploding = []
         for sym in gamestate.exploding_symbols:
@@ -241,6 +250,7 @@ def tumble_board_event(gamestate):
     exploding = sorted(exploding, key=lambda x: x["reel"])
 
     new_symbols = [[] for _ in range(gamestate.config.num_reels)]
+    count = 0
     for r, _ in enumerate(gamestate.new_symbols_from_tumble):
         if len(gamestate.new_symbols_from_tumble[r]) > 0:
             new_symbols[r] = [json_ready_sym(s, special_attributes) for s in gamestate.new_symbols_from_tumble[r]]

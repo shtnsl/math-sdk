@@ -1,3 +1,5 @@
+"""Handle win calculation for pay-anywhere games"""
+
 from typing import List, Dict
 from collections import defaultdict
 from src.wins.multiplier_strategy import MultiplierStrategy

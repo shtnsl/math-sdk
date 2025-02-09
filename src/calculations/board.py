@@ -2,7 +2,7 @@
 
 import random
 from typing import List
-from src.state.state import *
+from src.state.state import GeneralGameState
 from src.calculations.statistics import get_random_outcome
 
 
@@ -27,18 +27,18 @@ class Board(GeneralGameState):
         padding_positions = [0] * self.config.num_reels
         first_scatter_reel = -1
         for reel in range(self.config.num_reels):
-            reelPos = reel_positions[reel]
+            reel_pos = reel_positions[reel]
             if self.config.include_padding:
                 top_symbols.append(
-                    self.create_symbol(self.reelstrip[reel][(reelPos - 1) % len(self.reelstrip[reel])])
+                    self.create_symbol(self.reelstrip[reel][(reel_pos - 1) % len(self.reelstrip[reel])])
                 )
                 bottom_symbols.append(
                     self.create_symbol(
-                        self.reelstrip[reel][(reelPos + len(board[reel])) % len(self.reelstrip[reel])]
+                        self.reelstrip[reel][(reel_pos + len(board[reel])) % len(self.reelstrip[reel])]
                     )
                 )
             for row in range(self.config.num_rows[reel]):
-                symbolID = self.reelstrip[reel][(reelPos + row) % len(self.reelstrip[reel])]
+                symbolID = self.reelstrip[reel][(reel_pos + row) % len(self.reelstrip[reel])]
                 sym = self.create_symbol(symbolID)
                 board[reel][row] = sym
                 if sym.special:
@@ -67,8 +67,6 @@ class Board(GeneralGameState):
 
         self.board = board
         self.get_special_symbols_on_board()
-        if len(self.special_syms_on_board["scatter"]) == 0 and sum(anticipation) > 0:
-            print("here")
         self.reel_positions = reel_positions
         self.padding_position = padding_positions
         self.anticipation = anticipation
@@ -99,18 +97,18 @@ class Board(GeneralGameState):
         padding_positions = [0] * self.config.num_reels
         first_scatter_reel = -1
         for reel in range(self.config.num_reels):
-            reelPos = reel_positions[reel]
+            reel_pos = reel_positions[reel]
             if self.config.include_padding:
                 top_symbols.append(
-                    self.create_symbol(self.reelstrip[reel][(reelPos - 1) % len(self.reelstrip[reel])])
+                    self.create_symbol(self.reelstrip[reel][(reel_pos - 1) % len(self.reelstrip[reel])])
                 )
                 bottom_symbols.append(
                     self.create_symbol(
-                        self.reelstrip[reel][(reelPos + len(board[reel])) % len(self.reelstrip[reel])]
+                        self.reelstrip[reel][(reel_pos + len(board[reel])) % len(self.reelstrip[reel])]
                     )
                 )
             for row in range(self.config.num_rows[reel]):
-                symbolID = self.reelstrip[reel][(reelPos + row) % len(self.reelstrip[reel])]
+                symbolID = self.reelstrip[reel][(reel_pos + row) % len(self.reelstrip[reel])]
                 sym = self.create_symbol(symbolID)
                 board[reel][row] = sym
 
@@ -167,6 +165,8 @@ class Board(GeneralGameState):
                 if self.board[reel][row].special:
                     for specialType in list(self.special_syms_on_board.keys()):
                         if self.board[reel][row].check_attribute(specialType):
+                            if row > 5:
+                                print("here")
                             self.special_syms_on_board[specialType].append({"reel": reel, "row": row})
 
     def transpose_board_string(self, board_string: List[List[str]]) -> List[List[str]]:

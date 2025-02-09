@@ -1,9 +1,8 @@
 """Game-specific configuration file, inherits from src/config/config.py"""
 
 from src.config.config import Config
-from src.config.distributions import Distribution, DistributionConditions
-from src.write_data.force import *
-from src.config.betmode import BetMode
+from src.config.distributions import Distribution
+from src.config.config import BetMode
 
 
 class GameConfig(Config):

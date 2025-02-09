@@ -16,14 +16,14 @@ def send_mult_info_event(gamestate, board_mult: int, mult_info: dict, base_win: 
             )
 
     winInfo["tumbleWin"] = int(round(min(base_win, gamestate.config.wincap) * 100))
-    winInfo["board_mult"] = board_mult
-    winInfo["total_win"] = int(round(min(updatedWin, gamestate.config.wincap) * 100))
+    winInfo["boardMult"] = board_mult
+    winInfo["totalWin"] = int(round(min(updatedWin, gamestate.config.wincap) * 100))
 
     assert round(updatedWin, 1) == round(base_win * board_mult, 1)
     event = {
         "index": len(gamestate.book["events"]),
         "type": BOARD_MULT_INFO,
-        "mult_info": multiplier_info,
+        "multInfo": multiplier_info,
         "winInfo": winInfo,
     }
     gamestate.book["events"] += [event]

@@ -44,8 +44,11 @@ class Tumble(Board):
                 self.top_symbols[reel] = self.create_symbol(padding_name)
                 self.new_symbols_from_tumble[reel].insert(0, self.create_symbol(padding_name))
 
-        self.get_special_symbols_on_board()
         self.board = static_board
+        for reel, _ in enumerate(self.board):
+            if len(self.board[reel]) > 5:
+                print("here")
+        self.get_special_symbols_on_board()
 
     def set_end_tumble_event(self) -> None:
         """Emit wins related to latest cumulative tumble sequence."""

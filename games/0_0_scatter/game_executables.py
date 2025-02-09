@@ -1,4 +1,11 @@
+"""
+
+"""
+
+from copy import copy
+
 from game_calculations import GameCalculations
+from game_events import send_mult_info_event
 from src.events.events import (
     update_global_mult_event,
     set_win_event,
@@ -6,8 +13,6 @@ from src.events.events import (
     fs_trigger_event,
     update_tumble_win_event,
 )
-from game_events import send_mult_info_event
-from copy import copy
 
 
 class GameExecutables(GameCalculations):

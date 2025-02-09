@@ -16,11 +16,14 @@ class GeneralGameState(ABC):
         self.config = config
         self.library = {}
         self.recorded_events = {}
+        self.special_symbol_functions = {}
         self.temp_wins = []
         self.win_manager = WinManager(self.config.basegame_type, self.config.freegame_type)
-        self.create_symbol_map()
+        self.sim = 0
+        self.criteria = ""
         self.reset_seed()
-        # self.reset_book()
+        self.create_symbol_map()
+        self.reset_book()
         self.assign_special_sym_function()
         self.reset_fs_spin()
 

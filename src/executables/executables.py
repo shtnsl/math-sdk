@@ -2,10 +2,10 @@ import random
 import numpy as np
 from typing import List
 from src.state.state_conditions import Conditions
-from src.calculations.board import Board
 from src.calculations.lines import LineWins
 from src.calculations.cluster import ClusterWins
 from src.calculations.scatter import ScatterWins
+from src.calculations.ways import WaysWins
 from src.calculations.tumble import Tumble
 from src.calculations.statistics import get_random_outcome
 from src.events.events import (
@@ -20,16 +20,11 @@ from src.events.events import (
     fs_trigger_event,
     update_freespin_event,
     final_win_event,
+    update_global_mult_event,
 )
 
 
-class Executables(
-    Conditions,
-    Tumble,
-    LineWins,
-    ClusterWins,
-    ScatterWins,
-):
+class Executables(Conditions, Tumble, LineWins, ClusterWins, ScatterWins, WaysWins):
     """
     The purpose of this Class is to group together common actions which are likely to be reused between games.
     These can be overridden in the GameExecutables or GameCalculations if game-specific alterations are required.
@@ -118,7 +113,8 @@ class Executables(
             return True
         return False
 
-    def count_special_symbols(self, special_sym_criteria: str) -> bool:
+    def count_special_symbols(self, special_sym_criteria: str) -> int:
+        "Returns integer number of active symbols of any 'special' kind."
         return len(self.special_syms_on_board[special_sym_criteria])
 
     def check_fs_condition(self, scatter_key: str = "scatter") -> bool:
@@ -129,14 +125,14 @@ class Executables(
             return True
         return False
 
-    def check_freespin_entry(self, scatter_key: str = "scatter"):
+    def check_freespin_entry(self, scatter_key: str = "scatter") -> bool:
         """Ensure that betmode criteria is expecting freespin trigger."""
         if self.get_current_distribution_conditions()["force_freespins"] and len(
             self.special_syms_on_board[scatter_key]
         ) >= min(self.config.freespin_triggers[self.gametype].keys()):
             return True
         self.repeat = True
-        return True
+        return False
 
     def run_freespin_from_base(self, scatter_key: str = "scatter") -> None:
         """Trigger the freespin function and update total fs amount."""
@@ -166,12 +162,13 @@ class Executables(
 
     def update_freespin(self) -> None:
         """Called before a new reveal during freespins."""
+        self.fs += 1
         update_freespin_event(self)
+        self.global_multiplier = 1
+        update_global_mult_event(self)
         self.win_manager.reset_spin_win()
         self.tumblewin_mult = 0
         self.win_data = {}
-        self.fs += 1
-        self.global_multiplier = 1
 
     def end_freespin(self) -> None:
         """Transmit total amount awarded during freespins."""
