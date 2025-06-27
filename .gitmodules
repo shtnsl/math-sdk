@@ -1,0 +1,3 @@
+[submodule "games/evil_spin"]
+	path = games/evil_spin
+	url = https://github.com/shtnsl/EZ001-BE.git
